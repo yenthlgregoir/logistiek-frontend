@@ -1,0 +1,174 @@
+:root {
+  --brand-blue: #2f80ed; /* knopkleur */
+  --brand-blue-dark: #1f6cd6; /* hover */
+  --text-main: #1f2937; /* bijna-zwart */
+  --text-muted: #6b7280; /* subtitel */
+  --bg: #f7f9fc; /* pagina-achtergrond */
+  --panel: #ffffff; /* top bar */
+  --divider: #e5e7eb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial,
+    'Apple Color Emoji',
+    'Segoe UI Emoji';
+  color: var(--text-main);
+  background: var(--bg);
+}
+
+.container {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+}
+
+/* Top bar */
+.topbar {
+  background: var(--panel);
+  border-bottom: 1px solid var(--divider);
+  height: 72px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+}
+
+/* Logo blok linksboven */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand__icon {
+  width: 40px;
+  height: 40px;
+}
+
+.brand__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.brand__title {
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: #2a6fb0; /* afgestemd op logo */
+}
+
+.brand__subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Hero midden */
+.hero {
+  display: grid;
+  place-items: center;
+  padding: 48px 16px;
+}
+
+.hero__inner {
+  text-align: center;
+  max-width: 960px;
+  width: 100%;
+}
+
+/* Groot merk in het midden */
+.centermark {
+  display: inline-flex;
+  align-items: center;
+  gap: 28px;
+  margin-bottom: 12px;
+}
+
+.centermark__icon {
+  width: 96px;
+  height: 96px;
+  opacity: 0.9;
+}
+
+.centermark__title {
+  font-size: clamp(48px, 6vw, 96px);
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #2a6fb0;
+}
+
+.centermark__subtitle {
+  margin-top: 4px;
+  font-size: clamp(12px, 2vw, 18px);
+  color: #86a8c5;
+  font-weight: 500;
+}
+
+/* Logistiek Platform */
+.tagline {
+  margin: 28px 0 32px;
+  font-size: clamp(18px, 2.4vw, 28px);
+  font-weight: 500;
+}
+
+/* Knoppenrij */
+.actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn {
+  appearance: none;
+  border: 0;
+  outline: 0;
+  padding: 10px 18px;
+  clip-path: inset(0 round 999px); /* mooie pill‑vorm */
+  border-radius: 999px; /* fallback */
+  background: var(--brand-blue);
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.05),
+    0 4px 10px rgba(47, 128, 237, 0.25);
+  transition:
+    transform 0.06s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--brand-blue-dark);
+  box-shadow: 0 6px 16px rgba(47, 128, 237, 0.3);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* Responsief wat ruimer op grote schermen */
+@media (min-width: 1024px) {
+  .hero {
+    padding: 72px 16px;
+  }
+}
