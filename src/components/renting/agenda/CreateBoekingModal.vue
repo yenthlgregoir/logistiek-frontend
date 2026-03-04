@@ -83,7 +83,7 @@ import SelectLeverAdresModal from './SelectLeverAdresModal.vue'
 const showAdresModal = ref(false)
 const beschikbareAdressen = ref([])
 
-const emit = defineEmits(['close' , 'update'])
+const emit = defineEmits(['close', 'update'])
 
 const form = reactive({
   toestelType: '',

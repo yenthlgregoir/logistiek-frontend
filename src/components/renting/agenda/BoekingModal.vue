@@ -29,6 +29,15 @@
             {{ boeking.leverAdresDetails?.postcode || '' }}
             {{ boeking.leverAdresDetails?.gemeente || '' }}
           </p>
+          
+<button
+
+  class="assign-btn btn-leveradres"
+  @click="showLeveradresModal = true"
+>
+  Leveradres wijzigen
+</button>
+
         </div>
 
         <!-- PERIODE -->
@@ -55,7 +64,7 @@
   </div>
 
   <button
-  v-if="!boeking.toestel"
+
   class="assign-btn"
   @click="$emit('assignToestel', boeking._id)"
 >
@@ -80,6 +89,9 @@
   </select>
   <p v-if="statusError" class="error">{{ statusError.message }}</p>
 </div>
+<div class="verwijderen">
+  <button class="btn delete" @click="verwijderen">Verwijderen</button>
+</div> 
       </div>
 
       <div v-else class="modal-body">
@@ -87,21 +99,30 @@
       </div>
     </div>
   </div>
+
+  <SelectLeverAdresModal
+  v-if="showLeveradresModal"
+  :adressen="boeking?.klant?.leverAdressen || []"
+  @select="updateLeverAdres"
+  @close="showLeveradresModal = false"
+/>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue'
 import { boekingApi } from '@/api/boeking'
+import SelectLeverAdresModal from './SelectLeverAdresModal.vue'
 
 const props = defineProps({
   boekingId: String,
 })
 
-const emit = defineEmits(['close', 'update', 'assignToestel'])
+const emit = defineEmits(['close', 'update', 'assignToestel', 'verwijderen'])
 
 const boeking = ref(null)
 const localStatus = ref('')
 const statusError = ref('')
+const showLeveradresModal = ref(false)
 
 watch(
   () => props.boekingId,
@@ -111,10 +132,26 @@ watch(
   },
   { immediate: true }
 )
+async function updateLeverAdres(adres) {
+  try {
+    // Bijv. API call om leveradres in de boeking te updaten
+    console.log(adres._id)
+    await boekingApi.update(boeking.value._id, { leverAdres: adres._id })
 
+    // Update lokaal zodat de UI direct het nieuwe adres toont
+    boeking.value.leverAdresDetails = { ...adres }
+
+    showLeveradresModal.value = false
+    emit('update')
+  } catch (err) {
+    console.error('Fout bij wijzigen leveradres:', err)
+    alert('Wijzigen leveradres mislukt')
+  }
+}
 async function loadBoeking(id) {
   try {
     const res = await boekingApi.get(id)
+    console.log(res)
     boeking.value = res
     localStatus.value = res.status // Lokale status instellen
     statusError.value = ''
@@ -126,6 +163,9 @@ async function loadBoeking(id) {
 
 function close() {
   emit('close')
+}
+function verwijderen(){
+  emit('verwijderen' , props.boekingId);
 }
 
 async function updateStatus() {
@@ -197,6 +237,7 @@ p.error {
 .line {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -270,5 +311,14 @@ select:focus {
 
 .assign-btn:hover {
   background-color: #1d4ed8;
+}
+.btn-leveradres{
+  height: 50%;
+}
+.delete{
+  background-color: red;
+}
+.verwijderen{
+  padding-top: 1rem;
 }
 </style>

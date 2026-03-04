@@ -18,6 +18,7 @@
         @delete="deleteKlant"
         @leveradres-toevoegen="leveradresToevoegen"
         @remove-lever-adres="removeLeverAdres"
+        @update-lever-adres="updateLeverAdres"
       />
 
       <NieuwLeveradresModal
@@ -69,6 +70,7 @@ onMounted(loadKlanten)
 async function loadKlanten() {
   try {
     const data = await klantApi.list()
+    console.log(data)
     klanten.value = Array.isArray(data) ? data : (data.items ?? [])
   } catch (e) {
     console.error(e)
@@ -132,26 +134,46 @@ function leveradresToevoegen() {
 }
 
 async function addLeverAdres(adres) {
-  try {
+  if (selectedKlant.value?._id) {
+    // Bestaande klant → direct naar backend
     await klantApi.addLeverAdres(selectedKlant.value._id, JSON.stringify(adres))
     showModal.value = false
     selectNew()
     loadKlanten()
-  } catch (err) {
-    console.error(err)
+  } else {
+    // Nieuwe klant → enkel lokaal toevoegen
+    form.leverAdressen.push({ ...adres })
+  }
+
+  showModal.value = false
+}
+
+async function removeLeverAdres(adres) {
+  if (selectedKlant.value?._id) {
+    try {
+      // Bestaande klant → backend verwijderen
+      await klantApi.removeLeverAdres(selectedKlant.value._id, adres._id)
+      selectNew()
+      loadKlanten()
+    } catch (err) {
+      console.error(err)
+    }
+  } else {
+    // Nieuwe klant → lokaal verwijderen
+    form.leverAdressen = form.leverAdressen.filter((a) => a !== adres)
   }
 }
 
-async function removeLeverAdres(index) {
-  try {
-    await klantApi.removeLeverAdres(selectedKlant.value._id, index)
-    selectNew()
-    loadKlanten()
-  } catch (err) {
-    console.error(err)
-  }
+async function updateLeverAdres(adres) {
+      try {
+      // Bestaande klant → backend verwijderen
+      await klantApi.updateLeverAdres(selectedKlant.value._id, adres)
+      selectNew()
+      loadKlanten()
+    } catch (err) {
+      console.error(err)
+    }
 }
-
 async function deleteKlant() {
   try {
     await klantApi.remove(selectedKlant.value._id)

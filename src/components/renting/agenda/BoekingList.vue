@@ -13,17 +13,17 @@
         />
 
         <el-date-picker
-  v-model="dateRange"
-  type="daterange"
-  start-placeholder="Startdatum"
-  end-placeholder="Einddatum"
-  format="YYYY-MM-DD"
-  value-format="YYYY-MM-DD"
-  :picker-options="pickerOptions"
-  clearable
-  @change="onDateChange"
-  style="width: 300px;"
-/>
+          v-model="dateRange"
+          type="daterange"
+          start-placeholder="Startdatum"
+          end-placeholder="Einddatum"
+          format="YYYY-MM-DD"
+          value-format="YYYY-MM-DD"
+          :picker-options="pickerOptions"
+          clearable
+          @change="onDateChange"
+          style="width: 300px"
+        />
         <button class="btn btn-primary" @click="$emit('addBoeking')">
           <i class="fa fa-plus"></i> Add
         </button>
@@ -68,9 +68,7 @@
     </div>
 
     <!-- Geen resultaten -->
-    <div v-if="!gefilterdeBoekingen.length" class="no-results">
-      Geen resultaten gevonden
-    </div>
+    <div v-if="!gefilterdeBoekingen.length" class="no-results">Geen resultaten gevonden</div>
   </div>
 </template>
 
@@ -129,7 +127,7 @@ const gefilterdeBoekingen = computed(() => {
   const startFilter = dateRange.value[0] ? new Date(dateRange.value[0]) : null
   const eindFilter = dateRange.value[1] ? new Date(dateRange.value[1]) : null
 
-  return props.boekingen.filter(b => {
+  return props.boekingen.filter((b) => {
     // 1️⃣ tekst search
     const textMatch =
       !term ||

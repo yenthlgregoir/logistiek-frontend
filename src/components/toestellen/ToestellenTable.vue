@@ -1,6 +1,5 @@
 <template>
   <div class="lijstweergave">
-
     <!-- Table header -->
     <div class="table-header">
       <div>Type</div>
@@ -28,9 +27,7 @@
       </div>
     </div>
 
-    <div v-if="!gefilterdeToestellen.length" class="no-results">
-      Geen resultaten gevonden
-    </div>
+    <div v-if="!gefilterdeToestellen.length" class="no-results">Geen resultaten gevonden</div>
   </div>
 </template>
 
@@ -39,12 +36,12 @@ import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
   toestellen: { type: Array, default: () => [] },
-  search: { type: String, default: '' }
+  search: { type: String, default: '' },
 })
 defineEmits(['edit-toestel'])
 const gefilterdeToestellen = computed(() => {
   const term = props.search.toLowerCase()
-  return props.toestellen.filter(t => {
+  return props.toestellen.filter((t) => {
     return (
       !term ||
       t.Ref?.toLowerCase().includes(term) ||
@@ -97,16 +94,22 @@ const gefilterdeToestellen = computed(() => {
 }
 
 /* Status kleuren */
-.col-status.Actief { background: #9be470; color: #000; }
-.col-status.Kapot { background: #fca5a5; color: #7f1d1d; }
+.col-status.Actief {
+  background: #9be470;
+  color: #000;
+}
+.col-status.Kapot {
+  background: #fca5a5;
+  color: #7f1d1d;
+}
 
 .no-results {
   text-align: center;
   padding: 2rem;
   color: #9ca3af;
 }
-.table-header .right { 
-  text-align: right; 
+.table-header .right {
+  text-align: right;
 }
 /* Responsive */
 @media (max-width: 768px) {
@@ -115,6 +118,8 @@ const gefilterdeToestellen = computed(() => {
     grid-template-columns: 1fr 1fr;
     row-gap: 8px;
   }
-  .col-status { justify-self: start; }
+  .col-status {
+    justify-self: start;
+  }
 }
 </style>

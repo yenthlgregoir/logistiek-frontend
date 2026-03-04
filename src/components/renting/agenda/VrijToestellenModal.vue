@@ -20,7 +20,7 @@
           @click="selectToestel(toestel)"
           class="toestel-item"
         >
-          {{ toestel.Ref }} - {{ toestel.naam }} 
+          {{ toestel.Ref }} - {{ toestel.naam }}
           <span v-if="toestel.nrplaat">({{ toestel.nrplaat }})</span>
         </li>
       </ul>
@@ -36,7 +36,7 @@
 import { ref, computed } from 'vue'
 
 const props = defineProps({
-  toestellen: { type: Array, required: true }
+  toestellen: { type: Array, required: true },
 })
 
 const emit = defineEmits(['select', 'close'])
@@ -48,7 +48,7 @@ const gefilterdeToestellen = computed(() => {
   if (!search.value) return props.toestellen
 
   const query = search.value.toLowerCase()
-  return props.toestellen.filter(t => {
+  return props.toestellen.filter((t) => {
     return (
       (t.Ref && t.Ref.toLowerCase().includes(query)) ||
       (t.naam && t.naam.toLowerCase().includes(query)) ||

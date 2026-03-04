@@ -7,53 +7,53 @@
       <div class="factuuradres">
         <div class="form-group">
           <label>Naam</label>
-          <input v-model="localForm.naam" @blur="touched.naam = true" />
-          <p v-if="touched.naam && !localForm.naam" class="error">Naam is verplicht</p>
+          <input v-model="form.naam" @blur="touched.naam = true" />
+          <p v-if="touched.naam && !form.naam" class="error">Naam is verplicht</p>
         </div>
 
         <div class="form-group">
           <label>Klantnummer</label>
-          <input v-model="localForm.klantNummer" @blur="touched.klantNummer = true" />
-          <p v-if="touched.klantNummer && !localForm.klantNummer" class="error">
+          <input v-model="form.klantNummer" @blur="touched.klantNummer = true" />
+          <p v-if="touched.klantNummer && !form.klantNummer" class="error">
             Klantnummer is verplicht
           </p>
         </div>
 
         <div class="form-group">
           <label>Telefoonnummer</label>
-          <input v-model="localForm.telefoonnummer" />
+          <input v-model="form.telefoonnummer" />
         </div>
 
         <div class="form-group">
           <label>Mailadres</label>
-          <input v-model="localForm.mailadres" />
+          <input v-model="form.mailadres" />
         </div>
 
         <div class="form-group">
           <label>BTW-nummer</label>
-          <input v-model="localForm.BTWnummer" />
+          <input v-model="form.BTWnummer" />
         </div>
 
         <h4>Factuuradres</h4>
         <div class="form-group-inline">
           <div class="input-large">
             <label>Straat</label>
-            <input v-model="localForm.factuurAdres.straat" />
+            <input v-model="form.factuurAdres.straat" />
           </div>
           <div class="input-small">
             <label>Huisnummer</label>
-            <input v-model="localForm.factuurAdres.huisnummer" />
+            <input v-model="form.factuurAdres.huisnummer" />
           </div>
         </div>
 
         <div class="form-group-inline">
           <div class="input-small">
             <label>Postcode</label>
-            <input v-model="localForm.factuurAdres.postcode" />
+            <input v-model="form.factuurAdres.postcode" />
           </div>
           <div class="input-large">
             <label>Gemeente</label>
-            <input v-model="localForm.factuurAdres.gemeente" />
+            <input v-model="form.factuurAdres.gemeente" />
           </div>
         </div>
 
@@ -89,12 +89,18 @@
               :key="adres._id || index"
               class="leveradres-card"
             >
-              <div class="adres-info">
+              <div class="adres-info" @click="editLeverAdres(adres, index)">
                 <strong>{{ adres.naam }}</strong>
                 <div>{{ adres.straat }} {{ adres.huisnummer }}</div>
                 <div>{{ adres.postcode }} {{ adres.gemeente }}</div>
               </div>
-              <button class="delete-small" @click="removeLeverAdres(adres._id)">✕</button>
+
+              <div style="display: flex; gap: 6px">
+                <!-- delete knop: stuur het adres object en index mee -->
+                <button class="edit-small" @click.stop="editLeverAdres(adres, index)">✎</button>
+
+                <button class="delete-small" @click.stop="removeLeverAdres(adres)">✕</button>
+              </div>
             </div>
           </template>
           <p v-else class="no-results">Geen resultaten voor “{{ zoekTerm }}”.</p>
@@ -102,70 +108,101 @@
       </div>
     </div>
   </div>
+  <NieuwLeveradresModal
+    :show="showModal"
+    :model-value="editingAdres"
+    @close="showModal = false"
+    @save="saveEditedAdres"
+  />
 </template>
 
 <script setup>
 import { reactive, ref, watch, computed } from 'vue'
+import NieuwLeveradresModal from './NieuwLeveradresModal.vue'
 
 const props = defineProps({
   form: Object,
   selectedKlant: Object,
 })
 
-const emit = defineEmits(['save', 'cancel', 'delete', 'leveradresToevoegen', 'remove-lever-adres'])
+const emit = defineEmits([
+  'save',
+  'cancel',
+  'delete',
+  'leveradresToevoegen',
+  'update-lever-adres',
+  'remove-lever-adres',
+])
 
 const touched = reactive({
   naam: false,
   klantNummer: false,
 })
+
 const localSelected = ref(props.selectedKlant)
 
-// Watch zodat localSelected altijd update als parent wijzigt
 watch(
   () => props.selectedKlant,
   (newVal) => {
     localSelected.value = newVal
   },
 )
-// lokale kopie die we kunnen aanpassen
-const localForm = reactive(JSON.parse(JSON.stringify(props.form)))
 
-// geldigheid: minimaal naam + klantnummer
+// ✅ VALIDATIE rechtstreeks op props.form
 const isValid = computed(() => {
-  return Boolean(
-    localForm.naam &&
-    localForm.naam.trim() &&
-    localForm.klantNummer &&
-    localForm.klantNummer.trim(),
-  )
+  return Boolean(props.form?.naam?.trim() && props.form?.klantNummer?.trim())
 })
 
 // Zoekterm + filter
 const zoekTerm = ref('')
 
 const filteredLeverAdressen = computed(() => {
-  const q = (zoekTerm.value || '').toString().trim().toLowerCase()
-  const list = Array.isArray(localForm.leverAdressen) ? localForm.leverAdressen : []
+  const q = (zoekTerm.value || '').toLowerCase().trim()
+  const list = Array.isArray(props.form?.leverAdressen) ? props.form.leverAdressen : []
+
   if (!q) return list
-  return list.filter((a) => (a?.naam || '').toString().toLowerCase().includes(q))
+
+  return list.filter((a) => (a?.naam || '').toLowerCase().includes(q))
 })
 
-// sync met parent form
-watch(
-  () => props.form,
-  (newVal) => {
-    Object.assign(localForm, JSON.parse(JSON.stringify(newVal)))
-  },
-  { deep: true },
-)
-
 function emitSave() {
-  emit('save', JSON.parse(JSON.stringify(localForm)))
+  emit('save', { ...props.form })
 }
 
-function removeLeverAdres(id) {
-  // emit naar parent component (id of index, afhankelijk van jouw data)
-  emit('remove-lever-adres', id)
+function removeLeverAdres(adres) {
+  emit('remove-lever-adres', adres)
+}
+
+const adresIndex = ref(null) // Houd bij welk adres we bewerken
+const editingAdres = reactive({
+  naam: '',
+  straat: '',
+  huisnummer: '',
+  postcode: '',
+  gemeente: '',
+})
+const showModal = ref(false)
+
+function editLeverAdres(adres, index) {
+  adresIndex.value = index
+  Object.assign(editingAdres, { ...adres }) // kopie maken van geselecteerd adres
+  showModal.value = true
+}
+
+// Save adres vanuit de modal
+function saveEditedAdres(adres) {
+  if (adresIndex.value !== null) {
+    // Bestaande klant → backend update
+    if (props.selectedKlant?._id) {
+      // Eventueel emit naar parent om backend te updaten
+      emit('update-lever-adres', {adres })
+    } else {
+      // Nieuwe klant → lokaal updaten
+      props.form.leverAdressen[adresIndex.value] = { ...adres }
+    }
+  }
+  showModal.value = false
+  adresIndex.value = null
 }
 </script>
 
@@ -200,6 +237,16 @@ function removeLeverAdres(id) {
 /* Kleine & grote input velden */
 .input-small {
   flex: 2;
+}
+button.edit-small {
+  background: #3498db;
+  color: white;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+button.edit-small:hover {
+  background: #2774a7;
 }
 .input-large {
   flex: 5;

@@ -79,7 +79,7 @@ onMounted(getTypes)
 async function loadToestellen() {
   try {
     const data = await toestelApi.list()
-    toestellen.value = Array.isArray(data) ? data : data.items ?? []
+    toestellen.value = Array.isArray(data) ? data : (data.items ?? [])
   } catch (e) {
     console.error(e)
     alert('Laden van toestellen mislukt')
@@ -99,7 +99,7 @@ async function getTypes() {
 async function getKlanten() {
   try {
     const data = await klantApi.list()
-    klanten.value = Array.isArray(data) ? data : data.items ?? []
+    klanten.value = Array.isArray(data) ? data : (data.items ?? [])
   } catch (e) {
     console.error(e)
   }
@@ -128,7 +128,7 @@ function editForm(toestel) {
       eindDatum: toestel.status?.eindDatum || '',
       statusType: toestel.status?.statusType || 'Actief',
     },
-    klant: toestel.klant?._id || toestel.klant || ''
+    klant: toestel.klant?._id || toestel.klant || '',
   })
   isEdit.value = true
   showForm.value = true

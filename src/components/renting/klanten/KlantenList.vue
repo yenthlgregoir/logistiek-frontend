@@ -10,12 +10,11 @@
         <button @click="$emit('new')">+ Add</button>
       </div>
 
-      <!-- Alleen DEZE div mag scrollen -->
       <div class="table-scroll">
         <table class="table">
           <thead>
             <tr>
-              <th>klantnummer</th>
+              <th>Klantnummer</th>
               <th>Naam</th>
             </tr>
           </thead>
@@ -24,12 +23,13 @@
               class="row"
               v-for="k in filteredKlanten"
               :key="k._id || k.id"
-              :class="{ selected: k._id === selectedId }"
+              :class="{ selected: String(k._id) === String(selectedId) }"
               @click="$emit('select', k)"
             >
               <td>{{ k.klantNummer }}</td>
               <td>{{ k.naam }}</td>
             </tr>
+
             <tr v-if="filteredKlanten.length === 0">
               <td colspan="2" class="empty">Geen resultaten</td>
             </tr>

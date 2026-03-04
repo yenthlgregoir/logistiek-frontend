@@ -26,18 +26,18 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue'
+import { reactive, watch, toRefs } from 'vue'
 
-// Props ophalen
 const props = defineProps({
   show: Boolean,
-  modelValue: Object,
+  modelValue: Object, // adres van parent
 })
 
 const emit = defineEmits(['close', 'save'])
 
-// Reactive adres voor interne binding
+// interne reactive kopie
 const adres = reactive({
+  _id: '',
   naam: '',
   straat: '',
   huisnummer: '',
@@ -45,16 +45,21 @@ const adres = reactive({
   gemeente: '',
 })
 
-// Sync props naar reactive object bij openen
+// **Sync bij openen modal**
 watch(
   () => props.modelValue,
   (newVal) => {
-    if (newVal) Object.assign(adres, newVal)
+    if (newVal) {
+      // vul de reactive kopie met de parent data
+      Object.keys(adres).forEach((key) => {
+        adres[key] = newVal[key] || ''
+      })
+    }
   },
-  { immediate: true },
+  { immediate: true, deep: true },
 )
 
-// Save functie
+// Save functie → geef adres terug naar parent
 function save() {
   emit('save', { ...adres })
 }

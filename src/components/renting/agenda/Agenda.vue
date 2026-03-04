@@ -36,34 +36,28 @@
     </div>
 
     <!-- RIJ PER TOESTEL -->
-    <div v-if="!heeftBoekingen" class="geen-boekingen">
-  Geen boekingen deze periode
-</div>
+    <div v-if="!heeftBoekingen" class="geen-boekingen">Geen boekingen deze periode</div>
 
-<div v-else class="toestellen-wrapper">
-  <div
-    v-for="toestel in gefilterdeToestellen"
-    :key="toestel._id"
-    class="toestel-row"
-  >
-    <div class="toestel-cell">
-      {{ toestel.Ref || 'Toestel nog niet toegewezen' }}
-    </div>
+    <div v-else class="toestellen-wrapper">
+      <div v-for="toestel in gefilterdeToestellen" :key="toestel._id" class="toestel-row">
+        <div class="toestel-cell">
+          {{ toestel.Ref || 'Toestel nog niet toegewezen' }}
+        </div>
 
-    <div class="dagen-container">
-      <div
-        v-for="boek in boekingenVoorToestel(toestel._id)"
-        :key="boek._id"
-        class="boek-block"
-        :class="boek.status"
-        :style="boekStijl(boek)"
-        @click="$emit('openBoeking', boek._id)"
-      >
-        {{ boek.ref }}
+        <div class="dagen-container">
+          <div
+            v-for="boek in boekingenVoorToestel(toestel._id)"
+            :key="boek._id"
+            class="boek-block"
+            :class="boek.status"
+            :style="boekStijl(boek)"
+            @click="$emit('openBoeking', boek._id)"
+          >
+            {{ boek.ref }}
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
   </div>
 </template>
 
@@ -87,9 +81,7 @@ const props = defineProps({
   },
 })
 const heeftBoekingen = computed(() => {
-  return gefilterdeToestellen.value.some(toestel =>
-    boekingenVoorToestel(toestel._id).length > 0
-  )
+  return gefilterdeToestellen.value.some((toestel) => boekingenVoorToestel(toestel._id).length > 0)
 })
 const emit = defineEmits(['openBoeking', 'addBoeking'])
 
@@ -147,9 +139,7 @@ const toestellenFromBoekingen = computed(() => {
     const boekEind = new Date(b.eindDatum)
 
     // alleen boekingen die overlappen met geselecteerde periode
-    const overlapt =
-      boekStart <= eindDatum.value &&
-      boekEind >= startDatum.value
+    const overlapt = boekStart <= eindDatum.value && boekEind >= startDatum.value
 
     if (overlapt) {
       map.set(b.toestel._id, b.toestel)
@@ -164,7 +154,7 @@ watch(
   (val) => {
     toestellen.value = val
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 /* ----------------------------- DAGEN ----------------------------- */
@@ -233,7 +223,7 @@ onMounted(() => {
 .agenda-container {
   font-family: Arial, sans-serif;
   overflow-x: auto;
-  padding-top: 1rem
+  padding-top: 1rem;
 }
 .agenda-toolbar {
   display: flex;
@@ -312,7 +302,7 @@ onMounted(() => {
   color: #78350f;
 }
 .boek-block.Geleverd {
-   background: #d1fae5;
+  background: #d1fae5;
   color: #065f46;
 }
 

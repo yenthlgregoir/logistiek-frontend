@@ -46,7 +46,7 @@
         <!-- Ref -->
         <div class="form-group">
           <label>Ref</label>
-          <input v-model="localForm.Ref" required/>
+          <input v-model="localForm.Ref" required />
         </div>
 
         <!-- Chasisnummer -->
@@ -117,7 +117,7 @@ watch(
 
 // Computed: type naam voor readonly bij bewerken
 const typeName = computed(() => {
-  const typeObj = props.types.find(t => t._id === localForm.type)
+  const typeObj = props.types.find((t) => t._id === localForm.type)
   return typeObj?.naam || localForm.type || ''
 })
 

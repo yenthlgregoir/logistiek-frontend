@@ -2,12 +2,12 @@
   <div class="agenda-parent-container">
     <!-- Toggle knop -->
     <el-switch
-    v-model="showAgenda"
-    active-text="Agenda"
-    inactive-text="Lijst"
-    active-color="#4f46e5"
-    inactive-color="#ccc"
-  />
+      v-model="showAgenda"
+      active-text="Agenda"
+      inactive-text="Lijst"
+      active-color="#4f46e5"
+      inactive-color="#ccc"
+    />
 
     <!-- Agenda component -->
     <Agenda
@@ -19,11 +19,11 @@
 
     <!-- Lijstweergave -->
     <BoekingList
-  v-else
-  :boekingen="boekingen"
-  @openBoeking="openBoekingModal"
-  @addBoeking="openCreateModal"
-/>
+      v-else
+      :boekingen="boekingen"
+      @openBoeking="openBoekingModal"
+      @addBoeking="openCreateModal"
+    />
 
     <!-- Create Boeking Modal -->
     <CreateBoekingModal
@@ -31,23 +31,23 @@
       :types="types"
       v-on:close="closeBoekingModal"
       @update="loadBoekingen"
-
     />
 
     <!-- Boeking Modal -->
     <BoekingModal
-  v-if="showBoekingModal"
-  :boekingId="selectedBoekingId"
-  @close="showBoekingModal = false"
-  @update="loadBoekingen"
-  @assignToestel="openVrijeToestellenModal"
-/>
-<VrijToestellenModal
-  v-if="showVrijeToestellenModal"
-  :toestellen="vrijeToestellen"
-  @select="assignToestel"
-  @close="showVrijeToestellenModal = false"
-/>
+      v-if="showBoekingModal"
+      :boekingId="selectedBoekingId"
+      @close="showBoekingModal = false"
+      @update="loadBoekingen"
+      @assignToestel="openVrijeToestellenModal"
+      @verwijderen="deleteBoeking"
+    />
+    <VrijToestellenModal
+      v-if="showVrijeToestellenModal"
+      :toestellen="vrijeToestellen"
+      @select="assignToestel"
+      @close="showVrijeToestellenModal = false"
+    />
   </div>
 </template>
 
@@ -96,14 +96,14 @@ async function loadTypes() {
 
 async function openVrijeToestellenModal(boekingId) {
   try {
-    const boeking = boekingen.value.find(b => b._id === boekingId)
+    const boeking = boekingen.value.find((b) => b._id === boekingId)
     if (!boeking) return
 
     huidigeBoekingId.value = boekingId
     vrijeToestellen.value = await boekingApi.vrijeToestellen({
       beginDatum: boeking.beginDatum,
       eindDatum: boeking.eindDatum,
-      toestelType: boeking.toestelType?._id
+      toestelType: boeking.toestelType?._id,
     })
 
     showVrijeToestellenModal.value = true
@@ -121,9 +121,8 @@ function openBoekingModal(boekingId) {
 function openCreateModal() {
   showCreateModal.value = true
 }
-function closeBoekingModal(){
+function closeBoekingModal() {
   showCreateModal.value = false
-
 }
 async function assignToestel(toestel) {
   try {
@@ -133,16 +132,26 @@ async function assignToestel(toestel) {
     await boekingApi.assignToestel(huidigeBoekingId.value, toestel._id)
 
     // Update de boekingen in de frontend
-    const index = boekingen.value.findIndex(b => b._id === huidigeBoekingId.value)
+    const index = boekingen.value.findIndex((b) => b._id === huidigeBoekingId.value)
     if (index !== -1) {
       boekingen.value[index].toestel = toestel
     }
 
     // Sluit modal
     showVrijeToestellenModal.value = false
-    showBoekingModal = false
+    showBoekingModal.value = false
   } catch (err) {
     console.error(err)
+  }
+}
+
+async function deleteBoeking(boekingId) {
+  try {
+    await boekingApi.remove(boekingId)
+    loadBoekingen()
+    showBoekingModal.value = false
+  } catch (err) {
+    console.log(err)
   }
 }
 /* -------------------- ON MOUNT -------------------- */
@@ -172,8 +181,6 @@ onMounted(() => {
 .toggle-btn:hover {
   background-color: #1d4ed8;
 }
-
-
 
 .lijstweergave ul {
   list-style: none;
