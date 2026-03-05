@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import PurchaseView from '../views/purchase/PurchaseView.vue'
 import ArchiefView from '../views/purchase/ArchiefView.vue'
@@ -22,31 +22,32 @@ const routes = [
     path: '/Purchase',
     name: 'purchase',
     component: PurchaseView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, roles: ['admin','purchase'] },
   },
   {
     path: '/Purchase/archive',
     name: 'archive',
     component: ArchiefView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, roles: ['admin','purchase'] },
+
   },
   {
     path: '/Purchase/order/:id',
     name: 'order',
     component: OrderView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, roles: ['admin','purchase'] },
   },
   {
     path: '/Purchase/products/:id',
     name: 'products',
     component: ProductView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, roles: ['admin','purchase'] },
   },
   {
     path: '/Purchase/files/:id',
     name: 'files',
     component: FilesView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, roles: ['admin','purchase'] },
   },
   {
     path: '/login',
@@ -57,25 +58,25 @@ const routes = [
     path: '/renting/klanten',
     name: 'rentingKlanten',
     component: KlantenView,
-    meta: { requiresAuth: true },
+  meta: { requiresAuth: true, roles: ['admin','renting'] },
   },
   {
     path: '/renting/toestellen',
     name: 'rentingToestellen',
     component: ToestellenView,
-    meta: { requiresAuth: true },
+  meta: { requiresAuth: true, roles: ['admin','renting'] },
   },
   {
     path: '/renting',
     name: 'renting',
     component: agendaPage,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, roles: ['admin','renting'] },
   },
   {
     path: '/renting/detail/:boekingId',
     name: 'rentingDetail',
     component: DetailView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, roles: ['admin','renting'] },
     props: true,
   },
 ]
@@ -89,12 +90,29 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
 
+  
+  // Niet ingelogd
   if (to.meta.requiresAuth && !token) {
-    // Als route auth vereist en er is geen token → ga naar login
-    next({ name: 'login' })
-  } else {
-    next()
+    return next({ name: 'login' })
   }
+
+  // Authenticated en role-based check
+  if (to.meta.roles && token) {
+    const userRole = localStorage.getItem("role") // role uit login
+
+    if (!userRole) {
+      // Geen role aanwezig → token mogelijk verlopen of corrupt
+      return next({ name: 'login' })
+    }
+
+    // Admin mag overal
+    if (userRole !== 'admin' && !to.meta.roles.includes(userRole)) {
+      // Gebruiker niet toegestaan → naar home of 403 pagina
+      return next({ name: 'home' }) // of maak een ForbiddenView
+    }
+  }
+
+  next()
 })
 
 export default router

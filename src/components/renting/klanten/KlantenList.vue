@@ -1,15 +1,17 @@
 <template>
   <div class="klanten-pane">
     <div class="table-wrapper">
+      <!-- Header -->
       <div class="header">
         <input
           :value="search"
           @input="$emit('update:search', $event.target.value)"
-          placeholder="Search"
+          placeholder="Zoek klant..."
         />
         <button @click="$emit('new')">+ Add</button>
       </div>
 
+      <!-- Scrollable table -->
       <div class="table-scroll">
         <table class="table">
           <thead>
@@ -20,7 +22,6 @@
           </thead>
           <tbody>
             <tr
-              class="row"
               v-for="k in filteredKlanten"
               :key="k._id || k.id"
               :class="{ selected: String(k._id) === String(selectedId) }"
@@ -40,115 +41,136 @@
   </div>
 </template>
 
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  klanten: Array,
+  selectedId: [Number, String],
+  search: String,
+})
+
+const filteredKlanten = computed(() => {
+  if (!props.search) return props.klanten
+  const q = props.search.toLowerCase()
+  return props.klanten.filter((k) => k.naam.toLowerCase().includes(q))
+})
+</script>
+
 <style scoped>
-/* Buitenste pane wordt vanuit View een flex-column */
 .klanten-pane {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0; /* cruciaal */
+  min-height: 0;
 }
 
-/* Table wrapper = het "paneel" met borders en padding */
+/* Pane wrapper */
 .table-wrapper {
-  background: white;
-  border: 1px solid #ddd;
-
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 10px;
-
-  /* neemt de volledige hoogte van de .klanten-pane */
-  flex: 1 1 auto;
-  min-height: 0; /* cruciaal */
-  overflow: hidden; /* wrapper mag NIET scrollen */
+  gap: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* Header */
 .header {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex: 0 0 auto;
 }
-input {
-  padding: 6px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  width: 100%;
+.header input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
-button {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  background: #2f80ed;
+.header input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+
+.header button {
+  background: #2563eb;
   color: #fff;
   font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-button:hover {
-  background: #2262b6;
+.header button:hover {
+  background: #1d4ed8;
 }
 
-/* Scrollende zone voor de tabel */
+/* Scrollable table */
 .table-scroll {
-  flex: 1 1 auto; /* neemt de resterende hoogte */
-  min-height: 0; /* noodzakelijk binnen flex */
-  overflow: auto; /* <-- HIER scrollt het */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
 }
 
-/* Tabel + sticky header */
+/* Table */
 .table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
 }
-thead tr {
-  background: #8ec6f7;
+.table thead tr {
+  background: #f3f4f6;
 }
-
-th:first-child {
-  border-top-left-radius: 8px;
-}
-th:last-child {
-  border-top-right-radius: 8px;
-}
-th,
-td {
-  padding: 12px 14px;
-  border-bottom: 1px solid #e5e7eb;
+.table th,
+.table td {
+  padding: 12px 16px;
   text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.table th:first-child {
+  border-top-left-radius: 8px;
+}
+.table th:last-child {
+  border-top-right-radius: 8px;
+}
 
-.row:hover {
+/* Rows */
+.table tbody tr {
+  transition: all 0.15s ease;
+  cursor: pointer;
+  background: #ffffff;
+  border-radius: 8px;
+  margin-bottom: 2px;
+}
+.table tbody tr:hover {
   background: #f0f7ff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 .selected {
-  background: #cfe8ff !important;
+  background: #dbeafe !important;
+  font-weight: 600;
 }
 
+/* Empty state */
 .empty {
   text-align: center;
+  padding: 20px;
   color: #9ca3af;
-  padding: 24px;
+  font-style: italic;
 }
 </style>
-
-<script setup>
-import { computed } from 'vue'
-
-const props = defineProps({
-  klanten: Array,
-  selectedId: Number,
-  search: String,
-})
-
-const filteredKlanten = computed(() => {
-  if (!props.search) return props.klanten
-  return props.klanten.filter((k) => k.naam.toLowerCase().includes(props.search.toLowerCase()))
-})
-</script>

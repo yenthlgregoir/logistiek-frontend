@@ -3,18 +3,31 @@
     <div class="modal">
       <h3>Nieuw Leveradres</h3>
 
-      <div><label>Naam</label><input v-model="adres.naam" /></div>
+      <div class="form-group">
+        <label>Naam</label>
+        <input v-model="adres.naam" placeholder="Naam van het leveradres" />
+      </div>
 
       <div class="form-group-inline">
-        <div id="modal-straat"><label>Straat</label><input v-model="adres.straat" /></div>
-        <div id="modal-huisnummer">
-          <label>Huisnummer</label><input v-model="adres.huisnummer" />
+        <div class="input-large">
+          <label>Straat</label>
+          <input v-model="adres.straat" placeholder="Straatnaam" />
+        </div>
+        <div class="input-small">
+          <label>Huisnummer</label>
+          <input v-model="adres.huisnummer" placeholder="Nr" />
         </div>
       </div>
 
       <div class="form-group-inline">
-        <div id="modal-postcode"><label>Postcode</label><input v-model="adres.postcode" /></div>
-        <div id="modal-gemeente"><label>Gemeente</label><input v-model="adres.gemeente" /></div>
+        <div class="input-small">
+          <label>Postcode</label>
+          <input v-model="adres.postcode" placeholder="1234AB" />
+        </div>
+        <div class="input-large">
+          <label>Gemeente</label>
+          <input v-model="adres.gemeente" placeholder="Gemeente" />
+        </div>
       </div>
 
       <div class="modal-buttons">
@@ -26,16 +39,15 @@
 </template>
 
 <script setup>
-import { reactive, watch, toRefs } from 'vue'
+import { reactive, watch } from 'vue'
 
 const props = defineProps({
   show: Boolean,
-  modelValue: Object, // adres van parent
+  modelValue: Object,
 })
-
 const emit = defineEmits(['close', 'save'])
 
-// interne reactive kopie
+// Interne kopie van adres
 const adres = reactive({
   _id: '',
   naam: '',
@@ -45,109 +57,134 @@ const adres = reactive({
   gemeente: '',
 })
 
-// **Sync bij openen modal**
+// Sync met parent wanneer modal opent
 watch(
   () => props.modelValue,
   (newVal) => {
     if (newVal) {
-      // vul de reactive kopie met de parent data
       Object.keys(adres).forEach((key) => {
         adres[key] = newVal[key] || ''
       })
     }
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 )
 
-// Save functie → geef adres terug naar parent
 function save() {
   emit('save', { ...adres })
 }
 </script>
 
 <style scoped>
-/* Kopieer hier de CSS van je modal uit de originele pagina */
+/* Overlay */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 2000;
 }
+
+/* Modal container */
 .modal {
   background: #fff;
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  animation: fadeIn 0.3s ease-out;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.25s ease-out;
 }
+
+/* Titel */
 .modal h3 {
-  margin: 0 0 1.5rem;
+  margin-bottom: 1.5rem;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #333;
+  color: #111827;
 }
-.modal label {
-  display: block;
-  font-size: 0.9rem;
-  color: #555;
-  margin-bottom: 0.3rem;
-}
-.modal input {
-  width: 100%;
-  padding: 0.5rem 0.7rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-}
-.modal input:focus {
-  outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
-}
+
+/* Form-groups */
+.form-group,
 .form-group-inline {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
 }
-.form-group-inline > div {
-  flex: 1;
+
+/* Inline inputs */
+.form-group-inline {
+  flex-direction: row;
 }
+.input-small {
+  flex: 2;
+}
+.input-large {
+  flex: 5;
+}
+
+/* Labels */
+label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+/* Inputs */
+input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Buttons container */
 .modal-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: 10px;
+  margin-top: 1.5rem;
 }
-.modal-buttons button {
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
+
+/* Buttons */
+button {
+  padding: 10px 16px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
-.modal-buttons .save {
-  background-color: #3498db;
+
+/* Save */
+button.save {
+  background-color: #2563eb;
   color: #fff;
 }
-.modal-buttons .save:hover {
-  background-color: #2c7db3;
+button.save:hover {
+  background-color: #1d4ed8;
 }
-.modal-buttons .cancel {
+
+/* Cancel */
+button.cancel {
   background-color: #f3f4f6;
-  color: #333;
+  color: #111827;
 }
-.modal-buttons .cancel:hover {
+button.cancel:hover {
   background-color: #e5e7eb;
 }
+
+/* Animatie */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -157,19 +194,5 @@ function save() {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-#modal-straat {
-  flex: 5;
-}
-#modal-huisnummer {
-  flex: 2;
-}
-
-#modal-gemeente {
-  flex: 5;
-}
-#modal-postcode {
-  flex: 2;
 }
 </style>

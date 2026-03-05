@@ -13,12 +13,10 @@
         <div class="form-group">
           <label>Type toestel</label>
           <div class="type-select-wrapper">
-            <!-- Edit mode: type readonly -->
             <template v-if="isEdit">
               <input type="text" :value="typeName" readonly />
             </template>
 
-            <!-- Add mode -->
             <template v-else>
               <template v-if="addingType">
                 <input v-model="localForm.newType" placeholder="Nieuw type invoeren" />
@@ -60,6 +58,8 @@
           <label>Klant</label>
           <select v-model="localForm.klant">
             <option disabled value="">Selecteer klant</option>
+                              <option value="">Geen klant geselecteerd</option>
+
             <option v-for="klant in klanten" :key="klant._id" :value="klant._id">
               {{ klant.naam }}
             </option>
@@ -86,7 +86,7 @@ const props = defineProps({
   form: Object,
   klanten: Array,
   types: Array,
-  isEdit: Boolean, // toegevoegd
+  isEdit: Boolean,
 })
 
 const emit = defineEmits(['save', 'cancel'])
@@ -104,18 +104,14 @@ const addingType = ref(false)
 const message = ref('')
 const error = ref(false)
 
-// Vul localForm bij props.form wijzigingen
 watch(
   () => props.form,
   (val) => {
-    if (val) {
-      Object.assign(localForm, val)
-    }
+    if (val) Object.assign(localForm, val)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
-// Computed: type naam voor readonly bij bewerken
 const typeName = computed(() => {
   const typeObj = props.types.find((t) => t._id === localForm.type)
   return typeObj?.naam || localForm.type || ''
@@ -127,7 +123,6 @@ function cancelNewType() {
 }
 
 function submit() {
-  // Als nieuwe type toegevoegd wordt
   if (!props.isEdit && addingType.value && localForm.newType.trim() !== '') {
     localForm.type = localForm.newType.trim()
   }
@@ -155,23 +150,23 @@ function submit() {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0,0,0,0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 2000;
 }
 
-/* Modal container */
+/* Modal */
 .modal {
   background: #fff;
   padding: 2rem;
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.25s ease-out;
 }
 
 /* Header */
@@ -183,10 +178,9 @@ function submit() {
 }
 
 .modal-header h2 {
-  margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #333;
+  color: #111827;
 }
 
 .close-btn {
@@ -210,25 +204,26 @@ function submit() {
 
 label {
   font-size: 0.9rem;
-  color: #555;
+  font-weight: 500;
+  color: #6b7280;
   margin-bottom: 0.25rem;
 }
 
 input,
 select {
-  padding: 0.55rem 0.75rem;
+  padding: 0.6rem 0.9rem;
   font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  background: #f5f5f5;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
   transition: all 0.2s;
 }
 
 input:focus,
 select:focus {
   outline: none;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
   background: #fff;
 }
 
@@ -238,7 +233,6 @@ select:focus {
   gap: 8px;
   width: 100%;
 }
-
 .type-select-wrapper input,
 .type-select-wrapper select {
   flex-grow: 1;
@@ -252,24 +246,19 @@ select:focus {
   border: 1px solid #3a6ea5;
   background: #5b9bd5;
   color: #fff;
-  cursor: pointer;
   font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
   transition: background 0.2s ease;
 }
-.btn-small:hover {
-  background: #4a89c2;
-}
-
+.btn-small:hover { background: #4a89c2; }
 .btn-small.cancel {
-  background: #e55353;
-  border-color: #b33939;
+  background: #ef4444;
+  border-color: #c0392b;
 }
-.btn-small.cancel:hover {
-  background: #c03939;
-}
+.btn-small.cancel:hover { background: #dc2626; }
 
 /* Footer knoppen */
 .modal-footer {
@@ -280,47 +269,38 @@ select:focus {
 }
 
 .btn-primary {
-  background-color: #3498db;
+  background-color: #2563eb;
   color: #fff;
   border: none;
   padding: 0.65rem 1.2rem;
-  border-radius: 8px;
-  cursor: pointer;
+  border-radius: 10px;
   font-size: 1rem;
+  cursor: pointer;
   transition: background 0.2s ease;
 }
-.btn-primary:hover {
-  background-color: #2c7db3;
-}
+.btn-primary:hover { background-color: #1d4ed8; }
 
 .btn-secondary {
   background-color: #f3f4f6;
-  color: #333;
+  color: #111827;
   border: 1px solid #d1d5db;
   padding: 0.65rem 1.2rem;
-  border-radius: 8px;
-  cursor: pointer;
+  border-radius: 10px;
   font-size: 1rem;
+  cursor: pointer;
   transition: background 0.2s ease;
 }
-.btn-secondary:hover {
-  background-color: #e5e7eb;
-}
+.btn-secondary:hover { background-color: #e5e7eb; }
 
-/* Eventuele foutmelding */
+/* Foutmelding */
 p.error {
   color: #dc2626;
+  margin-top: 0.5rem;
 }
 
 /* Animatie */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

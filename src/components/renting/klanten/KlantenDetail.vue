@@ -95,10 +95,8 @@
                 <div>{{ adres.postcode }} {{ adres.gemeente }}</div>
               </div>
 
-              <div style="display: flex; gap: 6px">
-                <!-- delete knop: stuur het adres object en index mee -->
+              <div class="card-buttons">
                 <button class="edit-small" @click.stop="editLeverAdres(adres, index)">✎</button>
-
                 <button class="delete-small" @click.stop="removeLeverAdres(adres)">✕</button>
               </div>
             </div>
@@ -108,6 +106,7 @@
       </div>
     </div>
   </div>
+
   <NieuwLeveradresModal
     :show="showModal"
     :model-value="editingAdres"
@@ -115,6 +114,226 @@
     @save="saveEditedAdres"
   />
 </template>
+
+<style scoped>
+/* Container voor factuur + leveradressen */
+.adres-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 15px;
+}
+
+/* Factuuradres 70% */
+.factuuradres {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Leveradressen 30% */
+.leveradressen {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Divider */
+.divider {
+  width: 1px;
+  background-color: #e5e7eb;
+}
+
+/* Inputs moderniseren */
+input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+
+/* Form-groups */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.form-group-inline {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.input-small {
+  flex: 2;
+}
+.input-large {
+  flex: 5;
+}
+
+/* Foutmelding */
+.error {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Kopjes */
+h3, h4 {
+  margin: 10px 0;
+  font-weight: 600;
+}
+
+/* Buttons */
+button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.buttons button{
+  margin-right: 10px;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.2);
+}
+button.save {
+  background: #2563eb;
+  color: white;
+}
+button.save:hover {
+  background: #1d4ed8;
+}
+button.cancel {
+  background: #9ca3af;
+  color: white;
+}
+button.cancel:hover {
+  background: #6b7280;
+}
+button.delete {
+  background: #ef4444;
+  color: white;
+}
+button.delete:hover {
+  background: #dc2626;
+}
+
+/* Leveradressen container modern */
+.leveradressen-container {
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Leveradres kaarten */
+.leveradres-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 12px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.leveradres-card:hover {
+  background: #f3f4f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.adres-info strong {
+  font-weight: 600;
+  font-size: 14px;
+}
+.card-buttons button {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.edit-small {
+  background: #3b82f6;
+  color: white;
+}
+.edit-small:hover {
+  background: #2563eb;
+}
+.delete-small {
+  background: #ef4444;
+  color: white;
+}
+.delete-small:hover {
+  background: #dc2626;
+}
+
+/* Zoekbalk leveradressen */
+.search-row {
+  display: flex;
+  gap: 6px;
+}
+.search-input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+.add-adres {
+  background: #3b82f6;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+.add-adres:hover {
+  background: #2563eb;
+}
+
+/* Responsive: stacken bij kleinere schermen */
+@media (max-width: 1024px) {
+  .adres-row {
+    flex-direction: column;
+  }
+  .divider {
+    width: 100%;
+    height: 1px;
+    margin: 16px 0;
+  }
+  .leveradressen-container {
+    max-height: none;
+  }
+}
+
+/* Scrollbar styling */
+.leveradressen-container::-webkit-scrollbar {
+  width: 6px;
+}
+.leveradressen-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+/* Detail pane achtergrond en padding */
+.detail-pane {
+  flex: 2;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  background: #fff;
+}
+</style>
 
 <script setup>
 import { reactive, ref, watch, computed } from 'vue'
@@ -205,244 +424,3 @@ function saveEditedAdres(adres) {
   adresIndex.value = null
 }
 </script>
-
-<style scoped>
-/* Container voor factuur + leveradressen */
-.adres-row {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 15px;
-}
-
-/* Factuuradres 70% */
-.factuuradres {
-  flex: 5;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Leveradressen 30% */
-.leveradressen {
-  flex: 5;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Verticale scheidingslijn */
-.divider {
-  width: 1px;
-  background-color: #ddd;
-}
-
-/* Kleine & grote input velden */
-.input-small {
-  flex: 2;
-}
-button.edit-small {
-  background: #3498db;
-  color: white;
-  border-radius: 6px;
-  padding: 4px 8px;
-  font-size: 12px;
-}
-button.edit-small:hover {
-  background: #2774a7;
-}
-.input-large {
-  flex: 5;
-}
-
-/* Inline form-groups */
-.form-group-inline {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-/* Standaard form-groups */
-.form-group {
-  margin-bottom: 10px;
-}
-
-/* Input styling */
-input {
-  width: 100%;
-  padding: 6px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-/* Foutmelding */
-.error {
-  color: red;
-  font-size: 12px;
-  margin-top: 4px;
-}
-
-/* Kopjes */
-h4 {
-  margin: 10px 0 5px;
-}
-
-/* Knoppen */
-.buttons {
-  margin-top: 15px;
-  display: flex;
-  gap: 10px;
-}
-
-button {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  filter: grayscale(0.2);
-}
-
-/* Opslaan knop */
-button.save {
-  background-color: #2ecc71;
-  color: white;
-}
-button.save:hover {
-  background-color: #27ae60;
-}
-
-/* Annuleren knop */
-button.cancel {
-  background-color: #95a5a6;
-  color: white;
-}
-button.cancel:hover {
-  background-color: #7f8c8d;
-}
-
-/* Verwijderen knop */
-button.delete {
-  background-color: #e74c3c;
-  color: white;
-}
-button.delete:hover {
-  background-color: #c0392b;
-}
-
-/* Zoekbalk */
-.search-row {
-  position: relative;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.search-input {
-  flex: 1;
-  padding-right: 30px; /* ruimte voor clear-knop */
-}
-
-.clear {
-  position: absolute;
-  right: 8px;
-  background: transparent;
-  color: #666;
-  font-size: 18px;
-  line-height: 1;
-  padding: 0 4px;
-}
-.clear:hover {
-  color: #000;
-}
-
-/* Leveradressen lijst */
-.leveradressen-container {
-  max-height: calc(80px * 7 + 8px);
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-/* Medium schermen / tablets: 3 kaarten */
-
-@media (max-width: 1200px) {
-  .adres-row {
-    flex-direction: column;
-  }
-
-  .factuuradres,
-  .leveradressen {
-    flex: 1; /* volle breedte */
-  }
-
-  .divider {
-    width: 100%;
-    height: 1px;
-    margin: 10px 0;
-  }
-  .leveradressen-container {
-    overflow-y: visible;
-  }
-}
-.leveradressen-container::-webkit-scrollbar {
-  width: 6px;
-}
-.leveradressen-container::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 10px;
-}
-
-/* Leveradres kaart */
-.leveradres-card {
-  background: #f4f6f8;
-  padding: 10px;
-  border-radius: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  min-height: 70px;
-}
-
-/* Geen resultaten melding */
-.no-results {
-  color: #666;
-  font-size: 14px;
-  padding: 8px 2px;
-}
-
-/* Kleine delete knop */
-.delete-small {
-  background: #e74c3c;
-  color: white;
-  border-radius: 6px;
-  padding: 4px 8px;
-  font-size: 12px;
-}
-
-/* Toevoeg knop */
-.add-adres {
-  background: #3498db;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-}
-.add-adres:hover {
-  background: #2774a7;
-}
-/* Detail pane styling */
-.detail-pane {
-  flex: 2;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  background: #fff;
-}
-</style>

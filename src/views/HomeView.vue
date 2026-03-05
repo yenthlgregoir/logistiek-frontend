@@ -7,17 +7,25 @@
         <h2>Logistiek Platform</h2>
 
         <div class="buttons">
-          <RouterLink to="/purchase" class="btn">Purchase</RouterLink>
-          <RouterLink to="/renting" class="btn">Renting</RouterLink>
-          <RouterLink to="/tools" class="btn">Tools</RouterLink>
-          <RouterLink to="/logistiek" class="btn">Logistiek</RouterLink>
-          <RouterLink to="/facilities" class="btn">Facilities</RouterLink>
-        </div>
+    <RouterLink v-if="role === 'admin' || role === 'purchase'" to="/purchase" class="btn">Purchase</RouterLink>
+    <RouterLink v-if="role === 'admin' || role === 'renting'" to="/renting" class="btn">Renting</RouterLink>
+    <RouterLink v-if="role === 'admin' || role === 'tools'" to="/tools" class="btn">Tools</RouterLink>
+    <RouterLink v-if="role === 'admin' || role === 'logistiek'" to="/logistiek" class="btn">Logistiek</RouterLink>
+    <RouterLink v-if="role === 'admin' || role === 'facilities'" to="/facilities" class="btn">Facilities</RouterLink>
+    <div class="btn" @click="logout(); router.push('/login')">Logout</div>
+  </div>
       </div>
     </main>
   </div>
 </template>
-
+<script setup>
+import router from '@/router';
+const role = localStorage.getItem("role");
+function logout(){
+  localStorage.removeItem("token")
+  router.push('/login')
+}
+</script>
 <style scoped>
 .page {
   min-height: 90vh;
@@ -26,13 +34,12 @@
   flex-direction: column;
 }
 
-/* Header blijft boven */
 
 .center-wrapper {
-  flex: 1; /* neemt alle resterende hoogte */
+  flex: 1;
   display: flex;
-  align-items: center; /* verticaal centreren */
-  justify-content: center; /* horizontaal centreren */
+  align-items: center; 
+  justify-content: center; 
 }
 
 .content {

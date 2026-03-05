@@ -70,7 +70,6 @@ onMounted(loadKlanten)
 async function loadKlanten() {
   try {
     const data = await klantApi.list()
-    console.log(data)
     klanten.value = Array.isArray(data) ? data : (data.items ?? [])
   } catch (e) {
     console.error(e)

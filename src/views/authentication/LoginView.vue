@@ -11,31 +11,36 @@
         <input v-model="password" type="password" placeholder="Password" />
       </div>
 
-      <button @click="handleLogin">Login</button>
+      <button type="button" @click="handleLogin">Login</button>
 
       <p v-if="error" class="error">{{ error }}</p>
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { loginApi } from '@/api/login.js'
+import  { jwtDecode } from "jwt-decode" // ✅ frontend compatible
 
 const email = ref('')
 const password = ref('')
 const error = ref(null)
 const router = useRouter()
-
 const handleLogin = async () => {
   try {
     const response = await loginApi.login(email.value, password.value)
-    localStorage.setItem('token', response.token)
-    router.push({ name: 'home' })
+
+    const token = response.token
+    localStorage.setItem("token", token)
+
+    const decoded = jwtDecode(token)
+    localStorage.setItem("role", decoded.role)
+
+    router.push({ name: "home" })
   } catch (err) {
-    console.error(err)
-    error.value = 'Login mislukt'
+    console.error(err) // log error voor debugging
+    error.value = "Login mislukt"
   }
 }
 </script>
