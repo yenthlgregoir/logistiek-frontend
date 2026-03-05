@@ -30,7 +30,6 @@ const router = useRouter()
 const handleLogin = async () => {
   try {
     const response = await loginApi.login(email.value, password.value)
-
     const token = response.token
     localStorage.setItem("token", token)
 

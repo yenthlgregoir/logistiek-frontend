@@ -10,6 +10,8 @@ import KlantenView from '@/views/renting/KlantenView.vue'
 import ToestellenView from '@/views/renting/ToestellenView.vue'
 import agendaPage from '@/views/renting/agendaPage.vue'
 import DetailView from '@/views/renting/detailView.vue'
+import adminPage from '@/views/authentication/adminPage.vue'
+import ResetPasswordPage from '@/views/authentication/ResetPasswordPage.vue'
 
 const routes = [
   {
@@ -53,6 +55,17 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LoginView,
+  },
+  {
+    path: '/admin/create-user',
+    name: 'createUser',
+    component: adminPage,
+    meta: { requiresAuth: true, roles: ['admin'] },
+  },
+   {
+    path: '/password-reset/:token',
+    name: 'ResetPasswordPage',
+    component: ResetPasswordPage,
   },
   {
     path: '/renting/klanten',

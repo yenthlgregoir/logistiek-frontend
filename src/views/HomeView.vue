@@ -4,7 +4,7 @@
     <main class="center-wrapper">
       <div class="content">
         <img src="../assets/logo-bumacogroup.svg" alt="Bumaco" class="logo-large" />
-        <h2>Logistiek Platform</h2>
+        <h2>Ops Platform</h2>
 
         <div class="buttons">
     <RouterLink v-if="role === 'admin' || role === 'purchase'" to="/purchase" class="btn">Purchase</RouterLink>
@@ -12,6 +12,8 @@
     <RouterLink v-if="role === 'admin' || role === 'tools'" to="/tools" class="btn">Tools</RouterLink>
     <RouterLink v-if="role === 'admin' || role === 'logistiek'" to="/logistiek" class="btn">Logistiek</RouterLink>
     <RouterLink v-if="role === 'admin' || role === 'facilities'" to="/facilities" class="btn">Facilities</RouterLink>
+    <RouterLink v-if="role === 'admin'" to="/admin/create-user" class="btn">Create user</RouterLink>
+
     <div class="btn" @click="logout(); router.push('/login')">Logout</div>
   </div>
       </div>
@@ -47,8 +49,13 @@ function logout(){
 }
 
 .logo-large {
-  width: 90%;
-  margin-bottom: 16px;
+  width: 80vw;            /* niet 90% meer */
+  max-width: 450px;       /* vaste maximale breedte */
+  height: auto;           /* behoud aspect ratio */
+  margin-bottom: 24px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 h1 {
