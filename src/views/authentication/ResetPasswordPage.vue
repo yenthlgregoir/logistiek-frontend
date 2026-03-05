@@ -33,8 +33,8 @@ async function setPassword() {
   message.value = "";
 
   try {
-    const res = await loginApi.setPassword(token , password.value);
-    message.value = res.data.message || "Password updated successfully";
+    await loginApi.setPassword(token , password.value);
+    message.value = "Password updated successfully";
 
     router.push("/login");
     
