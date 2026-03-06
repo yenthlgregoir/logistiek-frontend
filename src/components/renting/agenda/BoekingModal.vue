@@ -62,7 +62,7 @@
     </div>
 
     <!-- TOESTEL -->
-    <div class="detail-card toestel">
+    <div class="detail-card">
 
   <div class="card-header">
     <span>Toestel</span>
@@ -87,6 +87,15 @@
     </template>
   </div>
 
+</div>
+<div class="detail-card">
+
+  <div class="card-header">
+    <span>Transport</span>
+  </div>
+  <div class="card-value">
+      {{ boeking.type }}
+  </div>
 </div>
 
   </div>
