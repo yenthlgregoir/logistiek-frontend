@@ -39,7 +39,7 @@ const linkGroups = {
 const currentLinks = computed(() => {
   if (route.path.startsWith('/purchase')) return linkGroups.purchase
   if (route.path.startsWith('/renting')) return linkGroups.renting
-  return [] // op home niets tonen (of kies één van beiden)
+  return [] 
 })
 
 function isActive(target) {
@@ -79,7 +79,6 @@ function isActive(target) {
   color: #080808;
 }
 
-/* Actieve route (Vue Router) */
 .header-right a.router-link-active {
   color: #2f80ed;
   font-weight: 600;
@@ -89,5 +88,4 @@ a.router-link-exact-active {
   color: #1976d2;
 }
 
-/* of elke actieve */
 </style>

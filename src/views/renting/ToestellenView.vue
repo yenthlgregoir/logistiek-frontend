@@ -165,8 +165,10 @@ async function saveToestel(data) {
     } else {
       await toestelApi.create(data)
     }
+    
     closeForm()
     loadToestellen()
+    getTypes()
   } catch (e) {
     console.error('Fout bij opslaan toestel:', e)
   }

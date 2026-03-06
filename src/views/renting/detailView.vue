@@ -124,7 +124,6 @@ async function getBoeking() {
     const response = await boekingApi.get(boekingId)
     boeking.value = response
     details.value = boeking.value.toestel || null
-    console.log(boeking.value)
   } catch (err) {
     console.log(err)
   }

@@ -61,7 +61,6 @@ const gefilterdeToestellen = computed(() => {
   border-radius: 14px;
 }
 
-/* Table header */
 .table-header {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
@@ -71,7 +70,6 @@ const gefilterdeToestellen = computed(() => {
   border-bottom: 2px solid #e5e7eb;
 }
 
-/* Table rows */
 .table-row {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
@@ -93,7 +91,6 @@ const gefilterdeToestellen = computed(() => {
   justify-self: end;
 }
 
-/* Status kleuren */
 .col-status.Actief {
   background: #9be470;
   color: #000;

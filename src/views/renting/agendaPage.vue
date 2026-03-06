@@ -78,7 +78,6 @@ const boekingen = ref([])
 async function loadBoekingen() {
   try {
     const res = await boekingApi.list()
-    console.log(res)
     boekingen.value = res
   } catch (err) {
     console.log(err)
@@ -113,7 +112,6 @@ async function openVrijeToestellenModal(boekingId) {
 }
 /* -------------------- MODAL HANDLERS -------------------- */
 function openBoekingModal(boekingId) {
-  console.log(boekingId)
   selectedBoekingId.value = boekingId
   showBoekingModal.value = true
 }

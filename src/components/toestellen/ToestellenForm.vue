@@ -13,11 +13,7 @@
         <div class="form-group">
           <label>Type toestel</label>
           <div class="type-select-wrapper">
-            <template v-if="isEdit">
-              <input type="text" :value="typeName" readonly />
-            </template>
-
-            <template v-else>
+            
               <template v-if="addingType">
                 <input v-model="localForm.newType" placeholder="Nieuw type invoeren" />
                 <button type="button" class="btn-small cancel" @click="cancelNewType">❌</button>
@@ -31,7 +27,6 @@
                 </select>
                 <button type="button" class="btn-small" @click="addingType = true">➕</button>
               </template>
-            </template>
           </div>
         </div>
 
@@ -58,8 +53,7 @@
           <label>Klant</label>
           <select v-model="localForm.klant">
             <option disabled value="">Selecteer klant</option>
-                              <option value="">Geen klant geselecteerd</option>
-
+            <option value="">Geen klant geselecteerd</option>
             <option v-for="klant in klanten" :key="klant._id" :value="klant._id">
               {{ klant.naam }}
             </option>
@@ -157,7 +151,7 @@ function submit() {
   z-index: 2000;
 }
 
-/* Modal */
+/* Mdal */
 .modal {
   background: #fff;
   padding: 2rem;
@@ -168,8 +162,6 @@ function submit() {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   animation: fadeIn 0.25s ease-out;
 }
-
-/* Header */
 .modal-header {
   display: flex;
   justify-content: space-between;
