@@ -3,9 +3,9 @@
     <!-- Table header -->
     <div class="table-header">
       <div>Type</div>
-      <div>Ref</div>
-      <div>Nr Plaat</div>
-      <div>Chasisnummer</div>
+      <div>Volgnummer</div>
+      <div>Nummerplaat</div>
+      <div>Identificatie</div>
       <div>Klant</div>
       <div class="right">Status</div>
     </div>

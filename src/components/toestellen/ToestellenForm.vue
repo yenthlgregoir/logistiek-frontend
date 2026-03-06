@@ -38,13 +38,13 @@
 
         <!-- Ref -->
         <div class="form-group">
-          <label>Ref</label>
+          <label>Volgnummer</label>
           <input v-model="localForm.Ref" required />
         </div>
 
         <!-- Chasisnummer -->
         <div class="form-group">
-          <label>Chasisnummer</label>
+          <label>Identificatie</label>
           <input v-model="localForm.chasisnummer" />
         </div>
 
