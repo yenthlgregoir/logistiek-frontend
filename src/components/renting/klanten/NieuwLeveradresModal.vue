@@ -71,6 +71,9 @@ watch(
 )
 
 function save() {
+   if (!adres._id) {
+    delete adres._id
+  }
   emit('save', { ...adres })
 }
 </script>
