@@ -61,7 +61,7 @@ import VrijToestellenModal from '@/components/renting/agenda/VrijToestellenModal
 import { boekingApi } from '@/api/boeking'
 import { toestelApi } from '@/api/toestel'
 import 'element-plus/dist/index.css'
-import { ElSwitch } from 'element-plus'
+import { colProps, ElSwitch } from 'element-plus'
 
 const showAgenda = ref(true)
 const showCreateModal = ref(false)
@@ -104,6 +104,7 @@ async function openVrijeToestellenModal(boekingId) {
       eindDatum: boeking.eindDatum,
       toestelType: boeking.toestelType?._id,
     })
+  console.log(vrijeToestellen)
 
     showVrijeToestellenModal.value = true
   } catch (err) {
@@ -113,6 +114,7 @@ async function openVrijeToestellenModal(boekingId) {
 /* -------------------- MODAL HANDLERS -------------------- */
 function openBoekingModal(boekingId) {
   selectedBoekingId.value = boekingId
+  
   showBoekingModal.value = true
 }
 

@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed} from 'vue'
 
 const props = defineProps({
   toestellen: { type: Array, default: () => [] },

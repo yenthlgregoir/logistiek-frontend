@@ -53,7 +53,9 @@
             :style="boekStijl(boek)"
             @click="$emit('openBoeking', boek._id)"
           >
-            {{ boek.ref }}
+            <div class="boeking-title">{{boek.leverAdresDetails?.naam }}</div>
+            -
+            {{boek.beginDatumFormatted }} - {{ boek.eindDatumFormatted }}
           </div>
         </div>
       </div>
@@ -241,6 +243,10 @@ onMounted(() => {
 .header-row {
   display: flex;
   min-width: 800px;
+}
+.boeking-title{
+  font-weight:800;
+  display: inline;
 }
 .corner-cell {
   width: 180px;

@@ -20,7 +20,7 @@
           @click="selectToestel(toestel)"
           class="toestel-item"
         >
-          <div class="toestel-title">{{ toestel.Ref }}</div>
+          <div class="toestel-title">{{ toestel.Ref }} - {{toestel.type.naam }}</div>
         </li>
       </ul>
 
@@ -32,7 +32,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed} from 'vue'
+
 
 const props = defineProps({
   toestellen: { type: Array, required: true },

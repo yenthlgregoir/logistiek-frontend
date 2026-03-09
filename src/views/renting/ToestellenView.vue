@@ -80,6 +80,7 @@ async function loadToestellen() {
   try {
     const data = await toestelApi.list()
     toestellen.value = Array.isArray(data) ? data : (data.items ?? [])
+    console.log(toestellen)
   } catch (e) {
     console.error(e)
     alert('Laden van toestellen mislukt')
