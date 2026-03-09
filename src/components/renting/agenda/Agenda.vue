@@ -41,7 +41,11 @@
     <div v-else class="toestellen-wrapper">
       <div v-for="toestel in gefilterdeToestellen" :key="toestel._id" class="toestel-row">
         <div class="toestel-cell">
-          {{ toestel.Ref || 'Toestel nog niet toegewezen' }}
+          {{ toestel.Ref}}
+          <div class="type-toestel">
+            -
+          {{toestel.type.naam}} 
+          </div>
         </div>
 
         <div class="dagen-container">
@@ -53,7 +57,11 @@
             :style="boekStijl(boek)"
             @click="$emit('openBoeking', boek._id)"
           >
-            <div class="boeking-title">{{boek.leverAdresDetails?.naam }}</div>
+            <div class="boeking-title">{{ 
+  boek.leverAdresDetails?.naam 
+  || boek.klant?.naam 
+  || 'Onbekende klant' 
+}}  </div>
             -
             {{boek.beginDatumFormatted }} - {{ boek.eindDatumFormatted }}
           </div>
@@ -327,6 +335,11 @@ select:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
   outline: none;
+}
+.type-toestel{
+  display: inline;
+  font-weight: lighter;
+  font-size: 15px;
 }
 /* MOBILE */
 @media (max-width: 768px) {

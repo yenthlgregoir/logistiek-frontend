@@ -13,8 +13,11 @@
 
     <div>
       <div class="title">
-        {{ boeking.leverAdresDetails?.naam || 'Onbekende klant' }}
-      </div>
+{{ 
+  boeking.leverAdresDetails?.naam 
+  || boeking.klant?.naam 
+  || 'Onbekende klant' 
+}}      </div>
 
       <div class="ref">
         Ref: {{ boeking.ref }}
@@ -52,6 +55,12 @@
     <div class="detail-card">
       <div class="card-header">
         <span>Periode</span>
+        <button
+          class="ghost-btn"
+          @click="showDatumAanpassen = true"
+        >
+          Wijzigen
+        </button>
       </div>
 
       <div class="card-value">
@@ -97,6 +106,14 @@
       {{ boeking.type }}
   </div>
 </div>
+<div class="detail-card opmerkingen">
+  <div class="card-header">Opmerkingen:</div>
+  <textarea
+    v-model="boeking.comment"
+    class="card-textarea"
+    placeholder="Voer hier opmerkingen in"
+  ></textarea>
+</div>
 
   </div>
 
@@ -123,8 +140,15 @@
 
   </div>
 
+  
   <!-- FOOTER -->
   <div class="modal-footer">
+    <button
+      class="toevoegen-btn"
+      @click="save"
+    >
+      Opslaan
+    </button>
     <button
       class="danger-btn"
       @click="verwijderen"
@@ -147,23 +171,32 @@
   @select="updateLeverAdres"
   @close="showLeveradresModal = false"
 />
+<DatumAanpassenModal
+v-if="showDatumAanpassen"
+@close="showDatumAanpassen = false"
+:boeking="boeking"
+@update="loadBoeking(boekingId)"
+/>
+
 </template>
 
 <script setup>
 import { ref, watch } from 'vue'
 import { boekingApi } from '@/api/boeking'
 import SelectLeverAdresModal from './SelectLeverAdresModal.vue'
+import DatumAanpassenModal from './DatumAanpassenModal.vue'
 
 const props = defineProps({
   boekingId: String,
 })
 
-const emit = defineEmits(['close', 'update', 'assignToestel', 'verwijderen'])
+const emit = defineEmits(['close', 'update', 'assignToestel', 'verwijderen', 'save'])
 
 const boeking = ref(null)
 const localStatus = ref('')
 const statusError = ref('')
 const showLeveradresModal = ref(false)
+const showDatumAanpassen = ref(false)
 
 watch(
   () => props.boekingId,
@@ -191,8 +224,13 @@ async function updateLeverAdres(adres) {
 async function loadBoeking(id) {
   try {
     const res = await boekingApi.get(id)
-    boeking.value = res
-    localStatus.value = res.status // Lokale status instellen
+
+    // Maak een nieuwe kopie van res, zodat comment altijd bestaat
+    boeking.value = {
+      ...res,
+      comment: res.comment || ''
+    }
+    localStatus.value = boeking.value.status
     statusError.value = ''
   } catch (err) {
     console.error(err)
@@ -207,6 +245,9 @@ function verwijderen() {
   if (window.confirm('Weet je zeker dat je deze boeking wilt verwijderen? Dit kan niet ongedaan gemaakt worden.')) {
     emit('verwijderen', props.boekingId)
   }
+}
+function save(){
+  emit('save' , boeking);
 }
 async function updateStatus() {
   if (!props.boekingId || !boeking.value) return
@@ -282,6 +323,7 @@ p.error {
     0 2px 10px rgba(0,0,0,0.06);
   max-height: 90vh;
   overflow-y: auto;
+  animation: fadeIn 0.25s ease-out;
 }
 
 /* HEADER */
@@ -445,6 +487,17 @@ p.error {
   background:#dc2626;
 }
 
+
+.toevoegen-btn{
+  background:#4447ef;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:8px;
+  font-size:13px;
+  cursor:pointer;
+  margin-right: 10px;
+}
 /* ERROR */
 
 .error{
@@ -470,5 +523,40 @@ p.error {
   border-color: #2563eb;
 }
 
+.card-textarea {
+  width: 100%;
+  min-height: 80px; /* kan je aanpassen voor meer ruimte */
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  resize: vertical; /* gebruiker kan zelf hoogte aanpassen */
+  background-color: #fafafa;
+  color: #111827;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
 
+.card-textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.detail-card.opmerkingen {
+  grid-column: 1 / -1; 
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 </style>

@@ -41,6 +41,7 @@
       @update="loadBoekingen"
       @assignToestel="openVrijeToestellenModal"
       @verwijderen="deleteBoeking"
+      @save= "saveComment"
     />
     <VrijToestellenModal
       v-if="showVrijeToestellenModal"
@@ -61,7 +62,7 @@ import VrijToestellenModal from '@/components/renting/agenda/VrijToestellenModal
 import { boekingApi } from '@/api/boeking'
 import { toestelApi } from '@/api/toestel'
 import 'element-plus/dist/index.css'
-import { colProps, ElSwitch } from 'element-plus'
+import { ElSwitch } from 'element-plus'
 
 const showAgenda = ref(true)
 const showCreateModal = ref(false)
@@ -152,6 +153,16 @@ async function deleteBoeking(boekingId) {
     showBoekingModal.value = false
   } catch (err) {
     console.log(err)
+  }
+}
+
+async function saveComment(boeking){
+  try{
+      await boekingApi.update(selectedBoekingId.value, {comment: boeking.value.comment})
+      loadBoekingen();
+      showBoekingModal.value = false;
+  }catch(err){
+      console.log(err);
   }
 }
 /* -------------------- ON MOUNT -------------------- */

@@ -37,7 +37,7 @@
 
         <div class="form-group">
           <label>Eind datum</label>
-          <input type="date" v-model="form.eindDatum" required />
+          <input type="date" v-model="form.eindDatum"/>
         </div>
 
         <!-- Service -->
@@ -122,18 +122,20 @@ watch(
   async (newKlantId) => {
     if (!newKlantId) return
 
-    const klant = klanten.value.find((k) => k._id === newKlantId)
+    const klant = klanten.value.find(k => k._id === newKlantId)
     if (!klant) return
 
-    if (klant.leverAdressen && klant.leverAdressen.length > 1) {
+    if (klant.leverAdressen?.length > 1) {
       beschikbareAdressen.value = klant.leverAdressen
       showAdresModal.value = true
-    } else if (klant.leverAdressen.length === 1) {
+    } else if (klant.leverAdressen?.length === 1) {
       form.leverAdres = klant.leverAdressen[0]._id
+    } else {
+      // geen leveradres → fallback naar factuuradres
+      form.leverAdres = klant.factuurAdres?._id || null
     }
-  },
+  }
 )
-
 async function submitBoeking() {
   if (!form.leverAdres) {
     message.value = 'Kies eerst een leveradres'
@@ -141,15 +143,29 @@ async function submitBoeking() {
     return
   }
 
+  // einddatum automatisch 5 jaar later indien leeg
+  if (!form.eindDatum) {
+    const begin = new Date(form.beginDatum)
+    begin.setFullYear(begin.getFullYear() + 5)
+    form.eindDatum = begin.toISOString().split('T')[0] // yyyy-mm-dd
+  }
+
   try {
+    // Verstuur het object rechtstreeks, geen JSON.stringify
     await boekingApi.add(JSON.stringify(form))
+
     message.value = 'Boeking succesvol aangemaakt!'
     error.value = false
     emit('update')
     setTimeout(() => close(), 800)
   } catch (err) {
-    const jsonerr = JSON.parse(err.message)
-    message.value = jsonerr.message
+    // Pak message van JSON of gewone Error
+    try {
+      const jsonErr = JSON.parse(err.message)
+      message.value = jsonErr.message || 'Er is een fout opgetreden.'
+    } catch {
+      message.value = err.message || 'Er is een fout opgetreden.'
+    }
     error.value = true
   }
 }

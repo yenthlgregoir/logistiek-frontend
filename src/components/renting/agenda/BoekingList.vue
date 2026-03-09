@@ -99,10 +99,13 @@ const pickerOptions = {
 }
 
 // Helper functies
-function formatAdres(b) {
-  if (!b.leverAdresDetails) return ''
-  const a = b.leverAdresDetails
-  return `${a.naam || ''}: ${a.straat || ''} ${a.huisnummer || ''}, ${a.postcode || ''} ${a.gemeente || ''}`
+function formatAdres(boeking) {
+  // Gebruik leveradres als beschikbaar
+  console.log(boeking)
+  const adres = boeking.leverAdresDetails || boeking.klant?.factuurAdres;
+  if (!adres) return 'Onbekende klant';
+
+  return `${adres.naam || boeking.klant?.naam || 'Onbekende klant'}: ${adres.straat || ''} ${adres.huisnummer || ''}, ${adres.postcode || ''} ${adres.gemeente || ''}`;
 }
 
 function formatDate(dateString) {

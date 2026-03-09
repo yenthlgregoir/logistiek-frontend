@@ -20,7 +20,7 @@
           @click="selectToestel(toestel)"
           class="toestel-item"
         >
-          <div class="toestel-title">{{ toestel.Ref }} - {{toestel.type.naam }}</div>
+          <div class="toestel-title">{{ toestel.Ref }}</div>
         </li>
       </ul>
 

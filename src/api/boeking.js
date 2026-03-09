@@ -13,4 +13,5 @@ export const boekingApi = {
   },
   assignToestel: (boekingId, toestelId) =>
   api.patch(`/boekingen/${boekingId}/toestellen/assign`, { toestel: toestelId }),
+  updatePeriode: (boekingId, beginDatum , eindDatum) => api.patch(`/boekingen/periode/update` , {boekingId: boekingId , beginDatum: beginDatum , eindDatum: eindDatum})
 }
