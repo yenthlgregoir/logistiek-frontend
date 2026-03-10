@@ -45,7 +45,7 @@
           <label>Type service</label>
           <select v-model="form.type" required>
             <option disabled value="">Selecteer</option>
-            <option value="levering door logistiek">Levering door logistiek</option>
+            <option value="Transport door logistiek">Transport door logistiek</option>
             <option value="ophaling door klant">Ophaling door klant</option>
           </select>
         </div>
