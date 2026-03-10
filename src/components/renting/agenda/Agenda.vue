@@ -22,9 +22,13 @@
         </label>
       </div>
 
+      <div class="right">
+        
       <button class="btn btn-primary" @click="$emit('addBoeking')">
         <i class="fa fa-plus"></i> Add
       </button>
+      </div>
+      
     </div>
 
     <!-- HEADER -->
@@ -93,7 +97,7 @@ const props = defineProps({
 const heeftBoekingen = computed(() => {
   return gefilterdeToestellen.value.some((toestel) => boekingenVoorToestel(toestel._id).length > 0)
 })
-const emit = defineEmits(['openBoeking', 'addBoeking'])
+const emit = defineEmits(['openBoeking', 'addBoeking', 'export-pdf'])
 
 /* ----------------------------- DATA ----------------------------- */
 const toestellen = ref([])

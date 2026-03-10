@@ -63,6 +63,7 @@ import { boekingApi } from '@/api/boeking'
 import { toestelApi } from '@/api/toestel'
 import 'element-plus/dist/index.css'
 import { ElSwitch } from 'element-plus'
+import { uploadApi } from '@/api/upload'
 
 const showAgenda = ref(true)
 const showCreateModal = ref(false)
@@ -163,6 +164,20 @@ async function saveComment(boeking){
       showBoekingModal.value = false;
   }catch(err){
       console.log(err);
+  }
+}
+async function exportPDF(){
+  try{
+    const blob = await uploadApi.exportBoekingen();
+     const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'boekingen.pdf';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+  catch(err){
+    console.log(err);
   }
 }
 /* -------------------- ON MOUNT -------------------- */

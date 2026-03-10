@@ -60,6 +60,18 @@
           </select>
         </div>
 
+        <div v-if="isEdit" class="form-group">
+          <label>Status</label>
+          <select v-model="localForm.status" class= "select" :class="localForm.status">
+            <option>
+              Actief
+            </option>
+            <option>
+              Kapot
+            </option>
+          </select>
+        </div>
+
         <!-- Knoppen -->
         <div class="modal-footer">
           <button type="button" class="btn-secondary" @click="$emit('cancel')">Annuleren</button>
@@ -92,6 +104,7 @@ const localForm = reactive({
   Ref: '',
   chasisnummer: '',
   klant: null,
+  status: '',
 })
 
 const addingType = ref(false)
@@ -294,5 +307,13 @@ p.error {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+.select.Actief{
+   background: #9be470;
+  color: #024908;
+}
+.select.Kapot{
+   background: #fca5a5;
+  color: #7f1d1d;
 }
 </style>

@@ -149,6 +149,9 @@
     >
       Opslaan
     </button>
+    <button class="btn btn-secondary download" @click="toPDF">
+    <i class="fa fa-download"></i> 
+  </button>
     <button
       class="danger-btn"
       @click="verwijderen"
@@ -185,6 +188,7 @@ import { ref, watch } from 'vue'
 import { boekingApi } from '@/api/boeking'
 import SelectLeverAdresModal from './SelectLeverAdresModal.vue'
 import DatumAanpassenModal from './DatumAanpassenModal.vue'
+import { uploadApi } from '@/api/upload'
 
 const props = defineProps({
   boekingId: String,
@@ -219,6 +223,20 @@ async function updateLeverAdres(adres) {
   } catch (err) {
     console.error('Fout bij wijzigen leveradres:', err)
     alert('Wijzigen leveradres mislukt')
+  }
+}
+async function toPDF(){
+  try{
+      const blob = await uploadApi.exportBoeking(props.boekingId);
+     const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'boekingen.pdf';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+  catch(err){
+    console.log(err)
   }
 }
 async function loadBoeking(id) {
@@ -548,7 +566,9 @@ p.error {
 .detail-card.opmerkingen {
   grid-column: 1 / -1; 
 }
-
+.download{
+  margin-right: 10px;
+}
 @keyframes fadeIn {
   from {
     opacity: 0;
