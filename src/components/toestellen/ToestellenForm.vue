@@ -62,7 +62,7 @@
 
         <div v-if="isEdit" class="form-group">
           <label>Status</label>
-          <select v-model="localForm.status" class= "select" :class="localForm.status">
+          <select v-model="localForm.status.statusType" class= "select" :class="localForm.status.statusType">
             <option>
               Actief
             </option>
