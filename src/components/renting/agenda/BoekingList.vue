@@ -101,7 +101,6 @@ const pickerOptions = {
 // Helper functies
 function formatAdres(boeking) {
   // Gebruik leveradres als beschikbaar
-  console.log(boeking)
   const adres = boeking.leverAdresDetails || boeking.klant?.factuurAdres;
   if (!adres) return 'Onbekende klant';
 
@@ -252,7 +251,10 @@ function onDateChange(val) {
   background: #d1fae5;
   color: #065f46;
 }
-
+.col-status.Opgehaald {
+  background: #d1fae5;
+  color: #065f46;
+}
 .no-results {
   text-align: center;
   padding: 2rem;

@@ -53,7 +53,7 @@
           <label>Klant</label>
           <select v-model="localForm.klant">
             <option disabled value="">Selecteer klant</option>
-            <option value="">Geen klant geselecteerd</option>
+            <option value=null>Geen klant geselecteerd</option>
             <option v-for="klant in klanten" :key="klant._id" :value="klant._id">
               {{ klant.naam }}
             </option>
@@ -145,7 +145,6 @@ function submit() {
       cleanedForm[key] = value
     }
   })
-
   emit('save', cleanedForm)
   addingType.value = false
   localForm.newType = ''

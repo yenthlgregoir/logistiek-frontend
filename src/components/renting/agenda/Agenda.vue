@@ -323,7 +323,10 @@ onMounted(() => {
   background: #d1fae5;
   color: #065f46;
 }
-
+.boek-block.Opgehaald {
+  background: #d1fae5;
+  color: #065f46;
+}
 select {
   padding: 8px 12px;
   border: 1px solid #d1d5db;

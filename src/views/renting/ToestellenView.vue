@@ -1,17 +1,19 @@
 <template>
   <div class="page">
+    <!-- TOOLBAR -->
     <ToestellenToolbar
       v-model:search="search"
       v-model:type="filterType"
       v-model:klant="filterKlant"
       :types="types"
       :klanten="klanten"
+      @update:vrijToestel="onFilterChange"
       @create="openForm"
     />
 
     <!-- TABLE -->
     <ToestellenTable
-      :toestellen="filteredToestellen"
+      :toestellen="toestellen"
       @update-status="handleStatusUpdate"
       @edit-toestel="editForm"
     />
@@ -33,7 +35,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import ToestellenTable from '@/components/toestellen/ToestellenTable.vue'
 import ToestellenToolbar from '@/components/toestellen/ToestellenToolbar.vue'
 import ToestellenForm from '@/components/toestellen/ToestellenForm.vue'
@@ -43,11 +45,11 @@ import { klantApi } from '@/api/klant'
 /* -----------------------------
    STATE
 ----------------------------- */
-
 const toestellen = ref([])
 const search = ref('')
 const filterType = ref('')
 const filterKlant = ref('')
+const currentDateFilter = ref(null)
 const showForm = ref(false)
 const klanten = ref([])
 const types = ref([])
@@ -65,26 +67,16 @@ const form = reactive({
   },
   klant: '',
 })
-
 const isEdit = ref(false)
 
 /* -----------------------------
    LOAD DATA
 ----------------------------- */
-
-onMounted(loadToestellen)
-onMounted(getKlanten)
-onMounted(getTypes)
-
-async function loadToestellen() {
-  try {
-    const data = await toestelApi.list()
-    toestellen.value = Array.isArray(data) ? data : (data.items ?? [])
-  } catch (e) {
-    console.error(e)
-    alert('Laden van toestellen mislukt')
-  }
-}
+onMounted(() => {
+  getKlanten()
+  getTypes()
+  loadToestellen()
+})
 
 async function getTypes() {
   try {
@@ -92,7 +84,6 @@ async function getTypes() {
     types.value = Array.isArray(response.types) ? response.types : []
   } catch (e) {
     console.error(e)
-    alert('Laden van types mislukt')
   }
 }
 
@@ -106,13 +97,47 @@ async function getKlanten() {
 }
 
 /* -----------------------------
+   LOAD TOESTELLEN MET FILTERS
+----------------------------- */
+async function loadToestellen() {
+  try {
+    const params = {
+      search: search.value || undefined,
+      type: filterType.value || undefined,
+      klant: filterKlant.value || undefined,
+      ...(currentDateFilter.value
+        ? {
+            beginDatum: currentDateFilter.value.beginDatum,
+            eindDatum: currentDateFilter.value.eindDatum,
+          }
+        : {}),
+    }
+    const res = await toestelApi.list(params)
+    toestellen.value = res.items || res
+  } catch (e) {
+    console.error('Fout bij laden toestellen', e)
+  }
+}
+
+/* -----------------------------
+   WATCHERS VOOR BACKEND FILTERING
+----------------------------- */
+watch([search, filterType, filterKlant], loadToestellen)
+
+/* -----------------------------
+   VRIJE TOESTELLEN
+----------------------------- */
+function onFilterChange(dateRange) {
+  currentDateFilter.value = dateRange
+  loadToestellen()
+}
+
+/* -----------------------------
    FORM LOGIC
 ----------------------------- */
-
 function openForm() {
   resetForm()
   isEdit.value = false
-  getKlanten()
   showForm.value = true
 }
 
@@ -129,7 +154,6 @@ function editForm(toestel) {
       statusType: toestel.status?.statusType || 'Actief',
     },
     klant: toestel.klant?._id || toestel.klant || '',
-    status: toestel.status.statusType,
   })
   isEdit.value = true
   showForm.value = true
@@ -156,17 +180,12 @@ function resetForm() {
 }
 
 /* -----------------------------
-   SAVE
+   SAVE TOESTEL
 ----------------------------- */
-
 async function saveToestel(data) {
   try {
-    if (data._id) {
-      await toestelApi.update(data._id, data)
-    } else {
-      await toestelApi.create(data)
-    }
-    
+    if (data._id) await toestelApi.update(data._id, data)
+    else await toestelApi.create(data)
     closeForm()
     loadToestellen()
     getTypes()
@@ -176,9 +195,8 @@ async function saveToestel(data) {
 }
 
 /* -----------------------------
-   STATUS UPDATE
+   UPDATE STATUS
 ----------------------------- */
-
 async function handleStatusUpdate(payload) {
   try {
     await toestelApi.updateStatus(payload.id, payload.statusType)
@@ -187,31 +205,7 @@ async function handleStatusUpdate(payload) {
     console.error(e)
   }
 }
-
-/* -----------------------------
-   FILTER
------------------------------ */
-
-const filteredToestellen = computed(() => {
-  return toestellen.value.filter((t) => {
-    const q = search.value.toLowerCase()
-    const matchSearch =
-      !search.value ||
-      t._id?.toLowerCase().includes(q) ||
-      t.type?.naam?.toLowerCase().includes(q) ||
-      t.Ref?.toLowerCase().includes(q) ||
-      t.nrplaat?.toLowerCase().includes(q) ||
-      t.chasisnummer?.toLowerCase().includes(q) ||
-      t.klant?.naam?.toLowerCase().includes(q)
-
-    const matchType = !filterType.value || t.type?.naam === filterType.value
-    const matchKlant = !filterKlant.value || t.klant?._id === filterKlant.value
-
-    return matchSearch && matchType && matchKlant
-  })
-})
 </script>
-
 <style scoped>
 .page {
   padding: 24px;

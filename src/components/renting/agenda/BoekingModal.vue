@@ -132,6 +132,7 @@
       <option value="Bevestigd">Bevestigd</option>
       <option value="Leveren">Leveren</option>
       <option value="Geleverd">Geleverd</option>
+       <option value="Opgehaald">Opgehaald</option>
     </select>
 
     <p v-if="statusError" class="error">
@@ -482,7 +483,9 @@ p.error {
 .status-select.Geleverd{
   background:#d1fae5;
 }
-
+.status-select.Opgehaald{
+  background:#d1fae5;
+}
 /* FOOTER */
 
 .modal-footer{
