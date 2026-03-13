@@ -84,6 +84,19 @@ const boekingen = ref([])
 watch([search, dateRange], () => {
   loadBoekingen()
 })
+
+// Watcher voor toggle
+watch(showAgenda, (newVal) => {
+  if (newVal) {
+    // Agenda is aan → laad boekingen zonder filters
+    search.value = ''               // lege search
+    dateRange.value = [null, null] // geen datumfilter
+    loadBoekingen()
+  } else {
+    // Lijst aan → eventueel filters behouden, of ook resetten
+    loadBoekingen()
+  }
+})
 /* -------------------- INIT DATA -------------------- */
 async function loadBoekingen() {
   try {
@@ -122,7 +135,6 @@ async function openVrijeToestellenModal(boekingId) {
     })
 
     showVrijeToestellenModal.value = true
-    showBoekingModal.value = false
   } catch (err) {
     console.error(err)
   }
