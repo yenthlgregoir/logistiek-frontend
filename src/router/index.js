@@ -12,6 +12,8 @@ import agendaPage from '@/views/renting/agendaPage.vue'
 import DetailView from '@/views/renting/detailView.vue'
 import adminPage from '@/views/authentication/adminPage.vue'
 import ResetPasswordPage from '@/views/authentication/ResetPasswordPage.vue'
+import CreateUserPage from '@/views/authentication/createUserPage.vue'
+import ArchiefPage from '@/views/renting/archiefPage.vue'
 
 const routes = [
   {
@@ -59,6 +61,12 @@ const routes = [
   {
     path: '/admin/create-user',
     name: 'createUser',
+    component: CreateUserPage,
+    meta: { requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/admin',
+    name: 'adminPage',
     component: adminPage,
     meta: { requiresAuth: true, roles: ['admin'] },
   },
@@ -83,6 +91,12 @@ const routes = [
     path: '/renting',
     name: 'renting',
     component: agendaPage,
+    meta: { requiresAuth: true, roles: ['admin','renting'] },
+  },
+  {
+    path: '/renting/archief',
+    name: 'Archief',
+    component: ArchiefPage,
     meta: { requiresAuth: true, roles: ['admin','renting'] },
   },
   {

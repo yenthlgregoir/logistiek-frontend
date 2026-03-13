@@ -31,6 +31,7 @@ const linkGroups = {
   ],
   renting: [
     { to: '/renting', label: 'Agenda' },
+    { to: '/renting/archief', label: 'Archief' },
     { to: '/renting/klanten', label: 'Klanten' },
     { to: '/renting/toestellen', label: 'Toestellen' },
   ],

@@ -9,8 +9,11 @@
           start-placeholder="Startdatum"
           end-placeholder="Einddatum"
           format="YYYY-MM-DD"
+          value-format="YYYY-MM-DD"
           :picker-options="pickerOptions"
+          @change="updateDateRange"
         />
+
         <label>
           Type:
           <select v-model="selectedType">
@@ -23,12 +26,10 @@
       </div>
 
       <div class="right">
-        
-      <button class="btn btn-primary" @click="$emit('addBoeking')">
-        <i class="fa fa-plus"></i> Add
-      </button>
+        <button class="btn btn-primary" @click="$emit('addBoeking')">
+          <i class="fa fa-plus"></i> Add
+        </button>
       </div>
-      
     </div>
 
     <!-- HEADER -->
@@ -39,16 +40,22 @@
       </div>
     </div>
 
-    <!-- RIJ PER TOESTEL -->
-    <div v-if="!heeftBoekingen" class="geen-boekingen">Geen boekingen deze periode</div>
+    <!-- GEEN BOEKINGEN -->
+    <div v-if="!heeftBoekingen" class="geen-boekingen">
+      Geen boekingen deze periode
+    </div>
 
+    <!-- RIJEN -->
     <div v-else class="toestellen-wrapper">
-      <div v-for="toestel in gefilterdeToestellen" :key="toestel._id" class="toestel-row">
+      <div
+        v-for="toestel in gefilterdeToestellen"
+        :key="toestel._id"
+        class="toestel-row"
+      >
         <div class="toestel-cell">
-          {{ toestel.Ref}}
+          {{ toestel.Ref }}
           <div class="type-toestel">
-            -
-          {{toestel.type.naam}} 
+            - {{ toestel.type?.naam }}
           </div>
         </div>
 
@@ -61,13 +68,15 @@
             :style="boekStijl(boek)"
             @click="$emit('openBoeking', boek._id)"
           >
-            <div class="boeking-title">{{ 
-  boek.leverAdresDetails?.naam 
-  || boek.klant?.naam 
-  || 'Onbekende klant' 
-}}  </div>
+            <div class="boeking-title">
+              {{
+                boek.leverAdresDetails?.naam ||
+                boek.klant?.naam ||
+                'Onbekende klant'
+              }}
+            </div>
             -
-            {{boek.beginDatumFormatted }} - {{ boek.eindDatumFormatted }}
+            {{ boek.beginDatumFormatted }} - {{ boek.eindDatumFormatted }}
           </div>
         </div>
       </div>
@@ -81,9 +90,9 @@ import { toestelApi } from '@/api/toestel'
 import 'element-plus/dist/index.css'
 import { ElDatePicker } from 'element-plus'
 
-/* ----------------------------- PROPS ----------------------------- */
+/* ---------------- PROPS ---------------- */
 const props = defineProps({
-  boekingen: { type: Array, default: () => [] }, // 👈 VAN PARENT
+  boekingen: { type: Array, default: () => [] },
   initialStart: { type: Date, default: () => new Date() },
   initialEnd: {
     type: Date,
@@ -94,12 +103,17 @@ const props = defineProps({
     },
   },
 })
-const heeftBoekingen = computed(() => {
-  return gefilterdeToestellen.value.some((toestel) => boekingenVoorToestel(toestel._id).length > 0)
-})
-const emit = defineEmits(['openBoeking', 'addBoeking', 'export-pdf'])
 
-/* ----------------------------- DATA ----------------------------- */
+/* ---------------- EMITS ---------------- */
+const emit = defineEmits([
+  'openBoeking',
+  'addBoeking',
+  'export-pdf',
+  'update:startDatum',
+  'update:eindDatum',
+])
+
+/* ---------------- DATA ---------------- */
 const toestellen = ref([])
 const dagen = ref([])
 const selectedType = ref('')
@@ -107,9 +121,14 @@ const types = ref([])
 
 const startDatum = ref(props.initialStart)
 const eindDatum = ref(props.initialEnd)
-const dateRange = ref([startDatum.value, eindDatum.value])
 
-/* ----------------------------- DATEPICKER ----------------------------- */
+const dateRange = ref([
+  startDatum.value.toISOString().slice(0, 10),
+  eindDatum.value.toISOString().slice(0, 10),
+])
+
+/* ---------------- DATE PICKER ---------------- */
+
 const pickerOptions = {
   disabledDate(date) {
     if (!dateRange.value || !dateRange.value[0]) return false
@@ -120,19 +139,27 @@ const pickerOptions = {
   },
 }
 
-watch(dateRange, (newRange) => {
-  if (!newRange || newRange.length !== 2) return
-  startDatum.value = newRange[0]
-  eindDatum.value = newRange[1]
+function updateDateRange(val) {
+  if (!val) return
+
+  startDatum.value = new Date(val[0])
+  eindDatum.value = new Date(val[1])
+
+  emit('update:startDatum', val[0])
+  emit('update:eindDatum', val[1])
+
   updateDagen()
-})
+}
+
+/* ---------------- FORMAT ---------------- */
 
 function formatDatum(datum) {
   const d = new Date(datum)
   return d.getDate() + '/' + (d.getMonth() + 1)
 }
 
-/* ----------------------------- TYPES ----------------------------- */
+/* ---------------- TYPES ---------------- */
+
 async function getTypes() {
   try {
     const response = await toestelApi.getTypes()
@@ -142,7 +169,8 @@ async function getTypes() {
   }
 }
 
-/* ----------------------------- TOESTELLEN AFLEIDEN VAN BOEKINGEN ----------------------------- */
+/* ---------------- TOESTELLEN AFLEIDEN ---------------- */
+
 const toestellenFromBoekingen = computed(() => {
   const map = new Map()
 
@@ -152,8 +180,8 @@ const toestellenFromBoekingen = computed(() => {
     const boekStart = new Date(b.beginDatum)
     const boekEind = new Date(b.eindDatum)
 
-    // alleen boekingen die overlappen met geselecteerde periode
-    const overlapt = boekStart <= eindDatum.value && boekEind >= startDatum.value
+    const overlapt =
+      boekStart <= eindDatum.value && boekEind >= startDatum.value
 
     if (overlapt) {
       map.set(b.toestel._id, b.toestel)
@@ -171,44 +199,64 @@ watch(
   { immediate: true },
 )
 
-/* ----------------------------- DAGEN ----------------------------- */
+/* ---------------- DAGEN ---------------- */
+
 function updateDagen() {
   const start = new Date(startDatum.value)
   const eind = new Date(eindDatum.value)
+
   dagen.value = []
+
   for (let d = new Date(start); d <= eind; d.setDate(d.getDate() + 1)) {
     dagen.value.push(new Date(d).toISOString().slice(0, 10))
   }
 }
 
-/* ----------------------------- FILTER ----------------------------- */
+/* ---------------- FILTER ---------------- */
+
 function boekingenVoorToestel(toestelId) {
   return props.boekingen.filter((b) => {
     if (!b.toestel) return false
     if (b.toestel._id !== toestelId) return false
+
     const boekStart = new Date(b.beginDatum)
     const boekEind = new Date(b.eindDatum)
+
     return boekStart <= eindDatum.value && boekEind >= startDatum.value
   })
 }
 
 const gefilterdeToestellen = computed(() => {
   if (!selectedType.value) return toestellen.value
-  return toestellen.value.filter((t) => t.type?._id === selectedType.value._id)
+  return toestellen.value.filter(
+    (t) => t.type?._id === selectedType.value._id
+  )
 })
+
+/* ---------------- BLOCK POSITIE ---------------- */
 
 function dagIndex(dag) {
   return dagen.value.findIndex((d) => d === dag)
 }
 
 function boekStijl(boek) {
-  const start = new Date(Math.max(new Date(boek.beginDatum), startDatum.value))
-  const eind = new Date(Math.min(new Date(boek.eindDatum), eindDatum.value))
+  const start = new Date(
+    Math.max(new Date(boek.beginDatum), startDatum.value),
+  )
+
+  const eind = new Date(
+    Math.min(new Date(boek.eindDatum), eindDatum.value),
+  )
+
   const startStr = start.toISOString().slice(0, 10)
   const eindStr = eind.toISOString().slice(0, 10)
+
   const startIdx = dagIndex(startStr)
   const eindIdx = dagIndex(eindStr)
-  if (startIdx === -1 || eindIdx === -1) return { display: 'none' }
+
+  if (startIdx === -1 || eindIdx === -1) {
+    return { display: 'none' }
+  }
 
   const width = eindIdx - startIdx + 1
 
@@ -218,7 +266,16 @@ function boekStijl(boek) {
   }
 }
 
-/* ----------------------------- INIT ----------------------------- */
+/* ---------------- COMPUTED ---------------- */
+
+const heeftBoekingen = computed(() => {
+  return gefilterdeToestellen.value.some(
+    (toestel) => boekingenVoorToestel(toestel._id).length > 0,
+  )
+})
+
+/* ---------------- INIT ---------------- */
+
 onMounted(() => {
   updateDagen()
   getTypes()
@@ -316,7 +373,7 @@ onMounted(() => {
   color: #1e3a8a;
 }
 .boek-block.Leveren {
-  background: #fde68a;
+  background: #f1b716;
   color: #78350f;
 }
 .boek-block.Geleverd {
@@ -324,6 +381,10 @@ onMounted(() => {
   color: #065f46;
 }
 .boek-block.Opgehaald {
+  background: #d1fae5;
+  color: #065f46;
+}
+.boek-block.Afgewerkt {
   background: #d1fae5;
   color: #065f46;
 }

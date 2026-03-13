@@ -1,40 +1,14 @@
 <template>
   <div class="agenda-parent-container">
-    <!-- Toggle knop -->
-    <el-switch
-      v-model="showAgenda"
-      active-text="Agenda"
-      inactive-text="Lijst"
-      active-color="#4f46e5"
-      inactive-color="#ccc"
-    />
-
-    <!-- Agenda component -->
-    <Agenda
-      v-if="showAgenda"
+   
+    <BoekingList
       :boekingen="boekingen"
+      :archief= true
       @openBoeking="openBoekingModal"
       @addBoeking="openCreateModal"
-    />
+      @update:search="search = $event"
+    @update:dateRange="dateRange = $event"
 
-    <!-- Lijstweergave -->
-    <BoekingList
-    v-else
-  :boekingen="boekingen"
-  v-model:search="search"
-  v-model:dateRange="dateRange"
-  @openBoeking="openBoekingModal"
-  @addBoeking="openCreateModal"
-  @update:search="search = $event"
-  @update:dateRange="dateRange = $event"
-/>
-
-    <!-- Create Boeking Modal -->
-    <CreateBoekingModal
-      v-if="showCreateModal"
-      :types="types"
-      v-on:close="closeBoekingModal"
-      @update="loadBoekingen"
     />
 
     <!-- Boeking Modal -->
@@ -57,30 +31,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch} from 'vue'
-import Agenda from '@/components/renting/agenda/Agenda.vue'
-import CreateBoekingModal from '@/components/renting/agenda/CreateBoekingModal.vue'
+import { ref, onMounted, watch } from 'vue'
 import BoekingModal from '@/components/renting/agenda/BoekingModal.vue'
 import BoekingList from '@/components/renting/agenda/BoekingList.vue'
 import VrijToestellenModal from '@/components/renting/agenda/VrijToestellenModal.vue'
 import { boekingApi } from '@/api/boeking'
 import { toestelApi } from '@/api/toestel'
 import 'element-plus/dist/index.css'
-import { ElSwitch } from 'element-plus'
 import { uploadApi } from '@/api/upload'
 
-const showAgenda = ref(true)
 const showCreateModal = ref(false)
 const showBoekingModal = ref(false)
 const selectedBoekingId = ref(null)
 const showVrijeToestellenModal = ref(false)
 const vrijeToestellen = ref([])
 const huidigeBoekingId = ref(null)
-const search = ref('')           // 🔹 zoekterm
-const dateRange = ref([null, null])  // 🔹 daterange filter
 
 const types = ref([])
 const boekingen = ref([])
+const search = ref("")
+const dateRange = ref([null, null])
+
 watch([search, dateRange], () => {
   loadBoekingen()
 })
@@ -92,7 +63,7 @@ async function loadBoekingen() {
       search: search.value,           // zoekterm
       startDatum: dateRange.value[0], // start datum
       eindDatum: dateRange.value[1],  // eind datum
-      archief: false                  // of true bij toggle
+      archief: true                  // of true bij toggle
     });
 
     boekingen.value = res
@@ -100,6 +71,7 @@ async function loadBoekingen() {
     console.log(err)
   }
 }
+
 async function loadTypes() {
   try {
     const res = await toestelApi.getTypes()
@@ -120,9 +92,9 @@ async function openVrijeToestellenModal(boekingId) {
       eindDatum: boeking.eindDatum,
       toestelType: boeking.toestelType?._id,
     })
+  console.log(vrijeToestellen)
 
     showVrijeToestellenModal.value = true
-    showBoekingModal.value = false
   } catch (err) {
     console.error(err)
   }
@@ -137,29 +109,23 @@ function openBoekingModal(boekingId) {
 function openCreateModal() {
   showCreateModal.value = true
 }
-function closeBoekingModal() {
-  showCreateModal.value = false
-}
+
 async function assignToestel(toestel) {
   try {
     if (!huidigeBoekingId.value) return
 
-    // Backend call
+    // Backend call: toestel toewijzen
     await boekingApi.assignToestel(huidigeBoekingId.value, toestel._id)
 
-    // Refreshed boeking ophalen
-    const refreshedBoeking = await boekingApi.get(huidigeBoekingId.value)
-
-    // Lokaal updaten
-    const index = boekingen.value.findIndex(b => b._id === huidigeBoekingId.value)
+    // Update de boekingen in de frontend
+    const index = boekingen.value.findIndex((b) => b._id === huidigeBoekingId.value)
     if (index !== -1) {
-      boekingen.value[index] = refreshedBoeking
+      boekingen.value[index].toestel = toestel
     }
 
+    // Sluit modal
     showVrijeToestellenModal.value = false
-      showBoekingModal.value = false
-
-    // Modal blijft open
+    showBoekingModal.value = false
   } catch (err) {
     console.error(err)
   }
@@ -175,23 +141,13 @@ async function deleteBoeking(boekingId) {
   }
 }
 
-async function saveComment(boeking) {
-  try {
-    // Update backend
-    await boekingApi.update(selectedBoekingId.value, { comment: boeking.value.comment })
-
-    // Refreshed boeking ophalen
-    const refreshedBoeking = await boekingApi.get(selectedBoekingId.value)
-
-    // Lokaal updaten
-    const index = boekingen.value.findIndex(b => b._id === selectedBoekingId.value)
-    if (index !== -1) {
-      boekingen.value[index] = refreshedBoeking
-    }
-
-      showBoekingModal.value = false
-  } catch (err) {
-    console.error(err)
+async function saveComment(boeking){
+  try{
+      await boekingApi.update(selectedBoekingId.value, {comment: boeking.value.comment})
+      loadBoekingen();
+      showBoekingModal.value = false;
+  }catch(err){
+      console.log(err);
   }
 }
 async function exportPDF(){

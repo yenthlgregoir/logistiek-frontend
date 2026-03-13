@@ -13,7 +13,6 @@
         <div class="form-group">
           <label>Type toestel</label>
           <div class="type-select-wrapper">
-            
               <template v-if="addingType">
                 <input v-model="localForm.newType" placeholder="Nieuw type invoeren" />
                 <button type="button" class="btn-small cancel" @click="cancelNewType">❌</button>
@@ -29,25 +28,21 @@
               </template>
           </div>
         </div>
-
         <!-- Nummerplaat -->
         <div class="form-group">
           <label>Nummerplaat</label>
           <input v-model="localForm.nrplaat" placeholder="Bv: 1-ABC-123" />
         </div>
-
         <!-- Ref -->
         <div class="form-group">
           <label>Volgnummer</label>
           <input v-model="localForm.Ref" required />
         </div>
-
         <!-- Chasisnummer -->
         <div class="form-group">
           <label>Identificatie</label>
           <input v-model="localForm.chasisnummer" />
         </div>
-
         <!-- Klant -->
         <div class="form-group">
           <label>Klant</label>

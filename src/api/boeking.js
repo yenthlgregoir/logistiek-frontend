@@ -1,7 +1,11 @@
 import { api } from './client'
 
 export const boekingApi = {
-  list: () => api.get(`/boekingen`),
+list:  ({ search, startDatum, eindDatum, archief } = {}) => {
+    const params = new URLSearchParams({search, startDatum, eindDatum, archief});
+    return api.get(`/boekingen?${params.toString()}`)
+   
+  },  
   get: (id) => api.get(`/boekingen/${id}`),
   add: (formData) => api.postFormData(`/boekingen`, formData),
   update: (id, formData) => api.patch(`/boekingen/${id}`, formData),
