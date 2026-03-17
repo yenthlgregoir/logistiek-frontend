@@ -67,124 +67,183 @@ function close() {
 </script>
 
 <style scoped>
+/* =========================================
+   OVERLAY
+========================================= */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000;
+  padding: 1.5rem;
+  z-index: 9999;
+  animation: fadeIn 0.25s ease-out;
 }
 
+/* =========================================
+   MODAL CONTAINER
+========================================= */
 .modal {
-  background: #fff;
-  border-radius: 14px;
   width: 95%;
-  max-width: 450px;
-  padding: 1.8rem;
-  box-shadow: 0 16px 40px rgba(0,0,0,0.15);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  max-width: 480px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  border-radius: 22px;
+  padding: 28px;
+  box-shadow:
+    0 12px 38px rgba(0,0,0,0.18),
+    0 4px 12px rgba(0,0,0,0.08);
+  animation: slideUp 0.3s ease-out;
+  font-family: "Inter", sans-serif;
 }
 
+/* =========================================
+   HEADER
+========================================= */
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  margin-bottom: 20px;
 }
 
 .modal-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #111827;
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
 }
 
+/* Close Button */
 .close-btn {
-  background: transparent;
+  width: 38px;
+  height: 38px;
   border: none;
-  font-size: 18px;
-  color: #6b7280;
+  background: rgba(0,0,0,0.06);
+  border-radius: 12px;
   cursor: pointer;
-}
-.close-btn:hover {
-  color: #111827;
+  font-size: 18px;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.25s ease;
 }
 
+.close-btn:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+
+
+/* =========================================
+   SEARCH INPUT
+========================================= */
 .search-input {
   width: 100%;
-  padding: 0.6rem 0.8rem;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(6px);
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.2s ease;
-}
-.search-input:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  transition: 0.25s ease;
 }
 
+.search-input:focus {
+  outline: none;
+  border-color: #4f73ff;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(79,115,255,0.20);
+}
+
+/* =========================================
+   TOESTELLEN LIST
+========================================= */
 .toestel-list {
   max-height: 420px;
   overflow-y: auto;
-  padding: 0;
   margin: 0;
+  padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
-/* Card style voor toestellen */
+/* High-end toestel card */
 .toestel-item {
-  padding: 12px 16px;
-  border-radius: 10px;
-  background: #f9fafb;
+  padding: 14px 16px;
+  background: rgba(248,250,252,0.85);
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  transition: all 0.2s ease;
-  border: 1px solid #ececec;
+  transition: 0.25s ease;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 2px 6px rgba(0,0,0,0.05);
 }
 
 .toestel-item:hover {
-  background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  border-color: #d1d5db;
+  transform: translateY(-2px);
+  background: white;
+  box-shadow:
+    0 6px 18px rgba(0,0,0,0.12),
+    0 3px 8px rgba(0,0,0,0.08);
+  border-color: #cbd5e1;
 }
 
 .toestel-title {
-  font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 700;
   color: #111827;
 }
 
-.toestel-sub {
-  font-size: 13px;
-  color: #6b7280;
-  margin-top: 2px;
-}
-
+/* =========================================
+   FOOTER
+========================================= */
 .modal-footer {
   display: flex;
   justify-content: flex-end;
-  margin-top: 0.5rem;
+  margin-top: 20px;
 }
 
+/* Cancel button */
 .btn-cancel {
-  background: #f3f4f6;
+  background: rgba(0,0,0,0.06);
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 10px;
+  padding: 10px 18px;
+  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: 0.25s ease;
+  color: #374151;
 }
+
 .btn-cancel:hover {
-  background: #e5e7eb;
+  background: rgba(0,0,0,0.12);
+}
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(25px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 </style>

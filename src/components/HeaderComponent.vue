@@ -48,45 +48,64 @@ function isActive(target) {
 }
 </script>
 
-<style scoped>
-.topbar {
+<style scoped>.topbar {
   display: flex;
   align-items: center;
-  background: white;
-  padding: 14px 32px;
-  border-bottom: 1px solid #e5e7eb;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0 40px; /* verticale padding weg, gebruik height voor hoogte */
+  max-height: 7vh; /* maximaal 7vh */
+  height: 7vh;     /* hoogte vastzetten */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  position: relative;
+  width: 100%;
+  z-index: 10;
 }
 
 .logo {
-  height: 32px;
+  height: 3vh;
+  transition: transform 0.3s ease;
+}
+
+.logo:hover{
+  transform: scale(1.05);
 }
 
 .header-right {
-  margin-left: auto;
   display: flex;
-  gap: 24px;
+  gap: 32px;
+  align-items: center;
+  height: 100%; /* vult de topbar */
 }
 
-/* RouterLink = <a> */
 .header-right a {
   text-decoration: none;
-  color: #4f5661;
+  color: #4b5563;
   font-weight: 500;
   font-size: 15px;
-  transition: color 0.2s ease;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  line-height: 1.5; /* zorgt dat tekst gecentreerd blijft */
 }
 
 .header-right a:hover {
-  color: #080808;
+  color: #ffffff;
+  background: #4f73ff;
+  box-shadow: 0 4px 12px rgba(79, 115, 255, 0.3);
 }
 
 .header-right a.router-link-active {
-  color: #2f80ed;
+  color: #4f73ff;
   font-weight: 600;
+  background: rgba(79, 115, 255, 0.1);
+  padding: 6px 12px;
 }
 
 a.router-link-exact-active {
-  color: #1976d2;
+  color: #2b6cb0;
 }
-
 </style>

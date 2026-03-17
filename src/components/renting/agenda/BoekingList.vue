@@ -92,7 +92,6 @@ const emit = defineEmits([
   'update:dateRange'
 ]);
 
-// Lokale bindings voor v-model style emit
 const localSearch = ref('')
 const localDateRange = ref([null, null])
 
@@ -144,80 +143,139 @@ function formatPeriode(b) {
 </script>
 
 <style scoped>
+/* =========================================
+   WRAPPER
+========================================= */
 .lijstweergave {
-  background: #f9fafb;
-  border-radius: 14px;
+  width: 100%;
+  font-family: "Inter", sans-serif;
 }
 
-/* Header */
+/* =========================================
+   HEADER BAR
+========================================= */
 .lijst-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
   flex-wrap: wrap;
+  margin-bottom: 20px;
 }
 
+.lijst-header h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* HEADER ACTIONS (Search + Datepicker) */
 .header-actions {
   display: flex;
   gap: 1rem;
-  align-items: center;
   flex-wrap: wrap;
+  align-items: center;
 }
-
-/* Search */
+.table-header .right {
+  justify-self: end;
+  text-align: right;
+}
+/* =========================================
+   SEARCH INPUT
+========================================= */
 .search-input {
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  font-size: 14px;
+  padding: 12px 14px;
   width: 260px;
-  transition: 0.2s ease;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(6px);
+  font-size: 14px;
+  font-weight: 500;
+  transition: 0.25s ease;
 }
 
 .search-input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
   outline: none;
+  border-color: #4f73ff;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(79,115,255,0.2);
 }
 
-/* Table header */
+/* =========================================
+   TABLE HEADER
+========================================= */
 .table-header {
   display: grid;
-  grid-template-columns: 1fr 1fr 2fr 1.5fr 1fr;
-  padding: 10px 16px;
-  font-weight: 600;
+  grid-template-columns: 1fr 1.2fr 2fr 1.4fr 1fr;
+  padding: 14px 18px;
+  background: rgba(249,250,251,0.8);
+  border-radius: 14px;
+  font-weight: 700;
   color: #374151;
-  border-bottom: 2px solid #e5e7eb;
+  border: 1px solid rgba(0,0,0,0.06);
+  backdrop-filter: blur(6px);
+  margin-bottom: 10px;
+  font-size: 14px;
 }
 
+/* =========================================
+   TABLE ROW
+========================================= */
 .table-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 2fr 1.5fr 1fr;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  align-items: center;
+  grid-template-columns: 1fr 1.2fr 2fr 1.4fr 1fr;
+  padding: 16px 18px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.06);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: 0.25s ease;
   cursor: pointer;
-  transition: all 0.2s ease;
+  margin-bottom: 10px;
 }
 
 .table-row:hover {
-  background: #eef2ff;
+  transform: translateY(-3px);
+  background: rgba(255,255,255,0.9);
+  box-shadow:
+    0 6px 20px rgba(0,0,0,0.10),
+    0 3px 8px rgba(0,0,0,0.06);
 }
 
+/* REF Column */
+.col-ref strong {
+  font-size: 15px;
+  color: #0f172a;
+  letter-spacing: 0.02em;
+}
+
+/* ADRES Column */
 .col-adres {
   color: #6b7280;
+  font-size: 14px;
 }
 
+/* PERIODE */
+.col-periode {
+  color: #475569;
+  font-weight: 500;
+}
+
+/* =========================================
+   STATUS BADGES
+========================================= */
 .col-status {
-  justify-content: end;
-  font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 6px;
   justify-self: end;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  text-align: center;
+  min-width: 120px;
+  transition: 0.2s ease;
 }
 
-/* Status kleuren */
 .col-status.Aangevraagd {
   background: #fef3c7;
   color: #92400e;
@@ -240,23 +298,25 @@ function formatPeriode(b) {
   color: #065f46;
 }
 
+/* =========================================
+   NO RESULTS
+========================================= */
 .no-results {
   text-align: center;
   padding: 2rem;
-  color: #9ca3af;
+  font-size: 15px;
+  color: #94a3b8;
+  font-style: italic;
 }
 
-.table-header .right {
-  justify-self: end;
-  text-align: right;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
+/* =========================================
+   RESPONSIVE
+========================================= */
+@media (max-width: 900px) {
   .table-header,
   .table-row {
     grid-template-columns: 1fr 1fr;
-    row-gap: 8px;
+    row-gap: 12px;
   }
 
   .col-status {
@@ -264,12 +324,7 @@ function formatPeriode(b) {
   }
 
   .search-input {
-    width: 160px;
+    width: 180px;
   }
-}
-
-.col-periode {
-  color: #4b5563;
-  font-size: 14px;
 }
 </style>

@@ -121,9 +121,6 @@ watch(dateRange, (range) => {
   const beginDatum = new Date(range[0]).toISOString().slice(0, 10)
   const eindDatum = new Date(range[1]).toISOString().slice(0, 10)
 
-  console.log(beginDatum) 
-  console.log(eindDatum)
-
   emit('update:vrijToestel', {
     beginDatum,
     eindDatum

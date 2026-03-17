@@ -1,5 +1,8 @@
 <template>
   <div class="page">
+    <h2>
+      Toestellen
+    </h2>
     <!-- TOOLBAR -->
     <ToestellenToolbar
       v-model:search="search"

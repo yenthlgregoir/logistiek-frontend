@@ -15,7 +15,7 @@
       v-for="toestel in gefilterdeToestellen"
       :key="toestel._id"
       class="table-row"
-      @dblclick="$emit('edit-toestel', toestel)"
+      @click="$emit('edit-toestel', toestel)"
     >
       <div>{{ toestel.type?.naam || 'Onbekend' }}</div>
       <div>{{ toestel.Ref || 'N/A' }}</div>
@@ -56,67 +56,118 @@ const gefilterdeToestellen = computed(() => {
 </script>
 
 <style scoped>
+/* =========================================
+   WRAPPER
+========================================= */
 .lijstweergave {
-  background: #f9fafb;
-  border-radius: 14px;
+  width: 100%;
+  font-family: "Inter", sans-serif;
 }
 
+/* =========================================
+   TABLE HEADER
+========================================= */
 .table-header {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-  padding: 10px 16px;
-  font-weight: 600;
+  grid-template-columns: repeat(6, 1fr);
+  padding: 14px 18px;
+  background: rgba(249,250,251,0.85);
+  backdrop-filter: blur(6px);
+  font-weight: 700;
   color: #374151;
-  border-bottom: 2px solid #e5e7eb;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.06);
+  margin-bottom: 14px;
+  font-size: 14px;
 }
 
+/* =========================================
+   ROWS
+========================================= */
 .table-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  align-items: center;
+  grid-template-columns: repeat(6, 1fr);
+  padding: 16px 18px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.05);
+  transition: 0.25s ease;
   cursor: pointer;
-  transition: all 0.2s ease;
+  margin-bottom: 10px;
+  align-items: center;
 }
+
 .table-row:hover {
-  background: #eef2ff;
+  transform: translateY(-3px);
+  background: rgba(255,255,255,1);
+  box-shadow:
+    0 6px 16px rgba(0,0,0,0.12),
+    0 3px 8px rgba(0,0,0,0.08);
 }
 
-.col-status {
-  text-align: right;
-  font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 6px;
+/* Basic text columns */
+.table-row > div {
+  font-size: 15px;
+  color: #1f2937;
+}
+
+.right {
   justify-self: end;
+  text-align: right;
 }
 
+/* =========================================
+   STATUS BADGES
+========================================= */
+.col-status {
+  justify-self: end;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  min-width: 120px;
+  text-align: center;
+  transition: 0.3s ease;
+}
+
+/* Actief (groen pastel) */
 .col-status.Actief {
-  background: #9be470;
-  color: #000;
-}
-.col-status.Kapot {
-  background: #fca5a5;
-  color: #7f1d1d;
+  background: #d1fae5;
+  color: #065f46;
 }
 
+/* Kapot (rood pastel) */
+.col-status.Kapot {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* =========================================
+   NO RESULTS
+========================================= */
 .no-results {
   text-align: center;
   padding: 2rem;
-  color: #9ca3af;
+  font-size: 15px;
+  color: #94a3b8;
+  font-style: italic;
 }
-.table-header .right {
-  text-align: right;
-}
-/* Responsive */
-@media (max-width: 768px) {
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+@media (max-width: 900px) {
   .table-header,
   .table-row {
     grid-template-columns: 1fr 1fr;
-    row-gap: 8px;
+    row-gap: 12px;
   }
+
   .col-status {
     justify-self: start;
   }
 }
+
 </style>

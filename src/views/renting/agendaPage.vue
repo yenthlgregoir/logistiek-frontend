@@ -1,5 +1,6 @@
 <template>
-  <div class="agenda-parent-container">
+
+  <div class="page"><div class="agenda-parent-container">
     <!-- Toggle knop -->
     <el-switch
       v-model="showAgenda"
@@ -53,7 +54,8 @@
       @select="assignToestel"
       @close="showVrijeToestellenModal = false"
     />
-  </div>
+  </div></div>
+  
 </template>
 
 <script setup>
@@ -85,27 +87,23 @@ watch([search, dateRange], () => {
   loadBoekingen()
 })
 
-// Watcher voor toggle
 watch(showAgenda, (newVal) => {
   if (newVal) {
-    // Agenda is aan → laad boekingen zonder filters
-    search.value = ''               // lege search
-    dateRange.value = [null, null] // geen datumfilter
+    search.value = ''               
+    dateRange.value = [null, null]
     loadBoekingen()
   } else {
-    // Lijst aan → eventueel filters behouden, of ook resetten
     loadBoekingen()
   }
 })
-/* -------------------- INIT DATA -------------------- */
 async function loadBoekingen() {
   try {
 
     const res = await boekingApi.list({
-      search: search.value,           // zoekterm
-      startDatum: dateRange.value[0], // start datum
-      eindDatum: dateRange.value[1],  // eind datum
-      archief: false                  // of true bij toggle
+      search: search.value,           
+      startDatum: dateRange.value[0], 
+      eindDatum: dateRange.value[1],  
+      archief: false                  
     });
 
     boekingen.value = res
@@ -228,9 +226,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
 .agenda-parent-container {
   font-family: Arial, sans-serif;
   padding: 1rem;
+
 }
 
 .toggle-btn {

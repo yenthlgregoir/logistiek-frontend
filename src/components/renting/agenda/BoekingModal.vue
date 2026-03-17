@@ -268,247 +268,300 @@ function cancelAfgewerkt() {
 </script>
 
 <style scoped>
+/* =========================================
+   OVERLAY
+========================================= */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  padding: 1.5rem;
+z-index: 10; /* lager dan popup */  animation: fadeIn 0.25s ease-out;
 }
-.close-btn {
-  background: transparent;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: #6b7280;
+
+/* =========================================
+   MODAL CONTAINER
+========================================= */
+.modal {
+  width: 95%;
+  max-width: 720px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  border-radius: 22px;
+  padding: 32px;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+  animation: slideUp 0.3s ease-out;
+  font-family: "Inter", sans-serif;
+  max-height: 90vh;
+  overflow-y: auto;
 }
-.close-btn:hover {
-  color: #1f2125;
-}
-p.error {
-  color: #dc2626;
-  font-size: 0.85rem;
-  margin-top: 0.25rem;
-}
-.modal-header h3 {
-  font-size: 20px;
-  font-weight: 600;
-}
+
+/* =========================================
+   HEADER
+========================================= */
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  margin-bottom: 26px;
 }
-.modal {
-  width: 680px;
-  background: white;
-  border-radius: 14px;
-  padding: 28px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(0, 0, 0, 0.06);
-  max-height: 90vh;
-  overflow-y: auto;
-  animation: fadeIn 0.25s ease-out;
+
+.modal-header h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
 }
+
+/* Close button */
+.close-btn {
+  width: 38px;
+  height: 38px;
+  border: none;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #475569;
+  transition: 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: #ef4444;
+  color: white;
+}
+
+/* =========================================
+   TOP INFO
+========================================= */
 .top-info {
-  margin-bottom: 24px;
+  margin-bottom: 26px;
 }
+
 .title {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 21px;
+  font-weight: 700;
   color: #111827;
+  margin-bottom: 2px;
 }
+
 .ref {
-  font-size: 13px;
-  color: #6b7280;
-  margin-top: 2px;
+  font-size: 14px;
+  color: #64748b;
 }
+
+/* =========================================
+   DETAILS GRID
+========================================= */
 .details-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 18px;
+  margin-bottom: 22px;
 }
+
+/* Card component */
 .detail-card {
-  background: #fafafa;
-  border: 1px solid #ececec;
-  border-radius: 10px;
   padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.2s ease;
+  background: rgba(248, 250, 252, 0.85);
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 2px 6px rgba(0,0,0,0.05);
+  transition: 0.25s ease;
 }
+
 .detail-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.12),
+    0 2px 6px rgba(0,0,0,0.05);
 }
-.detail-card.toestel {
-  grid-column: 1 / -1;
-}
+
+/* Card header */
 .card-header {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  color: #6b7280;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 8px;
 }
+
+/* Card values */
 .card-value {
   font-size: 15px;
-  font-weight: 700;
-  color: #111827;
+  color: #0f172a;
+  font-weight: 600;
   line-height: 1.5;
 }
+
 .muted {
-  color: #9ca3af;
+  color: #94a3b8;
   font-style: italic;
 }
-.primary-btn {
-  background: #2563eb;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.primary-btn:hover {
-  background: #1d4ed8;
-}
-.ghost-btn {
-  background: transparent;
-  border: none;
-  color: #2563eb;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-}
-.ghost-btn:hover {
-  text-decoration: underline;
-}
-.status-wrapper {
-  margin-top: 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.status-wrapper label {
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  color: #6b7280;
-}
-.status-select {
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  font-weight: 600;
-  font-size: 14px;
-}
-.status-select.Aangevraagd {
-  background: #fef3c7;
-}
-.status-select.Bevestigd {
-  background: #dbeafe;
-}
-.status-select.Leveren {
-  background: #fde68a;
-}
-.status-select.Geleverd {
-  background: #d1fae5;
-}
-.status-select.Opgehaald {
-  background: #d1fae5;
-}
-.modal-footer {
-  margin-top: 26px;
-  display: flex;
-  justify-content: flex-end;
-}
-.danger-btn {
-  background: #ef4444;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  cursor: pointer;
-}
-.danger-btn:hover {
-  background: #dc2626;
-}
-.toevoegen-btn {
-  background: #4447ef;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  cursor: pointer;
-  margin-right: 10px;
-}
-.error {
-  font-size: 13px;
-  color: #dc2626;
-}
-.ghost-btn,
-.danger-btn,
-.primary-btn,
-.status-select {
-  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-}
-.status-select:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
-  border-color: #2563eb;
-}
-.ghost-btn:focus,
-.primary-btn:focus,
-.danger-btn:focus,
-.status-select:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.4);
-  border-color: #2563eb;
-}
-.card-textarea {
-  width: 100%;
-  min-height: 80px;
-  padding: 10px 12px;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  resize: vertical;
-  background-color: #fafafa;
-  color: #111827;
-  font-family: inherit;
-  box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.card-textarea:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-}
+
+/* Full width card */
 .detail-card.opmerkingen {
   grid-column: 1 / -1;
 }
-.download {
-  margin-right: 10px;
+
+/* Textarea */
+.card-textarea {
+  width: 100%;
+  min-height: 90px;
+  background: white;
+  border: 1px solid #d4d4d8;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 15px;
+  resize: vertical;
+  transition: 0.25s ease;
+  font-family: inherit;
 }
+
+.card-textarea:focus {
+  border-color: #4f73ff;
+  box-shadow: 0px 0px 0 4px rgba(79,115,255,0.25);
+  outline: none;
+}
+
+/* =========================================
+   GHOST BUTTON
+========================================= */
+.ghost-btn {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4f73ff;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.ghost-btn:hover {
+  text-decoration: underline;
+}
+
+/* =========================================
+   STATUS SELECT
+========================================= */
+.status-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 20px;
+}
+
+.status-wrapper label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.status-select {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-weight: 600;
+  font-size: 14px;
+  transition: 0.25s ease;
+}
+
+/* Dynamic colors */
+.status-select.Aangevraagd { background: #fef3c7; }
+.status-select.Bevestigd   { background: #dbeafe; }
+.status-select.Leveren     { background: #fde68a; }
+.status-select.Geleverd    { background: #d1fae5; }
+.status-select.Opgehaald   { background: #d1fae5; }
+.status-select.Afgewerkt   { background: #44f097; }
+
+.status-select:focus {
+  border-color: #4f73ff;
+  box-shadow: 0 0 0 4px rgba(79,115,255,0.25);
+  outline: none;
+}
+
+/* =========================================
+   FOOTER BUTTONS
+========================================= */
+.modal-footer {
+  margin-top: 32px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.toevoegen-btn {
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  background: #4f73ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.toevoegen-btn:hover {
+  background: #355dff;
+  box-shadow: 0 4px 14px rgba(79,115,255,0.25);
+}
+
+.download {
+  background: #696d72;
+  border-radius: 10px;
+  padding: 9px 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.danger-btn {
+  padding: 9px 16px;
+  background: #ef4444;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.danger-btn:hover {
+  background: #dc2626;
+  box-shadow: 0 4px 14px rgba(239,68,68,0.25);
+}
+
+/* =========================================
+   ERRORS
+========================================= */
+.error {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #dc2626;
+}
+
+/* =========================================
+   ANIMATIONS
+========================================= */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(25px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 </style>

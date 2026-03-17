@@ -90,111 +90,171 @@ async function save(){
 </script>
 
 <style scoped>
-
-.modal-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.45);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:1000;
+/* =========================================
+   OVERLAY
+========================================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+  z-index: 9999;
+  animation: fadeIn 0.25s ease-out;
 }
 
-.modal-header h3{
-  font-size:20px;
-  font-weight:600;
-}
-
-.modal-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding-bottom:12px;
-  border-bottom:1px solid #e5e7eb;
-  margin-bottom:20px;
-}
-
-.modal{
-  width:680px;
-  background:white;
-  border-radius:14px;
-  padding:28px;
+/* =========================================
+   MODAL CONTAINER
+========================================= */
+.modal {
+  width: 95%;
+  max-width: 520px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  border-radius: 22px;
+  padding: 32px;
   box-shadow:
-    0 10px 30px rgba(0,0,0,0.08),
-    0 2px 10px rgba(0,0,0,0.06);
-  max-height:90vh;
-  overflow-y:auto;
-  animation:fadeIn 0.25s ease-out;
+    0 12px 40px rgba(0,0,0,0.16),
+    0 4px 12px rgba(0,0,0,0.08);
+  animation: slideUp 0.3s ease-out;
+  font-family: "Inter", sans-serif;
 }
 
-.form-group{
-  display:flex;
-  flex-direction:column;
-  margin-bottom:16px;
+/* =========================================
+   HEADER
+========================================= */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  margin-bottom: 24px;
 }
 
-.form-group label{
-  font-size:14px;
-  margin-bottom:4px;
-  color:#555;
+.modal-header h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
 }
 
-.form-group input{
-  padding:8px;
-  border-radius:6px;
-  border:1px solid #ddd;
+/* Close Button */
+.close-btn {
+  width: 38px;
+  height: 38px;
+  border: none;
+  background: rgba(0,0,0,0.06);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.25s;
 }
 
-.modal-footer{
-  margin-top:26px;
-  display:flex;
-  justify-content:flex-end;
-  gap:10px;
+.close-btn:hover {
+  background: #ef4444;
+  color: #fff;
 }
 
-.toevoegen-btn{
-  background:#3498db;
-  color:white;
-  border:none;
-  padding:8px 16px;
-  border-radius:8px;
-  cursor:pointer;
+/* =========================================
+   FORM GROUPS
+========================================= */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
 }
 
-.toevoegen-btn:hover{
-  background:#2c7db3;
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
 }
 
-.danger-btn{
-  background:#ef4444;
-  color:white;
-  border:none;
-  padding:8px 16px;
-  border-radius:8px;
-  cursor:pointer;
+.form-group input {
+  padding: 12px 14px;
+  font-size: 15px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(4px);
+  transition: 0.25s ease;
 }
 
-.danger-btn:hover{
-  background:#dc2626;
+.form-group input:focus {
+  outline: none;
+  border-color: #4f73ff;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(79,115,255,0.20);
 }
 
-.close-btn{
-  border:none;
-  background:none;
-  font-size:18px;
-  cursor:pointer;
+/* =========================================
+   ERROR BOX
+========================================= */
+.error-box {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  margin-top: -4px;
+  margin-bottom: 18px;
+  font-weight: 500;
+  animation: shake 0.25s ease-out;
 }
 
-@keyframes fadeIn{
-  from{
-    opacity:0;
-    transform:translateY(-10px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
+/* =========================================
+   FOOTER
+========================================= */
+.modal-footer {
+  margin-top: 28px;
+  display: flex;
+  justify-content: flex-end;
 }
 
+.toevoegen-btn {
+  background: #4f73ff;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.toevoegen-btn:hover {
+  background: #355dff;
+  box-shadow: 0 4px 14px rgba(79,115,255,0.25);
+}
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(26px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+  0%   { transform: translateX(0); }
+  25%  { transform: translateX(-3px); }
+  50%  { transform: translateX(3px); }
+  75%  { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
 </style>
