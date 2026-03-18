@@ -28,7 +28,8 @@
               <button class="ghost-btn" @click="showLeveradresModal = true">Wijzigen</button>
             </div>
             <div class="card-value">
-              {{ boeking.leverAdresDetails?.straat }} {{ boeking.leverAdresDetails?.huisnummer }} <br />
+              {{ boeking.leverAdresDetails?.straat }} {{ boeking.leverAdresDetails?.huisnummer }}
+              <br />
               {{ boeking.leverAdresDetails?.postcode }} {{ boeking.leverAdresDetails?.gemeente }}
             </div>
           </div>
@@ -40,7 +41,8 @@
               <button class="ghost-btn" @click="showDatumAanpassen = true">Wijzigen</button>
             </div>
             <div class="card-value">
-              {{ boeking.beginDatumFormatted || boeking.beginDatum }} — {{ boeking.eindDatumFormatted || boeking.eindDatum }}
+              {{ boeking.beginDatumFormatted || boeking.beginDatum }} —
+              {{ boeking.eindDatumFormatted || boeking.eindDatum }}
             </div>
           </div>
 
@@ -48,7 +50,9 @@
           <div class="detail-card">
             <div class="card-header">
               <span>Toestel</span>
-              <button class="ghost-btn" @click="$emit('assignToestel', boeking._id)">Toewijzen</button>
+              <button class="ghost-btn" @click="$emit('assignToestel', boeking._id)">
+                Toewijzen
+              </button>
             </div>
             <div class="card-value">
               <template v-if="boeking.toestel">
@@ -163,7 +167,7 @@ watch(
     if (id) await loadBoeking(id)
     else boeking.value = null
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 async function updateLeverAdres(adres) {
@@ -209,13 +213,17 @@ function close() {
 }
 
 function verwijderen() {
-  if (window.confirm('Weet je zeker dat je deze boeking wilt verwijderen? Dit kan niet ongedaan gemaakt worden.')) {
+  if (
+    window.confirm(
+      'Weet je zeker dat je deze boeking wilt verwijderen? Dit kan niet ongedaan gemaakt worden.',
+    )
+  ) {
     emit('verwijderen', props.boekingId)
   }
 }
 
 function save() {
-  emit('save', boeking)
+  emit('save', boeking.value)
 }
 
 async function updateStatus() {
@@ -224,12 +232,14 @@ async function updateStatus() {
   if (localStatus.value === 'Afgewerkt') {
     const beginDatum = new Date(boeking.value.beginDatum)
     const vandaag = new Date()
-    
-    beginDatum.setHours(0,0,0,0)
-    vandaag.setHours(0,0,0,0)
+
+    beginDatum.setHours(0, 0, 0, 0)
+    vandaag.setHours(0, 0, 0, 0)
 
     if (beginDatum > vandaag) {
-      statusError.value = { message: 'Boeking kan niet op "Afgewerkt" gezet worden voor een toekomstige datum.' }
+      statusError.value = {
+        message: 'Boeking kan niet op "Afgewerkt" gezet worden voor een toekomstige datum.',
+      }
       localStatus.value = boeking.value.status
       return
     }
@@ -246,14 +256,11 @@ async function sendStatus(status) {
   try {
     await boekingApi.changeState(props.boekingId, { status })
     boeking.value.status = status
-    statusError.value = '' 
+    statusError.value = ''
     emit('update')
   } catch (err) {
     localStatus.value = boeking.value.status
-    statusError.value =
-      err?.response?.data?.message ||
-      err?.message ||
-      'Fout bij wijzigen status'
+    statusError.value = err?.response?.data?.message || err?.message || 'Fout bij wijzigen status'
   }
 }
 async function confirmAfgewerkt() {
@@ -280,7 +287,8 @@ function cancelAfgewerkt() {
   justify-content: center;
   align-items: center;
   padding: 1.5rem;
-z-index: 10; /* lager dan popup */  animation: fadeIn 0.25s ease-out;
+  z-index: 10; /* lager dan popup */
+  animation: fadeIn 0.25s ease-out;
 }
 
 /* =========================================
@@ -297,7 +305,7 @@ z-index: 10; /* lager dan popup */  animation: fadeIn 0.25s ease-out;
     0 12px 40px rgba(0, 0, 0, 0.15),
     0 4px 12px rgba(0, 0, 0, 0.08);
   animation: slideUp 0.3s ease-out;
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -310,7 +318,7 @@ z-index: 10; /* lager dan popup */  animation: fadeIn 0.25s ease-out;
   justify-content: space-between;
   align-items: center;
   padding-bottom: 14px;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   margin-bottom: 26px;
 }
 
@@ -378,16 +386,16 @@ z-index: 10; /* lager dan popup */  animation: fadeIn 0.25s ease-out;
   border-radius: 14px;
   border: 1px solid #e2e8f0;
   box-shadow:
-    0 1px 2px rgba(0,0,0,0.04),
-    0 2px 6px rgba(0,0,0,0.05);
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 2px 6px rgba(0, 0, 0, 0.05);
   transition: 0.25s ease;
 }
 
 .detail-card:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 4px 12px rgba(0,0,0,0.12),
-    0 2px 6px rgba(0,0,0,0.05);
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 /* Card header */
@@ -434,7 +442,7 @@ z-index: 10; /* lager dan popup */  animation: fadeIn 0.25s ease-out;
 
 .card-textarea:focus {
   border-color: #4f73ff;
-  box-shadow: 0px 0px 0 4px rgba(79,115,255,0.25);
+  box-shadow: 0px 0px 0 4px rgba(79, 115, 255, 0.25);
   outline: none;
 }
 
@@ -480,16 +488,28 @@ z-index: 10; /* lager dan popup */  animation: fadeIn 0.25s ease-out;
 }
 
 /* Dynamic colors */
-.status-select.Aangevraagd { background: #fef3c7; }
-.status-select.Bevestigd   { background: #dbeafe; }
-.status-select.Leveren     { background: #fde68a; }
-.status-select.Geleverd    { background: #d1fae5; }
-.status-select.Opgehaald   { background: #d1fae5; }
-.status-select.Afgewerkt   { background: #44f097; }
+.status-select.Aangevraagd {
+  background: #fef3c7;
+}
+.status-select.Bevestigd {
+  background: #dbeafe;
+}
+.status-select.Leveren {
+  background: #fde68a;
+}
+.status-select.Geleverd {
+  background: #d1fae5;
+}
+.status-select.Opgehaald {
+  background: #d1fae5;
+}
+.status-select.Afgewerkt {
+  background: #44f097;
+}
 
 .status-select:focus {
   border-color: #4f73ff;
-  box-shadow: 0 0 0 4px rgba(79,115,255,0.25);
+  box-shadow: 0 0 0 4px rgba(79, 115, 255, 0.25);
   outline: none;
 }
 
@@ -516,7 +536,7 @@ z-index: 10; /* lager dan popup */  animation: fadeIn 0.25s ease-out;
 
 .toevoegen-btn:hover {
   background: #355dff;
-  box-shadow: 0 4px 14px rgba(79,115,255,0.25);
+  box-shadow: 0 4px 14px rgba(79, 115, 255, 0.25);
 }
 
 .download {
@@ -540,7 +560,7 @@ z-index: 10; /* lager dan popup */  animation: fadeIn 0.25s ease-out;
 
 .danger-btn:hover {
   background: #dc2626;
-  box-shadow: 0 4px 14px rgba(239,68,68,0.25);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25);
 }
 
 /* =========================================
@@ -556,12 +576,22 @@ z-index: 10; /* lager dan popup */  animation: fadeIn 0.25s ease-out;
    ANIMATIONS
 ========================================= */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(25px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

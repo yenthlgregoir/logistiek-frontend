@@ -2,35 +2,29 @@
 const props = defineProps({
   title: {
     type: String,
-    default: "Confirmation"
+    default: 'Confirmation',
   },
   message: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 })
 
-const emit = defineEmits(["confirm", "cancel"])
+const emit = defineEmits(['confirm', 'cancel'])
 </script>
 
 <template>
   <div class="overlay">
     <div class="dialog">
-      
       <h2 class="title">{{ title }}</h2>
 
       <p class="message">{{ message }}</p>
 
       <div class="buttons">
-        <button class="btn cancel" @click="emit('cancel')">
-          Nee
-        </button>
+        <button class="btn cancel" @click="emit('cancel')">Nee</button>
 
-        <button class="btn confirm" @click="emit('confirm')">
-            Ja
-        </button>
+        <button class="btn confirm" @click="emit('confirm')">Ja</button>
       </div>
-
     </div>
   </div>
 </template>
@@ -39,7 +33,7 @@ const emit = defineEmits(["confirm", "cancel"])
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -53,7 +47,7 @@ const emit = defineEmits(["confirm", "cancel"])
   border-radius: 12px;
   width: 380px;
   max-width: 90%;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   animation: popup 0.2s ease;
 }
 

@@ -1,8 +1,6 @@
 <template>
   <div class="page">
-    <h2>
-      Toestellen
-    </h2>
+    <h2>Toestellen</h2>
     <!-- TOOLBAR -->
     <ToestellenToolbar
       v-model:search="search"
@@ -16,11 +14,27 @@
 
     <!-- TABLE -->
     <ToestellenTable
-      :toestellen="toestellen"
+  :toestellen="paginatedToestellen"
       @update-status="handleStatusUpdate"
       @edit-toestel="editForm"
     />
+<div v-if="toestellen.length > pageSize" class="pagination">
+  <button
+    :disabled="currentPage === 1"
+    @click="currentPage--"
+  >
+    Vorige
+  </button>
 
+  <span>Pagina {{ currentPage }} van {{ totalPages }}</span>
+
+  <button
+    :disabled="currentPage === totalPages"
+    @click="currentPage++"
+  >
+    Volgende
+  </button>
+</div>
     <!-- OVERLAY FORM -->
     <div v-if="showForm" class="overlay">
       <div class="modal">
@@ -38,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch, computed, onBeforeUnmount} from 'vue'
 import ToestellenTable from '@/components/toestellen/ToestellenTable.vue'
 import ToestellenToolbar from '@/components/toestellen/ToestellenToolbar.vue'
 import ToestellenForm from '@/components/toestellen/ToestellenForm.vue'
@@ -208,19 +222,44 @@ async function handleStatusUpdate(payload) {
     console.error(e)
   }
 }
-</script>
-<style scoped>
-.page {
-  padding: 24px;
-  background: #f8fafc;
-  min-height: 100vh;
+
+const currentPage = ref(1)
+const pageSize = ref(9) // default, wordt overschreven
+const totalPages = computed(() => Math.ceil(toestellen.value.length / pageSize.value))
+
+function updatePageSize() {
+  // hoogte van viewport min header + toolbar (bijv 200px)
+  const availableHeight = window.innerHeight - 350
+
+  const rowHeight = 60 
+
+  pageSize.value = Math.floor(availableHeight / rowHeight)
 }
 
+// recompute bij resize
+onMounted(() => {
+  updatePageSize()
+  window.addEventListener('resize', updatePageSize)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updatePageSize)
+})
+const paginatedToestellen = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return toestellen.value.slice(start, end)
+})
+</script>
+<style scoped>
 /* OVERLAY */
+.page{
+  padding: 1rem;
+}
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(27, 73, 101, 0.65);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -228,12 +267,40 @@ async function handleStatusUpdate(payload) {
 }
 
 /* MODAL */
+
 .modal {
   width: 360px;
-  background: #f4f4f4;
+  background: #bee9e8;
   border-radius: 8px;
   padding: 28px 24px;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
-  animation: fadeIn 0.18s ease-out;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 12px;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background-color: #5786f7;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.pagination button:disabled {
+  background-color: #a1b9f5;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-weight: 500;
+  color: #1b4965;
 }
 </style>

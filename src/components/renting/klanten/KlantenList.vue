@@ -74,7 +74,7 @@ const filteredKlanten = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
   min-height: 0;
   overflow: hidden;
 }
@@ -96,7 +96,7 @@ const filteredKlanten = computed(() => {
 .header input:focus {
   outline: none;
   border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .header button {
@@ -159,7 +159,7 @@ const filteredKlanten = computed(() => {
 .table tbody tr:hover {
   background: #f0f7ff;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 .selected {
   background: #dbeafe !important;

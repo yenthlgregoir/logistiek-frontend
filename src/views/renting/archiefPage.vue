@@ -38,7 +38,6 @@ import VrijToestellenModal from '@/components/renting/agenda/VrijToestellenModal
 import { boekingApi } from '@/api/boeking'
 import { toestelApi } from '@/api/toestel'
 import 'element-plus/dist/index.css'
-import { uploadApi } from '@/api/upload'
 
 const showCreateModal = ref(false)
 const showBoekingModal = ref(false)
@@ -150,20 +149,7 @@ async function saveComment(boeking){
       console.log(err);
   }
 }
-async function exportPDF(){
-  try{
-    const blob = await uploadApi.exportBoekingen();
-     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'boekingen.pdf';
-    a.click();
-    window.URL.revokeObjectURL(url);
-  }
-  catch(err){
-    console.log(err);
-  }
-}
+
 /* -------------------- ON MOUNT -------------------- */
 onMounted(() => {
   loadBoekingen()

@@ -6,7 +6,7 @@
     </div>
     <div class="actions">
       <div class="filter-container">
-        <button class="btn btn-secondary" @click="showFilters = !showFilters">
+        <button class="btn btn-primary" @click="showFilters = !showFilters">
           <i class="fa fa-filter"></i> Filter
         </button>
         <!-- POPUP -->
@@ -45,18 +45,12 @@
               style="width: 100%"
             />
           </div>
-          <button class="btn btn-primary reset-btn" @click="resetFilters">
-            Reset filter
-          </button>
-          <button class="btn btn-primary close-btn" @click="showFilters = false">
-            Sluiten
-          </button>
+          <button class="btn btn-primary reset-btn" @click="resetFilters">Reset filter</button>
+          <button class="btn btn-primary close-btn" @click="showFilters = false">Sluiten</button>
         </div>
       </div>
 
-      <button class="btn btn-primary" @click="onCreate">
-        <i class="fa fa-plus"></i> Add
-      </button>
+      <button class="btn btn-primary" @click="onCreate"><i class="fa fa-plus"></i> Add</button>
     </div>
   </div>
 </template>
@@ -80,7 +74,7 @@ const emit = defineEmits([
   'update:klant',
   'update:vrijToestel',
   'create',
-  'resetFilters'
+  'resetFilters',
 ])
 
 const searchProxy = computed({
@@ -117,13 +111,12 @@ watch(dateRange, (range) => {
     return
   }
 
-
   const beginDatum = new Date(range[0]).toISOString().slice(0, 10)
   const eindDatum = new Date(range[1]).toISOString().slice(0, 10)
 
   emit('update:vrijToestel', {
     beginDatum,
-    eindDatum
+    eindDatum,
   })
 })
 function onCreate() {
@@ -146,6 +139,7 @@ function resetFilters() {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  background: transparent;
 }
 
 .search {
@@ -157,8 +151,8 @@ function resetFilters() {
 .search input {
   padding: 8px 12px 8px 32px;
   border-radius: 6px;
-  border: 1px solid #d1d5db;
-  width: 100%;
+  border: none;
+  background: transparent;
 }
 
 .search i {
@@ -166,7 +160,8 @@ function resetFilters() {
   left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
+
+  color: #1b4965;
 }
 
 .actions {
@@ -183,15 +178,17 @@ function resetFilters() {
 }
 
 .btn-primary {
-  background: #2f80ed;
+  background: #5786f7;
   color: white;
+  transition:
+    background 0.3s ease,
+    transform 0.2s ease;
 }
 
-.btn-secondary {
-  background: #e6f0fa;
-  color: #1f4e79;
+.btn-primary:hover {
+  background: #5077d3;
+  transform: translateY(-2px);
 }
-
 .filter-container {
   position: relative;
 }
@@ -200,8 +197,8 @@ function resetFilters() {
   position: absolute;
   top: 42px;
   right: 0;
-  background: white;
-  border: 1px solid #d1d5db;
+  background: #ebeffa;
+  border: 1px solid #1b4965;
   border-radius: 6px;
   padding: 14px;
   width: 350px;
@@ -229,7 +226,9 @@ select {
   border-radius: 6px;
   font-size: 12px;
   width: 100%;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 select:focus {
@@ -256,9 +255,9 @@ select:focus {
   width: 100%;
   background-color: rgb(128, 181, 228);
   margin-bottom: 10px;
-  color:rgb(255, 255, 255);
+  color: rgb(255, 255, 255);
 }
-.reset-btn:hover{
+.reset-btn:hover {
   background-color: #62a0f1;
 }
 </style>

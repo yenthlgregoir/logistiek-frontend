@@ -27,7 +27,6 @@
           @change="updateDateRange"
           style="width: 300px"
         />
-
       </div>
     </div>
 
@@ -41,12 +40,7 @@
     </div>
 
     <!-- Rijen -->
-    <div
-      v-for="b in boekingen"
-      :key="b._id"
-      @click="$emit('openBoeking', b._id)"
-      class="table-row"
-    >
+    <div v-for="b in boekingen" :key="b._id" @click="$emit('openBoeking', b._id)" class="table-row">
       <div class="col-ref">
         <strong>{{ b.ref }}</strong>
       </div>
@@ -76,21 +70,16 @@
 <script setup>
 import { ref } from 'vue'
 import 'element-plus/dist/index.css'
-import { ElDatePicker, ElMenuItemGroup } from 'element-plus'
+import { ElDatePicker } from 'element-plus'
 
-const props = defineProps({
+defineProps({
   boekingen: {
     type: Array,
     default: () => [],
   },
 })
 
-const emit = defineEmits([
-  'openBoeking',
-  'addBoeking',
-  'update:search',
-  'update:dateRange'
-]);
+const emit = defineEmits(['openBoeking', 'addBoeking', 'update:search', 'update:dateRange'])
 
 const localSearch = ref('')
 const localDateRange = ref([null, null])
@@ -108,7 +97,7 @@ let timeout
 
 function updateSearch() {
   clearTimeout(timeout)
-  console.log("emit")
+  console.log('emit')
   timeout = setTimeout(() => {
     emit('update:search', localSearch.value)
   }, 300)
@@ -148,7 +137,7 @@ function formatPeriode(b) {
 ========================================= */
 .lijstweergave {
   width: 100%;
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 /* =========================================
@@ -187,7 +176,7 @@ function formatPeriode(b) {
   width: 260px;
   border-radius: 12px;
   border: 1px solid #d1d5db;
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(6px);
   font-size: 14px;
   font-weight: 500;
@@ -198,7 +187,7 @@ function formatPeriode(b) {
   outline: none;
   border-color: #4f73ff;
   background: white;
-  box-shadow: 0 0 0 4px rgba(79,115,255,0.2);
+  box-shadow: 0 0 0 4px rgba(79, 115, 255, 0.2);
 }
 
 /* =========================================
@@ -208,11 +197,11 @@ function formatPeriode(b) {
   display: grid;
   grid-template-columns: 1fr 1.2fr 2fr 1.4fr 1fr;
   padding: 14px 18px;
-  background: rgba(249,250,251,0.8);
+  background: rgba(249, 250, 251, 0.8);
   border-radius: 14px;
   font-weight: 700;
   color: #374151;
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   backdrop-filter: blur(6px);
   margin-bottom: 10px;
   font-size: 14px;
@@ -225,11 +214,11 @@ function formatPeriode(b) {
   display: grid;
   grid-template-columns: 1fr 1.2fr 2fr 1.4fr 1fr;
   padding: 16px 18px;
-  background: rgba(255,255,255,0.85);
+  background: rgba(255, 255, 255, 0.85);
   border-radius: 14px;
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   backdrop-filter: blur(6px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: 0.25s ease;
   cursor: pointer;
   margin-bottom: 10px;
@@ -237,10 +226,10 @@ function formatPeriode(b) {
 
 .table-row:hover {
   transform: translateY(-3px);
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.9);
   box-shadow:
-    0 6px 20px rgba(0,0,0,0.10),
-    0 3px 8px rgba(0,0,0,0.06);
+    0 6px 20px rgba(0, 0, 0, 0.1),
+    0 3px 8px rgba(0, 0, 0, 0.06);
 }
 
 /* REF Column */

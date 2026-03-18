@@ -21,7 +21,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { loginApi } from '@/api/login.js'
-import  { jwtDecode } from "jwt-decode" // ✅ frontend compatible
+import { jwtDecode } from 'jwt-decode' // ✅ frontend compatible
 
 const email = ref('')
 const password = ref('')
@@ -31,15 +31,15 @@ const handleLogin = async () => {
   try {
     const response = await loginApi.login(email.value, password.value)
     const token = response.token
-    localStorage.setItem("token", token)
+    localStorage.setItem('token', token)
 
     const decoded = jwtDecode(token)
-    localStorage.setItem("role", decoded.role)
+    localStorage.setItem('role', decoded.role)
 
-    router.push({ name: "home" })
+    router.push({ name: 'home' })
   } catch (err) {
     console.error(err)
-    error.value = "Login mislukt"
+    error.value = 'Login mislukt'
   }
 }
 </script>
@@ -66,7 +66,9 @@ const handleLogin = async () => {
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .login-card:hover {
@@ -140,8 +142,13 @@ button:active {
 
 /* Subtle floating animation for card */
 @keyframes floatCard {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
 .login-card {

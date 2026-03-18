@@ -37,7 +37,7 @@
 
         <div class="form-group">
           <label>Eind datum</label>
-          <input type="date" v-model="form.eindDatum"/>
+          <input type="date" v-model="form.eindDatum" />
         </div>
 
         <!-- Service -->
@@ -97,7 +97,7 @@ const message = ref('')
 const error = ref(false)
 const klanten = ref([])
 
-const props = defineProps({
+defineProps({
   types: Object,
 })
 
@@ -122,7 +122,7 @@ watch(
   async (newKlantId) => {
     if (!newKlantId) return
 
-    const klant = klanten.value.find(k => k._id === newKlantId)
+    const klant = klanten.value.find((k) => k._id === newKlantId)
     if (!klant) return
 
     if (klant.leverAdressen?.length > 1) {
@@ -134,7 +134,7 @@ watch(
       // geen leveradres → fallback naar factuuradres
       form.leverAdres = klant.factuurAdres?._id || null
     }
-  }
+  },
 )
 async function submitBoeking() {
   if (!form.leverAdres) {
@@ -206,8 +206,8 @@ async function getKlanten() {
   border-radius: 18px;
   padding: 2.2rem;
   box-shadow:
-    0 10px 35px rgba(0,0,0,0.18),
-    0 4px 12px rgba(0,0,0,0.08);
+    0 10px 35px rgba(0, 0, 0, 0.18),
+    0 4px 12px rgba(0, 0, 0, 0.08);
   animation: slideUp 0.3s ease-out;
   position: relative;
   font-family: 'Inter', sans-serif;
@@ -232,7 +232,7 @@ async function getKlanten() {
 }
 
 .close-btn {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0, 0, 0, 0.05);
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -274,7 +274,7 @@ async function getKlanten() {
   font-size: 1rem;
   border: 1px solid #cbd5e1;
   border-radius: 10px;
-  background: rgba(255,255,255,0.85);
+  background: rgba(255, 255, 255, 0.85);
   transition: all 0.25s ease;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 20 20' stroke='%236b7280' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 8 10 12 14 8'%3E%3C/polyline%3E%3C/svg%3E");
@@ -286,7 +286,7 @@ async function getKlanten() {
 .form-group select:focus {
   border-color: #4f73ff;
   background: white;
-  box-shadow: 0 0 0 4px rgba(79,115,255,0.15);
+  box-shadow: 0 0 0 4px rgba(79, 115, 255, 0.15);
 }
 
 /* =========================================
@@ -312,11 +312,11 @@ async function getKlanten() {
 
 .btn-primary:hover {
   background: #355dff;
-  box-shadow: 0 5px 14px rgba(79,115,255,0.25);
+  box-shadow: 0 5px 14px rgba(79, 115, 255, 0.25);
 }
 
 .btn-cancel {
-  background: rgba(0,0,0,0.08);
+  background: rgba(0, 0, 0, 0.08);
   color: #334155;
   padding: 0.65rem 1.3rem;
   border-radius: 10px;
@@ -326,7 +326,7 @@ async function getKlanten() {
 }
 
 .btn-cancel:hover {
-  background: rgba(0,0,0,0.12);
+  background: rgba(0, 0, 0, 0.12);
 }
 
 /* =========================================
@@ -347,12 +347,22 @@ p.error {
    ANIMATIES
 ========================================= */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(25px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

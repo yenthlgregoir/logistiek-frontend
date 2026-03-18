@@ -164,14 +164,14 @@ async function removeLeverAdres(adres) {
 }
 
 async function updateLeverAdres(adres) {
-      try {
-      // Bestaande klant → backend verwijderen
-      await klantApi.updateLeverAdres(selectedKlant.value._id, adres)
-      selectNew()
-      loadKlanten()
-    } catch (err) {
-      console.error(err)
-    }
+  try {
+    // Bestaande klant → backend verwijderen
+    await klantApi.updateLeverAdres(selectedKlant.value._id, adres)
+    selectNew()
+    loadKlanten()
+  } catch (err) {
+    console.error(err)
+  }
 }
 async function deleteKlant() {
   try {

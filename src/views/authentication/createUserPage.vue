@@ -1,39 +1,28 @@
 <script setup>
-import { ref , onMounted} from "vue"
-import { loginApi } from "@/api/login"
+import { ref } from 'vue'
+import { loginApi } from '@/api/login'
 
-
-const email = ref("")
-const role = ref("purchase")
-const message = ref("")
+const email = ref('')
+const role = ref('purchase')
+const message = ref('')
 const loading = ref(false)
 
 async function createUser() {
   try {
     loading.value = true
-    message.value = ""
+    message.value = ''
 
-    const res = await loginApi.createUser(email.value, role.value)
+    await loginApi.createUser(email.value, role.value)
 
-    message.value = "User created successfully"
-    email.value = ""
-    role.value = "purchase"
+    message.value = 'User created successfully'
+    email.value = ''
+    role.value = 'purchase'
   } catch (err) {
-    message.value = err.response?.data?.message || "Server error"
+    message.value = err.response?.data?.message || 'Server error'
   } finally {
     loading.value = false
   }
 }
-
-onMounted(async () => {
-  try {
-    const users = await loginApi.getUsers();
-    console.log(users)
-  } catch (err) {
-    console.error(err)
-  }
-})
-
 </script>
 
 <template>
@@ -54,7 +43,7 @@ onMounted(async () => {
       </div>
 
       <button type="button" @click="createUser" :disabled="loading">
-        {{ loading ? "Creating..." : "Create User" }}
+        {{ loading ? 'Creating...' : 'Create User' }}
       </button>
 
       <p v-if="message" class="message">{{ message }}</p>
@@ -95,7 +84,8 @@ h2 {
   margin-bottom: 15px;
 }
 
-input, select {
+input,
+select {
   width: 100%;
   padding: 12px 14px;
   border-radius: 8px;
@@ -104,7 +94,8 @@ input, select {
   transition: all 0.2s ease;
 }
 
-input:focus, select:focus {
+input:focus,
+select:focus {
   outline: none;
   border-color: #4f73ff;
   box-shadow: 0 0 0 3px rgba(79, 115, 255, 0.15);

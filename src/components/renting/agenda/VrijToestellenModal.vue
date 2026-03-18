@@ -6,12 +6,7 @@
         <button class="close-btn" @click="close">✕</button>
       </div>
 
-      <input
-        type="text"
-        v-model="search"
-        placeholder="Zoek toestel..."
-        class="search-input"
-      />
+      <input type="text" v-model="search" placeholder="Zoek toestel..." class="search-input" />
 
       <ul class="toestel-list">
         <li
@@ -32,8 +27,7 @@
 </template>
 
 <script setup>
-import { ref, computed} from 'vue'
-
+import { ref, computed } from 'vue'
 
 const props = defineProps({
   toestellen: { type: Array, required: true },
@@ -48,9 +42,7 @@ const gefilterdeToestellen = computed(() => {
     const query = search.value.toLowerCase()
     lijst = lijst.filter(
       (t) =>
-        (t.Ref && t.Ref.toLowerCase().includes(query)) ||
-        (t.type && t.type.toLowerCase().includes(query)) ||
-        (t.status && t.status.toLowerCase().includes(query))
+        (t.Ref && t.Ref.toLowerCase().includes(query)) 
     )
   }
   return lijst
@@ -94,10 +86,10 @@ function close() {
   border-radius: 22px;
   padding: 28px;
   box-shadow:
-    0 12px 38px rgba(0,0,0,0.18),
-    0 4px 12px rgba(0,0,0,0.08);
+    0 12px 38px rgba(0, 0, 0, 0.18),
+    0 4px 12px rgba(0, 0, 0, 0.08);
   animation: slideUp 0.3s ease-out;
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 /* =========================================
@@ -108,7 +100,7 @@ function close() {
   justify-content: space-between;
   align-items: center;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   margin-bottom: 20px;
 }
 
@@ -124,7 +116,7 @@ function close() {
   width: 38px;
   height: 38px;
   border: none;
-  background: rgba(0,0,0,0.06);
+  background: rgba(0, 0, 0, 0.06);
   border-radius: 12px;
   cursor: pointer;
   font-size: 18px;
@@ -140,8 +132,6 @@ function close() {
   color: #ffffff;
 }
 
-
-
 /* =========================================
    SEARCH INPUT
 ========================================= */
@@ -150,7 +140,7 @@ function close() {
   padding: 12px 14px;
   border-radius: 12px;
   border: 1px solid #d1d5db;
-  background: rgba(255,255,255,0.7);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(6px);
   font-size: 14px;
   font-weight: 500;
@@ -161,7 +151,7 @@ function close() {
   outline: none;
   border-color: #4f73ff;
   background: white;
-  box-shadow: 0 0 0 4px rgba(79,115,255,0.20);
+  box-shadow: 0 0 0 4px rgba(79, 115, 255, 0.2);
 }
 
 /* =========================================
@@ -182,7 +172,7 @@ function close() {
 /* High-end toestel card */
 .toestel-item {
   padding: 14px 16px;
-  background: rgba(248,250,252,0.85);
+  background: rgba(248, 250, 252, 0.85);
   border-radius: 14px;
   border: 1px solid #e2e8f0;
   cursor: pointer;
@@ -190,16 +180,16 @@ function close() {
   flex-direction: column;
   transition: 0.25s ease;
   box-shadow:
-    0 1px 2px rgba(0,0,0,0.04),
-    0 2px 6px rgba(0,0,0,0.05);
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .toestel-item:hover {
   transform: translateY(-2px);
   background: white;
   box-shadow:
-    0 6px 18px rgba(0,0,0,0.12),
-    0 3px 8px rgba(0,0,0,0.08);
+    0 6px 18px rgba(0, 0, 0, 0.12),
+    0 3px 8px rgba(0, 0, 0, 0.08);
   border-color: #cbd5e1;
 }
 
@@ -220,7 +210,7 @@ function close() {
 
 /* Cancel button */
 .btn-cancel {
-  background: rgba(0,0,0,0.06);
+  background: rgba(0, 0, 0, 0.06);
   border: none;
   padding: 10px 18px;
   border-radius: 12px;
@@ -231,19 +221,29 @@ function close() {
 }
 
 .btn-cancel:hover {
-  background: rgba(0,0,0,0.12);
+  background: rgba(0, 0, 0, 0.12);
 }
 
 /* =========================================
    ANIMATIONS
 ========================================= */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(25px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

@@ -1,88 +1,77 @@
 <template>
-<div class="modal-overlay" @click.self="close">
-  <div class="modal">
+  <div class="modal-overlay" @click.self="close">
+    <div class="modal">
+      <!-- HEADER -->
+      <div class="modal-header">
+        <h3>Datum aanpassen</h3>
+        <button class="close-btn" @click="close">✖</button>
+      </div>
 
-    <!-- HEADER -->
-    <div class="modal-header">
-      <h3>Datum aanpassen</h3>
-      <button class="close-btn" @click="close">✖</button>
+      <!-- BEGIN DATUM -->
+      <div class="form-group">
+        <label>Begin datum</label>
+        <input type="date" v-model="form.beginDatum" required />
+      </div>
+
+      <!-- EIND DATUM -->
+      <div class="form-group">
+        <label>Eind datum</label>
+        <input type="date" v-model="form.eindDatum" />
+      </div>
+
+      <!-- ERROR -->
+      <div v-if="errorMessage" class="error-box">
+        {{ errorMessage }}
+      </div>
+
+      <div class="modal-footer">
+        <button class="toevoegen-btn" @click="save">Opslaan</button>
+      </div>
     </div>
-
-    <!-- BEGIN DATUM -->
-    <div class="form-group">
-      <label>Begin datum</label>
-<input type="date" v-model="form.beginDatum" required />
-    </div>
-
-    <!-- EIND DATUM -->
-    <div class="form-group">
-      <label>Eind datum</label>
-      <input type="date" v-model="form.eindDatum"  />
-    </div>
-
-    <!-- ERROR -->
-<div v-if="errorMessage" class="error-box">
-  {{ errorMessage }}
-</div>
-
-    <div class="modal-footer">
-      <button class="toevoegen-btn" @click="save">
-        Opslaan
-      </button>
-    </div>
-
   </div>
-</div>
 </template>
 <script setup>
-import { reactive, onMounted, ref } from "vue"
-import { boekingApi } from "@/api/boeking"
+import { reactive, onMounted, ref } from 'vue'
+import { boekingApi } from '@/api/boeking'
 
 const props = defineProps({
   boeking: Object,
 })
 
-const emit = defineEmits(["close","update"])
-const errorMessage = ref("")
+const emit = defineEmits(['close', 'update'])
+const errorMessage = ref('')
 const form = reactive({
-  beginDatum: "",
-  eindDatum: ""
+  beginDatum: '',
+  eindDatum: '',
 })
 
 onMounted(() => {
   console.log(props.boeking)
 
-  form.beginDatum = props.boeking.beginDatum?.split("T")[0]
-  form.eindDatum = props.boeking.eindDatum?.split("T")[0]
+  form.beginDatum = props.boeking.beginDatum?.split('T')[0]
+  form.eindDatum = props.boeking.eindDatum?.split('T')[0]
 })
 
-function close(){
-  emit("close")
+function close() {
+  emit('close')
 }
 
-async function save(){
-
-  errorMessage.value = ""
+async function save() {
+  errorMessage.value = ''
 
   // als einddatum leeg → 5 jaar later
-  if(!form.eindDatum){
+  if (!form.eindDatum) {
     const begin = new Date(form.beginDatum)
     begin.setFullYear(begin.getFullYear() + 5)
-    form.eindDatum = begin.toISOString().split("T")[0]
+    form.eindDatum = begin.toISOString().split('T')[0]
   }
 
-  try{
+  try {
+    await boekingApi.updatePeriode(props.boeking._id, form.beginDatum, form.eindDatum)
 
-    await boekingApi.updatePeriode(
-      props.boeking._id,
-      form.beginDatum,
-      form.eindDatum
-    )
-
-    emit("update")
-    emit("close")
-
-  }catch(e){
+    emit('update')
+    emit('close')
+  } catch (e) {
     const parsed = JSON.parse(e.message)
     errorMessage.value = parsed.message
   }
@@ -117,10 +106,10 @@ async function save(){
   border-radius: 22px;
   padding: 32px;
   box-shadow:
-    0 12px 40px rgba(0,0,0,0.16),
-    0 4px 12px rgba(0,0,0,0.08);
+    0 12px 40px rgba(0, 0, 0, 0.16),
+    0 4px 12px rgba(0, 0, 0, 0.08);
   animation: slideUp 0.3s ease-out;
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 /* =========================================
@@ -131,7 +120,7 @@ async function save(){
   justify-content: space-between;
   align-items: center;
   padding-bottom: 14px;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
 }
 
@@ -146,7 +135,7 @@ async function save(){
   width: 38px;
   height: 38px;
   border: none;
-  background: rgba(0,0,0,0.06);
+  background: rgba(0, 0, 0, 0.06);
   border-radius: 12px;
   cursor: pointer;
   font-size: 18px;
@@ -183,7 +172,7 @@ async function save(){
   font-size: 15px;
   border-radius: 12px;
   border: 1px solid #cbd5e1;
-  background: rgba(255,255,255,0.85);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(4px);
   transition: 0.25s ease;
 }
@@ -192,7 +181,7 @@ async function save(){
   outline: none;
   border-color: #4f73ff;
   background: white;
-  box-shadow: 0 0 0 4px rgba(79,115,255,0.20);
+  box-shadow: 0 0 0 4px rgba(79, 115, 255, 0.2);
 }
 
 /* =========================================
@@ -234,27 +223,47 @@ async function save(){
 
 .toevoegen-btn:hover {
   background: #355dff;
-  box-shadow: 0 4px 14px rgba(79,115,255,0.25);
+  box-shadow: 0 4px 14px rgba(79, 115, 255, 0.25);
 }
 
 /* =========================================
    ANIMATIONS
 ========================================= */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(26px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes shake {
-  0%   { transform: translateX(0); }
-  25%  { transform: translateX(-3px); }
-  50%  { transform: translateX(3px); }
-  75%  { transform: translateX(-3px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+  75% {
+    transform: translateX(-3px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 </style>

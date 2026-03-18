@@ -1,6 +1,5 @@
 <template>
   <div class="page">
-
     <!-- TITLE + SEARCH CENTERED -->
     <div class="title-wrapper">
       <h1>Admin - Users</h1>
@@ -15,7 +14,6 @@
 
     <!-- TABLE + CARDS -->
     <div class="user-table-wrapper">
-
       <div class="table-header">
         <div>Naam</div>
         <div>Email</div>
@@ -44,9 +42,7 @@
         </div>
       </div>
 
-      <div v-if="!paginatedUsers.length" class="no-results">
-        Geen users gevonden
-      </div>
+      <div v-if="!paginatedUsers.length" class="no-results">Geen users gevonden</div>
 
       <!-- PAGINATION -->
       <div class="pagination" v-if="totalPages > 1">
@@ -64,13 +60,11 @@
 
         <button class="page-btn" :disabled="page === totalPages" @click="page++">›</button>
       </div>
-
     </div>
-
   </div>
 </template>
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { loginApi } from '@/api/login'
 
 const users = ref([])
@@ -93,17 +87,17 @@ async function getUsers() {
 
 const gefilterdeUsers = computed(() => {
   const term = search.value.toLowerCase()
-  page.value = 1
-  return users.value.filter(u =>
-    u.naam?.toLowerCase().includes(term) ||
-    u.email?.toLowerCase().includes(term) ||
-    u.role?.toLowerCase().includes(term)
+  return users.value.filter(
+    (u) =>
+      u.naam?.toLowerCase().includes(term) ||
+      u.email?.toLowerCase().includes(term) ||
+      u.role?.toLowerCase().includes(term),
   )
 })
-
-const totalPages = computed(() =>
-  Math.ceil(gefilterdeUsers.value.length / perPage)
-)
+watch(search, () => {
+  page.value = 1
+})
+const totalPages = computed(() => Math.ceil(gefilterdeUsers.value.length / perPage))
 
 const paginatedUsers = computed(() => {
   const start = (page.value - 1) * perPage
@@ -151,7 +145,7 @@ function resetPassword(user) {
   max-width: 360px;
   border-radius: 14px;
   border: 1px solid #d1d5db;
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
   transition: 0.3s ease;
   margin: 0 auto;
   display: block;
@@ -160,7 +154,7 @@ function resetPassword(user) {
 .search:focus {
   outline: none;
   border-color: #4f73ff;
-  box-shadow: 0 0 0 4px rgba(79,115,255,0.18);
+  box-shadow: 0 0 0 4px rgba(79, 115, 255, 0.18);
 }
 
 /* TABLE + CARDS CENTERED */
@@ -179,9 +173,9 @@ function resetPassword(user) {
   grid-template-columns: 2fr 2fr 1fr minmax(7rem, 0.4fr);
   padding: 1rem 1.2rem;
   border-radius: 14px;
-  background: rgba(255,255,255,0.9);
-  border: 1px solid rgba(0,0,0,0.06);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
   font-weight: 600;
   color: #3a4b63;
 }
@@ -189,18 +183,18 @@ function resetPassword(user) {
 /* CARD ROW */
 .user-card {
   display: grid;
-  grid-template-columns: 2fr 2fr 1fr minmax(7rem,0.4fr);
+  grid-template-columns: 2fr 2fr 1fr minmax(7rem, 0.4fr);
   background: white;
   padding: 1.1rem 1.2rem;
   border-radius: 18px;
-  border: 1px solid rgba(0,0,0,0.05);
-  box-shadow: 0 8px 20px rgba(0,0,70,0.06);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 70, 0.06);
   transition: 0.25s ease;
 }
 
 .user-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(0,0,60,0.1);
+  box-shadow: 0 12px 28px rgba(0, 0, 60, 0.1);
 }
 
 .info {

@@ -8,7 +8,7 @@
       <OrdersTable
         :orders="groupedOrders"
         :status-options="STATUS_OPTIONS"
-        :open-menu.sync="openMenu"
+        v-model:open-menu="openMenu"
         @edit="openEdit"
         @archive="archiveOrder"
         @open-products="openProducts"
@@ -31,16 +31,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ordersApi } from '@/api/orders'
 import OrdersToolbar from '@/components/purchase/PurchaseToolbar.vue'
 import OrdersTable from '@/components/purchase/OrdersTable.vue'
 import OrderModal from '@/components/purchase/OrderModal.vue'
-
-/** ================== API ================== */
-const API_BASE = import.meta.env.VITE_API_BASE_URL
-const LIVE_URL = `${API_BASE}/live-orders`
 const router = useRouter()
 
 /** ================== STATUS ================== */
@@ -151,8 +147,6 @@ function openEdit(order) {
   // reset kebab menu via emit als openMenu prop is
   if (typeof openMenu?.value !== 'undefined') {
     openMenu.value = null
-  } else {
-    emits('update:openMenu', null)
   }
 }
 function closeModal() {

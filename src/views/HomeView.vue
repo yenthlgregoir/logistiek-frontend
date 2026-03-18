@@ -12,8 +12,8 @@
             <div class="icon">🛒</div>
             <span>Purchase</span>
           </RouterLink>
-          <RouterLink v-if="role === 'admin' || role === 'renting'" to="/renting" class="card">
-            <div class="icon">❄️</div>             
+          <RouterLink v-if="role === 'admin' || role === 'renting'" to="/renting/agenda/planning" class="card">
+            <div class="icon">❄️</div>
             <span>Renting</span>
           </RouterLink>
           <RouterLink v-if="role === 'admin' || role === 'tools'" to="/tools" class="card">
@@ -24,11 +24,15 @@
             <div class="icon">🚚</div>
             <span>Logistiek</span>
           </RouterLink>
-          <RouterLink v-if="role === 'admin' || role === 'facilities'" to="/facilities" class="card">
+          <RouterLink
+            v-if="role === 'admin' || role === 'facilities'"
+            to="/facilities"
+            class="card"
+          >
             <div class="icon">🏢</div>
             <span>Facilities</span>
           </RouterLink>
-          <RouterLink v-if="role === 'admin'" to="/admin" class="card">
+          <RouterLink v-if="role === 'admin'" to="/admin/users" class="card">
             <div class="icon">⚙️</div>
             <span>Admin</span>
           </RouterLink>
@@ -41,18 +45,18 @@
 </template>
 
 <script setup>
-import router from '@/router';
-const role = localStorage.getItem("role");
+import router from '@/router'
+const role = localStorage.getItem('role')
 
 function logout() {
-  localStorage.removeItem("token");
-  router.push('/login');
+  localStorage.removeItem('token')
+  router.push('/login')
 }
 </script>
 
 <style scoped>
 .page {
-  min-height: 92.4vh;
+  min-height: 100vh;
   background: linear-gradient(135deg, #f9fbff, #e6f0ff);
   display: flex;
   flex-direction: column;
@@ -67,8 +71,8 @@ function logout() {
 }
 
 .content {
-  max-width: 80vw;  
-  margin: 0 auto;    
+  max-width: 80vw;
+  margin: 0 auto;
   text-align: center;
   width: 100%;
 }
@@ -101,9 +105,9 @@ h1 {
 
 .cards {
   display: grid;
-  grid-auto-flow: column;          /* kaarten op één rij */
-  grid-auto-columns: 140px;        /* vaste breedte van elke kaart */
-  justify-content: center;          /* belangrijk: centreren van alle kaarten als groep */
+  grid-auto-flow: column; /* kaarten op één rij */
+  grid-auto-columns: 140px; /* vaste breedte van elke kaart */
+  justify-content: center; /* belangrijk: centreren van alle kaarten als groep */
   gap: 24px;
   margin-bottom: 40px;
 }
@@ -118,8 +122,9 @@ h1 {
   flex-direction: column;
   align-items: center;
   font-weight: 600;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
   cursor: pointer;
 }
@@ -151,7 +156,9 @@ h1 {
   font-weight: 700;
   font-size: 16px;
   box-shadow: 0 6px 12px rgba(47, 128, 237, 0.4);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease;
   user-select: none;
 }
 

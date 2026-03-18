@@ -1,48 +1,46 @@
 <script setup>
-import { ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { loginApi } from "@/api/login";
+import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { loginApi } from '@/api/login'
 
-const route = useRoute();
-const router = useRouter();
+const route = useRoute()
+const router = useRouter()
 
-const password = ref("");
-const confirmPassword = ref("");
-const message = ref("");
-const loading = ref(false);
+const password = ref('')
+const confirmPassword = ref('')
+const message = ref('')
+const loading = ref(false)
 
-const token = route.params.token;
+const token = route.params.token
 
 async function setPassword() {
   if (!password.value || !confirmPassword.value) {
-    message.value = "Please fill in all fields";
-    return;
+    message.value = 'Please fill in all fields'
+    return
   }
 
   if (password.value !== confirmPassword.value) {
-    message.value = "Passwords do not match";
-    return;
+    message.value = 'Passwords do not match'
+    return
   }
 
   if (password.value.length < 6) {
-    message.value = "Password must be at least 6 characters";
-    return;
+    message.value = 'Password must be at least 6 characters'
+    return
   }
 
-  loading.value = true;
-  message.value = "";
+  loading.value = true
+  message.value = ''
 
   try {
-    await loginApi.setPassword(token , password.value);
-    message.value = "Password updated successfully";
+    await loginApi.setPassword(token, password.value)
+    message.value = 'Password updated successfully'
 
-    router.push("/login");
-    
-
+    router.push('/login')
   } catch (err) {
-    message.value = err.response?.data?.message || "Server error";
+    message.value = err.response?.data?.message || 'Server error'
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 </script>
@@ -61,7 +59,7 @@ async function setPassword() {
       </div>
 
       <button @click="setPassword" :disabled="loading">
-        {{ loading ? "Updating..." : "Set Password" }}
+        {{ loading ? 'Updating...' : 'Set Password' }}
       </button>
 
       <p v-if="message" class="message">{{ message }}</p>

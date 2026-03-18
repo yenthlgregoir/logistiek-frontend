@@ -14,49 +14,51 @@ import adminPage from '@/views/authentication/adminPage.vue'
 import ResetPasswordPage from '@/views/authentication/ResetPasswordPage.vue'
 import CreateUserPage from '@/views/authentication/createUserPage.vue'
 import ArchiefPage from '@/views/renting/archiefPage.vue'
+import BoekingList from '@/components/renting/agenda/BoekingList.vue'
+import AgendaComponent from '@/components/renting/agenda/AgendaComponent.vue'
 
 const routes = [
   {
     path: '/',
     name: 'home',
     component: HomeView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, noSidebar:true },
   },
   {
     path: '/Purchase',
     name: 'purchase',
     component: PurchaseView,
-    meta: { requiresAuth: true, roles: ['admin','purchase'] },
+    meta: { requiresAuth: true, roles: ['admin', 'purchase'] },
   },
   {
     path: '/Purchase/archive',
     name: 'archive',
     component: ArchiefView,
-    meta: { requiresAuth: true, roles: ['admin','purchase'] },
-
+    meta: { requiresAuth: true, roles: ['admin', 'purchase'] },
   },
   {
     path: '/Purchase/order/:id',
     name: 'order',
     component: OrderView,
-    meta: { requiresAuth: true, roles: ['admin','purchase'] },
+    meta: { requiresAuth: true, roles: ['admin', 'purchase'] },
   },
   {
     path: '/Purchase/products/:id',
     name: 'products',
     component: ProductView,
-    meta: { requiresAuth: true, roles: ['admin','purchase'] },
+    meta: { requiresAuth: true, roles: ['admin', 'purchase'] },
   },
   {
     path: '/Purchase/files/:id',
     name: 'files',
     component: FilesView,
-    meta: { requiresAuth: true, roles: ['admin','purchase'] },
+    meta: { requiresAuth: true, roles: ['admin', 'purchase'] },
   },
   {
     path: '/login',
     name: 'login',
     component: LoginView,
+    meta: { noSidebar:true },
   },
   {
     path: '/admin/create-user',
@@ -65,12 +67,12 @@ const routes = [
     meta: { requiresAuth: true, roles: ['admin'] },
   },
   {
-    path: '/admin',
+    path: '/admin/users',
     name: 'adminPage',
     component: adminPage,
     meta: { requiresAuth: true, roles: ['admin'] },
   },
-   {
+  {
     path: '/password-reset/:token',
     name: 'ResetPasswordPage',
     component: ResetPasswordPage,
@@ -79,37 +81,50 @@ const routes = [
     path: '/renting/klanten',
     name: 'rentingKlanten',
     component: KlantenView,
-  meta: { requiresAuth: true, roles: ['admin','renting'] },
+    meta: { requiresAuth: true, roles: ['admin', 'renting'] },
   },
   {
     path: '/renting/toestellen',
     name: 'rentingToestellen',
     component: ToestellenView,
-  meta: { requiresAuth: true, roles: ['admin','renting'] },
+    meta: { requiresAuth: true, roles: ['admin', 'renting'] },
   },
   {
-    path: '/renting',
+    path: '/renting/agenda',
     name: 'renting',
     component: agendaPage,
-    meta: { requiresAuth: true, roles: ['admin','renting'] },
+    meta: { requiresAuth: true, roles: ['admin', 'renting'] },
+    redirect: '/renting/agenda/planning',
+    children: [
+      {
+        path: 'planning',
+        name: 'rentingPlanning',
+        component: AgendaComponent,
+      },
+      {
+        path: 'lijst',
+        name: 'rentingLijst',
+        component: BoekingList,
+      },
+    ],
   },
   {
     path: '/renting/archief',
     name: 'Archief',
     component: ArchiefPage,
-    meta: { requiresAuth: true, roles: ['admin','renting'] },
+    meta: { requiresAuth: true, roles: ['admin', 'renting'] },
   },
   {
     path: '/renting/detail/:boekingId',
     name: 'rentingDetail',
     component: DetailView,
-    meta: { requiresAuth: true, roles: ['admin','renting'] },
+    meta: { requiresAuth: true, roles: ['admin', 'renting'] },
     props: true,
   },
 ]
 
 const router = createRouter({
-  history: createWebHistory('/'),  // 🔑 base '/'
+  history: createWebHistory('/'), // 🔑 base '/'
   routes,
 })
 
@@ -117,7 +132,6 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
 
-  
   // Niet ingelogd
   if (to.meta.requiresAuth && !token) {
     return next({ name: 'login' })
@@ -125,7 +139,7 @@ router.beforeEach((to, from, next) => {
 
   // Authenticated en role-based check
   if (to.meta.roles && token) {
-    const userRole = localStorage.getItem("role") // role uit login
+    const userRole = localStorage.getItem('role') // role uit login
 
     if (!userRole) {
       // Geen role aanwezig → token mogelijk verlopen of corrupt

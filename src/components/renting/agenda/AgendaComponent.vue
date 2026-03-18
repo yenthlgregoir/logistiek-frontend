@@ -1,5 +1,6 @@
 <template>
   <div class="agenda-container">
+    <h1>Plannig</h1>
     <!-- DATUM SELECTIE -->
     <div class="agenda-toolbar">
       <div class="datepickers">
@@ -15,14 +16,14 @@
         />
 
         <label class="type-filter">
-  <span>Type</span>
-  <select v-model="selectedType">
-    <option value="">Alle types</option>
-    <option v-for="type in types" :key="type._id" :value="type">
-      {{ type.naam }}
-    </option>
-  </select>
-</label>
+          <span>Type</span>
+          <select v-model="selectedType">
+            <option value="">Alle types</option>
+            <option v-for="type in types" :key="type._id" :value="type">
+              {{ type.naam }}
+            </option>
+          </select>
+        </label>
       </div>
 
       <div class="right">
@@ -41,17 +42,11 @@
     </div>
 
     <!-- GEEN BOEKINGEN -->
-    <div v-if="!heeftBoekingen" class="geen-boekingen">
-      Geen boekingen deze periode
-    </div>
+    <div v-if="!heeftBoekingen" class="geen-boekingen">Geen boekingen deze periode</div>
 
     <!-- RIJEN -->
     <div v-else class="toestellen-wrapper">
-      <div
-        v-for="toestel in gefilterdeToestellen"
-        :key="toestel._id"
-        class="toestel-row"
-      >
+      <div v-for="toestel in gefilterdeToestellen" :key="toestel._id" class="toestel-row">
         <div class="toestel-cell">
           {{ toestel.Ref }}
           <div class="type-toestel">
@@ -69,11 +64,7 @@
             @click="$emit('openBoeking', boek._id)"
           >
             <div class="boeking-title">
-              {{
-                boek.leverAdresDetails?.naam ||
-                boek.klant?.naam ||
-                'Onbekende klant'
-              }}
+              {{ boek.leverAdresDetails?.naam || boek.klant?.naam || 'Onbekende klant' }}
             </div>
             {{ boek.beginDatumFormatted }} - {{ boek.eindDatumFormatted }}
           </div>
@@ -167,7 +158,7 @@ const pickerOptions = {
 function updateDateRange(val) {
   if (!val || val.length !== 2) return
 
-  let [start, end] = val.map(d => new Date(d))
+  let [start, end] = val.map((d) => new Date(d))
 
   // Zorg dat max-range niet overschreden wordt
   const diffTime = end - start
@@ -215,7 +206,7 @@ async function getTypes() {
 /* ---------------- TOESTELLEN ---------------- */
 const toestellenFromBoekingen = computed(() => {
   const map = new Map()
-  props.boekingen.forEach(b => {
+  props.boekingen.forEach((b) => {
     if (!b.toestel) return
     const boekStart = new Date(b.beginDatum)
     const boekEind = new Date(b.eindDatum)
@@ -226,15 +217,15 @@ const toestellenFromBoekingen = computed(() => {
   return Array.from(map.values())
 })
 
-watch(toestellenFromBoekingen, val => (toestellen.value = val), { immediate: true })
+watch(toestellenFromBoekingen, (val) => (toestellen.value = val), { immediate: true })
 
 const gefilterdeToestellen = computed(() => {
   if (!selectedType.value) return toestellen.value
-  return toestellen.value.filter(t => t.type?._id === selectedType.value._id)
+  return toestellen.value.filter((t) => t.type?._id === selectedType.value._id)
 })
 
 function boekingenVoorToestel(toestelId) {
-  return props.boekingen.filter(b => {
+  return props.boekingen.filter((b) => {
     if (!b.toestel) return false
     if (b.toestel._id !== toestelId) return false
     const boekStart = new Date(b.beginDatum)
@@ -245,13 +236,13 @@ function boekingenVoorToestel(toestelId) {
 
 /* ---------------- BOEKING POSITIE ---------------- */
 function boekStijl(boek) {
-  const format = d => d.toISOString().slice(0, 10)
+  const format = (d) => d.toISOString().slice(0, 10)
   const start = new Date(Math.max(new Date(boek.beginDatum), startDatum.value))
   const eind = new Date(Math.min(new Date(boek.eindDatum), eindDatum.value))
   const startStr = format(start)
   const eindStr = format(eind)
-  const startIdx = dagen.value.findIndex(d => d === startStr)
-  const eindIdx = dagen.value.findIndex(d => d === eindStr)
+  const startIdx = dagen.value.findIndex((d) => d === startStr)
+  const eindIdx = dagen.value.findIndex((d) => d === eindStr)
   if (startIdx === -1 || eindIdx === -1) return { display: 'none' }
   const width = eindIdx - startIdx + 1
   return {
@@ -262,7 +253,7 @@ function boekStijl(boek) {
 
 /* ---------------- COMPUTED ---------------- */
 const heeftBoekingen = computed(() =>
-  gefilterdeToestellen.value.some(t => boekingenVoorToestel(t._id).length > 0)
+  gefilterdeToestellen.value.some((t) => boekingenVoorToestel(t._id).length > 0),
 )
 
 /* ---------------- INIT ---------------- */
@@ -286,10 +277,6 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.4rem;
-  padding: 1rem;
-  background: rgba(255,255,255,0.85);
-  border-radius: 14px;
-  box-shadow: 0 6px 16px rgba(0,0,60,0.08);
   backdrop-filter: blur(10px);
 }
 
@@ -328,10 +315,10 @@ onMounted(() => {
 .header-row {
   width: 100%;
   display: flex;
-  background: rgba(255,255,255,0.7);
+  background: rgba(255, 255, 255, 0.7);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
 .corner-cell {
@@ -349,7 +336,7 @@ onMounted(() => {
   text-align: center;
   padding: 12px;
   background: #e4edff;
-  color: #1e3a8a;
+  color: #374151;
   font-weight: 600;
   border-right: 1px solid #cbd5e1;
 }
@@ -360,7 +347,7 @@ onMounted(() => {
   margin-top: 1.6rem;
   padding: 2rem;
   text-align: center;
-  background: rgba(255,255,255,0.8);
+  background: rgba(255, 255, 255, 0.8);
   border-radius: 12px;
   border: 2px dashed #cbd5e1;
   color: #6b7280;
@@ -381,7 +368,7 @@ onMounted(() => {
   margin-bottom: 12px;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,50,0.05);
+  box-shadow: 0 2px 10px rgba(0, 0, 50, 0.05);
   overflow: hidden;
 }
 
@@ -407,7 +394,7 @@ onMounted(() => {
   height: 40px;
   padding: 8px 10px;
   border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   cursor: pointer;
   font-size: 13px;
   display: flex;
@@ -418,16 +405,28 @@ onMounted(() => {
 
 .boek-block:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
 /* STATUS COLORS */
-.boek-block.Aangevraagd { background: #fef7c3; color: #854d0e; }
-.boek-block.Bevestigd   { background: #dbeafe; color: #1e3a8a; }
-.boek-block.Leveren     { background: #fdecc8; color: #78350f; }
+.boek-block.Aangevraagd {
+  background: #fef7c3;
+  color: #854d0e;
+}
+.boek-block.Bevestigd {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+.boek-block.Leveren {
+  background: #fdecc8;
+  color: #78350f;
+}
 .boek-block.Geleverd,
 .boek-block.Opgehaald,
-.boek-block.Afgewerkt   { background: #d1fae5; color: #065f46; }
+.boek-block.Afgewerkt {
+  background: #d1fae5;
+  color: #065f46;
+}
 
 .boeking-title {
   font-weight: 700;

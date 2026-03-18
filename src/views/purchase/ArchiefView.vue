@@ -95,10 +95,6 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { ordersApi } from '@/api/orders'
 
-/** ================== API ENDPOINTS ================== */
-const API_BASE = import.meta.env.VITE_API_BASE_URL
-const ARCHIVE_URL = `${API_BASE}/archive-orders`
-
 /** ================== STATUS (kleur) ================== */
 const STATUS_OPTIONS = [
   { label: 'Aanvraag bestelling', color: '#CE93D8' },
@@ -181,18 +177,6 @@ const groupedOrders = computed(() => {
       isGrouped: map[ref].length > 1,
     }))
 })
-
-/** ================== KLEUR HELPER ================== */
-function getTextColor(bg) {
-  if (!bg) return '#000'
-  const c = bg.substring(1) // remove '#'
-  const rgb = parseInt(c, 16)
-  const r = (rgb >> 16) & 0xff
-  const g = (rgb >> 8) & 0xff
-  const b = rgb & 0xff
-  const luma = 0.299 * r + 0.587 * g + 0.114 * b
-  return luma > 186 ? '#000' : '#fff'
-}
 
 /** ================== (OPTIONEEL) LIVE SEARCH DEBOUNCE ================== */
 let debounceTimer

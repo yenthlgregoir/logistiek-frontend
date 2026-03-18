@@ -1,15 +1,13 @@
 <template>
   <div class="table-wrapper">
     <table class="table">
-        
-<colgroup>
-    <col style="width: 10%" />  <!-- productcode -->
-    <col style="width: 60%" />  <!-- omschrijving -->
-    <col style="width: 10%" />  <!-- Aantal -->
-    <col style="width: 10%" />  <!-- Prijs -->
-    <col style="width: 10%" />  <!-- Action -->
-
-  </colgroup>
+      <colgroup>
+        <col style="width: 10%" />
+        <col style="width: 60%" />
+        <col style="width: 10%" />
+        <col style="width: 10%" />
+        <col style="width: 10%" />
+      </colgroup>
 
       <thead>
         <tr>
@@ -26,39 +24,32 @@
         </tr>
 
         <template v-for="item in products" :key="item._id">
-  <tr>
-    <td>{{ item.product.productcode }}</td>
-    <td>{{ item.product.omschrijving }}</td>
-    <td>{{ item.aantal }}</td>
-    <td>{{ item.product.eenheidsprijs * item.aantal }}</td>
-    <td class="right"><button>-</button></td> 
-
-  </tr>
-</template>
-
+          <tr>
+            <td>{{ item.product.productcode }}</td>
+            <td>{{ item.product.omschrijving }}</td>
+            <td>{{ item.aantal }}</td>
+            <td>{{ item.product.eenheidsprijs * item.aantal }}</td>
+            <td class="right"><button>-</button></td>
+          </tr>
+        </template>
       </tbody>
     </table>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, toRefs, computed } from 'vue';
-const props = defineProps({
+defineProps({
   products: { type: Array, required: true },
-});
+})
 
-
-const emit = defineEmits([
-
-  'delete-file',
-]);
+defineEmits(['delete-file'])
 </script>
 
 <style scoped>
 .table-wrapper {
   background: white;
   border-radius: 8px;
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 .table {
@@ -66,10 +57,9 @@ const emit = defineEmits([
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
-
 }
 
-thead tr{
+thead tr {
   background: #8ec6f7;
 }
 
@@ -92,6 +82,4 @@ td {
   color: #9ca3af;
   padding: 24px;
 }
-
-
 </style>

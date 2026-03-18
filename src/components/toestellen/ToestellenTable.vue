@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { computed} from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps({
   toestellen: { type: Array, default: () => [] },
@@ -59,9 +59,10 @@ const gefilterdeToestellen = computed(() => {
 /* =========================================
    WRAPPER
 ========================================= */
+
 .lijstweergave {
   width: 100%;
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 /* =========================================
@@ -71,12 +72,12 @@ const gefilterdeToestellen = computed(() => {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   padding: 14px 18px;
-  background: rgba(249,250,251,0.85);
+  background: #f0f0f0;
   backdrop-filter: blur(6px);
   font-weight: 700;
-  color: #374151;
+  color: #6e6e6e;
   border-radius: 14px;
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   margin-bottom: 14px;
   font-size: 14px;
 }
@@ -84,15 +85,15 @@ const gefilterdeToestellen = computed(() => {
 /* =========================================
    ROWS
 ========================================= */
+
 .table-row {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   padding: 16px 18px;
-  background: rgba(255,255,255,0.9);
+  background: #ffffff; /* licht turquoise */
   border-radius: 14px;
-  border: 1px solid rgba(0,0,0,0.06);
-  box-shadow:
-    0 2px 6px rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
   transition: 0.25s ease;
   cursor: pointer;
   margin-bottom: 10px;
@@ -100,18 +101,16 @@ const gefilterdeToestellen = computed(() => {
 }
 
 .table-row:hover {
+  background: #5786f7; /* donkerder turquoise hover */
+  color: white;
   transform: translateY(-3px);
-  background: rgba(255,255,255,1);
-  box-shadow:
-    0 6px 16px rgba(0,0,0,0.12),
-    0 3px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* Basic text columns */
 .table-row > div {
   font-size: 15px;
-  color: #1f2937;
 }
+
 
 .right {
   justify-self: end;
@@ -121,6 +120,7 @@ const gefilterdeToestellen = computed(() => {
 /* =========================================
    STATUS BADGES
 ========================================= */
+
 .col-status {
   justify-self: end;
   padding: 6px 12px;
@@ -132,16 +132,16 @@ const gefilterdeToestellen = computed(() => {
   transition: 0.3s ease;
 }
 
-/* Actief (groen pastel) */
+/* Actief (minder fel groen → blauw variatie) */
 .col-status.Actief {
-  background: #d1fae5;
-  color: #065f46;
+  background: #A8EEAF;
+  color: #0B7226;
 }
 
-/* Kapot (rood pastel) */
+/* Kapot (variatie rood vermijden → gebruik contrastkleur uit palet) */
 .col-status.Kapot {
-  background: #fee2e2;
-  color: #991b1b;
+  background: #ff745c;
+  color: rgb(99, 8, 8);
 }
 
 /* =========================================
@@ -151,7 +151,7 @@ const gefilterdeToestellen = computed(() => {
   text-align: center;
   padding: 2rem;
   font-size: 15px;
-  color: #94a3b8;
+  color: #1b4965;
   font-style: italic;
 }
 
@@ -169,5 +169,4 @@ const gefilterdeToestellen = computed(() => {
     justify-self: start;
   }
 }
-
 </style>

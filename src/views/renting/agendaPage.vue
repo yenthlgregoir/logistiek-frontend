@@ -1,116 +1,118 @@
 <template>
+  <div class="page-content">
+    <div class="agenda-parent-container">
+      
+      <!-- Agenda -->
+      <Agenda
+        v-if="showAgenda"
+        :boekingen="boekingen"
+        @openBoeking="openBoekingModal"
+        @addBoeking="openCreateModal"
+      />
 
-  <div class="page"><div class="agenda-parent-container">
-    <!-- Toggle knop -->
-    <el-switch
-      v-model="showAgenda"
-      active-text="Agenda"
-      inactive-text="Lijst"
-      active-color="#4f46e5"
-      inactive-color="#ccc"
-    />
+      <!-- Lijst -->
+      <BoekingList
+        v-else
+        :boekingen="boekingen"
+        v-model:search="search"
+        v-model:dateRange="dateRange"
+        @openBoeking="openBoekingModal"
+        @addBoeking="openCreateModal"
+        @update:search="search = $event"
+        @update:dateRange="dateRange = $event"
+      />
 
-    <!-- Agenda component -->
-    <Agenda
-      v-if="showAgenda"
-      :boekingen="boekingen"
-      @openBoeking="openBoekingModal"
-      @addBoeking="openCreateModal"
-    />
+      <!-- Modals -->
+      <CreateBoekingModal
+        v-if="showCreateModal"
+        :types="types"
+        @close="closeBoekingModal"
+        @update="loadBoekingen"
+      />
 
-    <!-- Lijstweergave -->
-    <BoekingList
-    v-else
-  :boekingen="boekingen"
-  v-model:search="search"
-  v-model:dateRange="dateRange"
-  @openBoeking="openBoekingModal"
-  @addBoeking="openCreateModal"
-  @update:search="search = $event"
-  @update:dateRange="dateRange = $event"
-/>
+      <BoekingModal
+        v-if="showBoekingModal"
+        :boekingId="selectedBoekingId"
+        @close="showBoekingModal = false"
+        @update="loadBoekingen"
+        @assignToestel="openVrijeToestellenModal"
+        @verwijderen="deleteBoeking"
+        @save="saveComment"
+      />
 
-    <!-- Create Boeking Modal -->
-    <CreateBoekingModal
-      v-if="showCreateModal"
-      :types="types"
-      v-on:close="closeBoekingModal"
-      @update="loadBoekingen"
-    />
-
-    <!-- Boeking Modal -->
-    <BoekingModal
-      v-if="showBoekingModal"
-      :boekingId="selectedBoekingId"
-      @close="showBoekingModal = false"
-      @update="loadBoekingen"
-      @assignToestel="openVrijeToestellenModal"
-      @verwijderen="deleteBoeking"
-      @save= "saveComment"
-    />
-    <VrijToestellenModal
-      v-if="showVrijeToestellenModal"
-      :toestellen="vrijeToestellen"
-      @select="assignToestel"
-      @close="showVrijeToestellenModal = false"
-    />
-  </div></div>
-  
+      <VrijToestellenModal
+        v-if="showVrijeToestellenModal"
+        :toestellen="vrijeToestellen"
+        @select="assignToestel"
+        @close="showVrijeToestellenModal = false"
+      />
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch} from 'vue'
-import Agenda from '@/components/renting/agenda/Agenda.vue'
+import { ref, onMounted, watch, computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+import Agenda from '@/components/renting/agenda/AgendaComponent.vue'
+import BoekingList from '@/components/renting/agenda/BoekingList.vue'
 import CreateBoekingModal from '@/components/renting/agenda/CreateBoekingModal.vue'
 import BoekingModal from '@/components/renting/agenda/BoekingModal.vue'
-import BoekingList from '@/components/renting/agenda/BoekingList.vue'
 import VrijToestellenModal from '@/components/renting/agenda/VrijToestellenModal.vue'
+
 import { boekingApi } from '@/api/boeking'
 import { toestelApi } from '@/api/toestel'
-import 'element-plus/dist/index.css'
-import { ElSwitch } from 'element-plus'
-import { uploadApi } from '@/api/upload'
 
-const showAgenda = ref(true)
+const route = useRoute()
+
+// 🔥 ROUTE bepaalt view
+const showAgenda = computed(() => {
+  return route.path.includes('/planning')
+})
+
+// STATE
 const showCreateModal = ref(false)
 const showBoekingModal = ref(false)
-const selectedBoekingId = ref(null)
 const showVrijeToestellenModal = ref(false)
-const vrijeToestellen = ref([])
+const selectedBoekingId = ref(null)
 const huidigeBoekingId = ref(null)
-const search = ref('')           // 🔹 zoekterm
-const dateRange = ref([null, null])  // 🔹 daterange filter
 
-const types = ref([])
+const vrijeToestellen = ref([])
 const boekingen = ref([])
+const types = ref([])
+
+const search = ref('')
+const dateRange = ref([null, null])
+
+// 🔥 FILTER WATCH (ongewijzigd)
 watch([search, dateRange], () => {
   loadBoekingen()
 })
 
-watch(showAgenda, (newVal) => {
+// 🔥 BELANGRIJK: reageer op switch tussen planning/lijst
+watch(() => showAgenda.value, (newVal) => {
   if (newVal) {
-    search.value = ''               
+    search.value = ''
     dateRange.value = [null, null]
-    loadBoekingen()
-  } else {
-    loadBoekingen()
   }
+  loadBoekingen()
 })
+
+// API
 async function loadBoekingen() {
   try {
-
     const res = await boekingApi.list({
-      search: search.value,           
-      startDatum: dateRange.value[0], 
-      eindDatum: dateRange.value[1],  
-      archief: false                  
-    });
-
+      search: search.value,
+      startDatum: dateRange.value[0],
+      eindDatum: dateRange.value[1],
+      archief: false
+    })
     boekingen.value = res
   } catch (err) {
     console.log(err)
   }
 }
+
 async function loadTypes() {
   try {
     const res = await toestelApi.getTypes()
@@ -120,105 +122,73 @@ async function loadTypes() {
   }
 }
 
-async function openVrijeToestellenModal(boekingId) {
-  try {
-    const boeking = boekingen.value.find((b) => b._id === boekingId)
-    if (!boeking) return
-
-    huidigeBoekingId.value = boekingId
-    vrijeToestellen.value = await boekingApi.vrijeToestellen({
-      beginDatum: boeking.beginDatum,
-      eindDatum: boeking.eindDatum,
-      toestelType: boeking.toestelType?._id,
-    })
-
-    showVrijeToestellenModal.value = true
-  } catch (err) {
-    console.error(err)
-  }
-}
-/* -------------------- MODAL HANDLERS -------------------- */
-function openBoekingModal(boekingId) {
-  selectedBoekingId.value = boekingId
-  
+// MODALS
+function openBoekingModal(id) {
+  selectedBoekingId.value = id
   showBoekingModal.value = true
 }
 
 function openCreateModal() {
   showCreateModal.value = true
 }
+
 function closeBoekingModal() {
   showCreateModal.value = false
 }
-async function assignToestel(toestel) {
-  try {
-    if (!huidigeBoekingId.value) return
 
-    // Backend call
-    await boekingApi.assignToestel(huidigeBoekingId.value, toestel._id)
+async function openVrijeToestellenModal(id) {
+  const boeking = boekingen.value.find(b => b._id === id)
+  if (!boeking) return
 
-    // Refreshed boeking ophalen
-    const refreshedBoeking = await boekingApi.get(huidigeBoekingId.value)
+  huidigeBoekingId.value = id
 
-    // Lokaal updaten
-    const index = boekingen.value.findIndex(b => b._id === huidigeBoekingId.value)
-    if (index !== -1) {
-      boekingen.value[index] = refreshedBoeking
-    }
+  vrijeToestellen.value = await boekingApi.vrijeToestellen({
+    beginDatum: boeking.beginDatum,
+    eindDatum: boeking.eindDatum,
+    toestelType: boeking.toestelType?._id,
+  })
 
-    showVrijeToestellenModal.value = false
-      showBoekingModal.value = false
-
-    // Modal blijft open
-  } catch (err) {
-    console.error(err)
-  }
+  showVrijeToestellenModal.value = true
 }
 
-async function deleteBoeking(boekingId) {
-  try {
-    await boekingApi.remove(boekingId)
-    loadBoekingen()
-    showBoekingModal.value = false
-  } catch (err) {
-    console.log(err)
+async function assignToestel(toestel) {
+  if (!huidigeBoekingId.value) return
+
+  await boekingApi.assignToestel(huidigeBoekingId.value, toestel._id)
+
+  const refreshed = await boekingApi.get(huidigeBoekingId.value)
+  const index = boekingen.value.findIndex(b => b._id === huidigeBoekingId.value)
+
+  if (index !== -1) {
+    boekingen.value[index] = refreshed
   }
+
+  showVrijeToestellenModal.value = false
+  showBoekingModal.value = false
+}
+
+async function deleteBoeking(id) {
+  await boekingApi.remove(id)
+  loadBoekingen()
+  showBoekingModal.value = false
 }
 
 async function saveComment(boeking) {
-  try {
-    // Update backend
-    await boekingApi.update(selectedBoekingId.value, { comment: boeking.value.comment })
+  await boekingApi.update(selectedBoekingId.value, {
+    comment: boeking.value.comment
+  })
 
-    // Refreshed boeking ophalen
-    const refreshedBoeking = await boekingApi.get(selectedBoekingId.value)
+  const refreshed = await boekingApi.get(selectedBoekingId.value)
+  const index = boekingen.value.findIndex(b => b._id === selectedBoekingId.value)
 
-    // Lokaal updaten
-    const index = boekingen.value.findIndex(b => b._id === selectedBoekingId.value)
-    if (index !== -1) {
-      boekingen.value[index] = refreshedBoeking
-    }
-
-      showBoekingModal.value = false
-  } catch (err) {
-    console.error(err)
+  if (index !== -1) {
+    boekingen.value[index] = refreshed
   }
+
+  showBoekingModal.value = false
 }
-async function exportPDF(){
-  try{
-    const blob = await uploadApi.exportBoekingen();
-     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'boekingen.pdf';
-    a.click();
-    window.URL.revokeObjectURL(url);
-  }
-  catch(err){
-    console.log(err);
-  }
-}
-/* -------------------- ON MOUNT -------------------- */
+
+// INIT
 onMounted(() => {
   loadBoekingen()
   loadTypes()
@@ -230,46 +200,5 @@ onMounted(() => {
 .agenda-parent-container {
   font-family: Arial, sans-serif;
   padding: 1rem;
-
-}
-
-.toggle-btn {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  cursor: pointer;
-  margin-bottom: 1rem;
-  font-size: 1rem;
-}
-
-.toggle-btn:hover {
-  background-color: #1d4ed8;
-}
-
-.lijstweergave ul {
-  list-style: none;
-  padding: 0;
-}
-
-.lijstweergave li,
-.lijst-item {
-  padding: 0.5rem;
-  border-bottom: 1px solid #ddd;
-  cursor: pointer;
-}
-
-.lijstweergave li:hover,
-.lijst-item:hover {
-  background: #e0e7ff;
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  .toggle-btn {
-    width: 100%;
-    font-size: 0.9rem;
-  }
 }
 </style>

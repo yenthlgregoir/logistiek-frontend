@@ -13,19 +13,19 @@
         <div class="form-group">
           <label>Type toestel</label>
           <div class="type-select-wrapper">
-              <template v-if="addingType">
-                <input v-model="localForm.newType" placeholder="Nieuw type invoeren" />
-                <button type="button" class="btn-small cancel" @click="cancelNewType">❌</button>
-              </template>
-              <template v-else>
-                <select v-model="localForm.type" required>
-                  <option disabled value="">Selecteer type</option>
-                  <option v-for="type in types" :key="type._id" :value="type._id">
-                    {{ type.naam }}
-                  </option>
-                </select>
-                <button type="button" class="btn-small" @click="addingType = true">➕</button>
-              </template>
+            <template v-if="addingType">
+              <input v-model="localForm.newType" placeholder="Nieuw type invoeren" />
+              <button type="button" class="btn-small cancel" @click="cancelNewType">❌</button>
+            </template>
+            <template v-else>
+              <select v-model="localForm.type" required>
+                <option disabled value="">Selecteer type</option>
+                <option v-for="type in types" :key="type._id" :value="type._id">
+                  {{ type.naam }}
+                </option>
+              </select>
+              <button type="button" class="btn-small" @click="addingType = true">➕</button>
+            </template>
           </div>
         </div>
         <!-- Nummerplaat -->
@@ -48,7 +48,7 @@
           <label>Klant</label>
           <select v-model="localForm.klant">
             <option disabled value="">Selecteer klant</option>
-            <option value=null>Geen klant geselecteerd</option>
+            <option value="null">Geen klant geselecteerd</option>
             <option v-for="klant in klanten" :key="klant._id" :value="klant._id">
               {{ klant.naam }}
             </option>
@@ -57,13 +57,13 @@
 
         <div v-if="isEdit" class="form-group">
           <label>Status</label>
-          <select v-model="localForm.status.statusType" class= "select" :class="localForm.status.statusType">
-            <option>
-              Actief
-            </option>
-            <option>
-              Kapot
-            </option>
+          <select
+            v-model="localForm.status.statusType"
+            class="select"
+            :class="localForm.status.statusType"
+          >
+            <option>Actief</option>
+            <option>Kapot</option>
           </select>
         </div>
 
@@ -81,7 +81,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch, computed } from 'vue'
+import { reactive, ref, watch } from 'vue'
 
 const props = defineProps({
   form: Object,
@@ -111,13 +111,8 @@ watch(
   (val) => {
     if (val) Object.assign(localForm, val)
   },
-  { immediate: true }
+  { immediate: true },
 )
-
-const typeName = computed(() => {
-  const typeObj = props.types.find((t) => t._id === localForm.type)
-  return typeObj?.naam || localForm.type || ''
-})
 
 function cancelNewType() {
   addingType.value = false
@@ -151,7 +146,7 @@ function submit() {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -165,7 +160,7 @@ function submit() {
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
-  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   animation: fadeIn 0.25s ease-out;
 }
@@ -222,7 +217,7 @@ input:focus,
 select:focus {
   outline: none;
   border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
   background: #fff;
 }
 
@@ -252,12 +247,16 @@ select:focus {
   cursor: pointer;
   transition: background 0.2s ease;
 }
-.btn-small:hover { background: #4a89c2; }
+.btn-small:hover {
+  background: #4a89c2;
+}
 .btn-small.cancel {
   background: #ef4444;
   border-color: #c0392b;
 }
-.btn-small.cancel:hover { background: #dc2626; }
+.btn-small.cancel:hover {
+  background: #dc2626;
+}
 
 /* Footer knoppen */
 .modal-footer {
@@ -277,7 +276,9 @@ select:focus {
   cursor: pointer;
   transition: background 0.2s ease;
 }
-.btn-primary:hover { background-color: #1d4ed8; }
+.btn-primary:hover {
+  background-color: #1d4ed8;
+}
 
 .btn-secondary {
   background-color: #f3f4f6;
@@ -289,7 +290,9 @@ select:focus {
   cursor: pointer;
   transition: background 0.2s ease;
 }
-.btn-secondary:hover { background-color: #e5e7eb; }
+.btn-secondary:hover {
+  background-color: #e5e7eb;
+}
 
 /* Foutmelding */
 p.error {
@@ -299,15 +302,21 @@ p.error {
 
 /* Animatie */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.select.Actief{
-   background: #9be470;
+.select.Actief {
+  background: #9be470;
   color: #024908;
 }
-.select.Kapot{
-   background: #fca5a5;
+.select.Kapot {
+  background: #fca5a5;
   color: #7f1d1d;
 }
 </style>
