@@ -1,20 +1,27 @@
 <template>
   <div class="lijstweergave">
-    <!-- Header -->
-    <div class="lijst-header">
+
+    <!-- ======================= -->
+    <!--      NIEUWE TOOLBAR     -->
+    <!-- ======================= -->
+    <div class="toolbar">
       <h3>Boekingen</h3>
 
-      <div class="header-actions">
-        <!-- Search input -->
-        <input
-          v-model="localSearch"
-          type="text"
-          placeholder="Zoek op ref, toestel, adres..."
-          class="search-input"
-          @input="updateSearch"
-        />
+      <div class="toolbar-right">
 
-        <!-- Date range picker -->
+        <!-- SEARCH -->
+        <div class="search">
+          <i class="fa fa-search"></i>
+          <input
+            v-model="localSearch"
+            type="text"
+            placeholder="Zoek"
+            class="search-input"
+            @input="updateSearch"
+          />
+        </div>
+
+        <!-- DATE RANGE -->
         <el-date-picker
           v-model="localDateRange"
           type="daterange"
@@ -25,7 +32,7 @@
           :picker-options="pickerOptions"
           clearable
           @change="updateDateRange"
-          style="width: 300px"
+          style="width: 260px"
         />
       </div>
     </div>
@@ -40,7 +47,12 @@
     </div>
 
     <!-- Rijen -->
-    <div v-for="b in boekingen" :key="b._id" @click="$emit('openBoeking', b._id)" class="table-row">
+    <div
+      v-for="b in boekingen"
+      :key="b._id"
+      @click="$emit('openBoeking', b._id)"
+      class="table-row"
+    >
       <div class="col-ref">
         <strong>{{ b.ref }}</strong>
       </div>
@@ -63,7 +75,10 @@
     </div>
 
     <!-- Geen resultaten -->
-    <div v-if="!boekingen.length" class="no-results">Geen resultaten gevonden</div>
+    <div v-if="!boekingen.length" class="no-results">
+      Geen resultaten gevonden
+    </div>
+
   </div>
 </template>
 
@@ -97,7 +112,6 @@ let timeout
 
 function updateSearch() {
   clearTimeout(timeout)
-  console.log('emit')
   timeout = setTimeout(() => {
     emit('update:search', localSearch.value)
   }, 300)
@@ -106,12 +120,15 @@ function updateSearch() {
 function updateDateRange(val) {
   emit('update:dateRange', val || [null, null])
 }
+
 // Helper functies
 function formatAdres(boeking) {
   const adres = boeking.leverAdresDetails || boeking.klant?.factuurAdres
   if (!adres) return 'Onbekende klant'
 
-  return `${adres.naam || boeking.klant?.naam || 'Onbekende klant'}: ${adres.straat || ''} ${adres.huisnummer || ''}, ${adres.postcode || ''} ${adres.gemeente || ''}`
+  return `${adres.naam || boeking.klant?.naam || 'Onbekende klant'}: ${adres.straat || ''} ${
+    adres.huisnummer || ''
+  }, ${adres.postcode || ''} ${adres.gemeente || ''}`
 }
 
 function formatDate(dateString) {
@@ -141,53 +158,49 @@ function formatPeriode(b) {
 }
 
 /* =========================================
-   HEADER BAR
+   NIEUWE TOOLBAR
 ========================================= */
-.lijst-header {
+.toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
   margin-bottom: 20px;
 }
 
-.lijst-header h3 {
-  font-size: 22px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-/* HEADER ACTIONS (Search + Datepicker) */
-.header-actions {
+.toolbar-right {
   display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
   align-items: center;
-}
-.table-header .right {
-  justify-self: end;
-  text-align: right;
-}
-/* =========================================
-   SEARCH INPUT
-========================================= */
-.search-input {
-  padding: 12px 14px;
-  width: 260px;
-  border-radius: 12px;
-  border: 1px solid #d1d5db;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(6px);
-  font-size: 14px;
-  font-weight: 500;
-  transition: 0.25s ease;
+  gap: 16px;
 }
 
-.search-input:focus {
+/* SEARCH */
+.search {
+  position: relative;
+  width: 260px;
+}
+
+.search input {
+  width: 100%;
+  padding: 8px 10px 8px 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  transition: 0.2s ease;
+}
+
+.search input:focus {
   outline: none;
-  border-color: #4f73ff;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(79, 115, 255, 0.2);
+  background: #e8f0ff;
+  box-shadow: 0 0 0 3px rgba(87, 134, 247, 0.2);
+}
+
+.search i {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: #1b4965;
 }
 
 /* =========================================
@@ -197,10 +210,10 @@ function formatPeriode(b) {
   display: grid;
   grid-template-columns: 1fr 1.2fr 2fr 1.4fr 1fr;
   padding: 14px 18px;
-  background: rgba(249, 250, 251, 0.8);
+  background: #f0f0f0;
   border-radius: 14px;
   font-weight: 700;
-  color: #374151;
+  color: #6e6e6e;
   border: 1px solid rgba(0, 0, 0, 0.06);
   backdrop-filter: blur(6px);
   margin-bottom: 10px;
@@ -214,7 +227,7 @@ function formatPeriode(b) {
   display: grid;
   grid-template-columns: 1fr 1.2fr 2fr 1.4fr 1fr;
   padding: 16px 18px;
-  background: rgba(255, 255, 255, 0.85);
+  background: white;
   border-radius: 14px;
   border: 1px solid rgba(0, 0, 0, 0.06);
   backdrop-filter: blur(6px);
@@ -224,12 +237,17 @@ function formatPeriode(b) {
   margin-bottom: 10px;
 }
 
-.table-row:hover {
+.table-row:hover  {
+  background: #5786f7;
+  color: white ;
   transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow:
-    0 6px 20px rgba(0, 0, 0, 0.1),
-    0 3px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.table-row:hover .col-ref strong,
+.table-row:hover .col-adres,
+.table-row:hover .col-periode {
+  color: white;
 }
 
 /* REF Column */
@@ -302,18 +320,10 @@ function formatPeriode(b) {
    RESPONSIVE
 ========================================= */
 @media (max-width: 900px) {
-  .table-header,
-  .table-row {
-    grid-template-columns: 1fr 1fr;
-    row-gap: 12px;
-  }
-
-  .col-status {
-    justify-self: start;
-  }
-
-  .search-input {
-    width: 180px;
+  .toolbar-right {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
   }
 }
 </style>

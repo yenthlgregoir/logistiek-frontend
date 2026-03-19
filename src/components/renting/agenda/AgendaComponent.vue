@@ -263,8 +263,7 @@ onMounted(() => {
 })
 </script>
 <style scoped>
-/* ===== CONTAINER ===== */
-/* ===== CONTAINER FULL WIDTH ===== */
+
 .agenda-container {
   width: 100%;
   font-family: 'Inter', sans-serif;

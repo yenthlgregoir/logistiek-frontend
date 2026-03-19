@@ -1,452 +1,469 @@
 <template>
-  <div class="detail-pane">
-    <h3>Detail</h3>
-
-    <div class="adres-row">
-      <!-- Factuuradres -->
-      <div class="factuuradres">
-        <div class="form-group">
-          <label>Naam</label>
-          <input v-model="localForm.naam" @blur="touched.naam = true" />
-          <p v-if="touched.naam && !localForm.naam" class="error">Naam is verplicht</p>
+  <Transition name="drawer">
+    <div v-if="show" class="drawer-wrapper">
+      <div class="drawer">
+        <!-- Header -->
+        <div class="drawer-header">
+          <h3>Detail</h3>
+          <button class="close-btn" @click="$emit('close')">✕</button>
         </div>
 
-        <div class="form-group">
-          <label>Klantnummer</label>
-          <input v-model="localForm.klantNummer" @blur="touched.klantNummer = true" />
-          <p v-if="touched.klantNummer && !localForm.klantNummer" class="error">
-            Klantnummer is verplicht
-          </p>
-        </div>
-
-        <div class="form-group">
-          <label>Telefoonnummer</label>
-          <input v-model="localForm.telefoonnummer" />
-        </div>
-
-        <div class="form-group">
-          <label>Mailadres</label>
-          <input v-model="localForm.mailadres" />
-        </div>
-
-        <div class="form-group">
-          <label>BTW-nummer</label>
-          <input v-model="localForm.BTWnummer" />
-        </div>
-
-        <h4>Factuuradres</h4>
-
-        <div class="form-group-inline">
-          <div class="input-large">
-            <label>Straat</label>
-            <input v-model="localForm.factuurAdres.straat" />
-          </div>
-          <div class="input-small">
-            <label>Huisnummer</label>
-            <input v-model="localForm.factuurAdres.huisnummer" />
-          </div>
-        </div>
-
-        <div class="form-group-inline">
-          <div class="input-small">
-            <label>Postcode</label>
-            <input v-model="localForm.factuurAdres.postcode" />
-          </div>
-          <div class="input-large">
-            <label>Gemeente</label>
-            <input v-model="localForm.factuurAdres.gemeente" />
-          </div>
-        </div>
-
-        <div class="buttons">
-          <button class="save" :disabled="!isValid" @click="emitSave">Opslaan</button>
-          <button class="cancel" @click="$emit('cancel')">Annuleren</button>
-          <button class="delete" v-if="localSelected" @click="$emit('delete')">Verwijderen</button>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <!-- Leveradressen -->
-      <div class="leveradressen">
-        <h4>Leveradressen</h4>
-
-        <div class="search-row">
-          <input
-            class="search-input"
-            type="search"
-            v-model="zoekTerm"
-            placeholder="Zoek op naam…"
-          />
-          <button @click="$emit('leveradresToevoegen')" class="add-adres">+ Add</button>
-        </div>
-
-        <div class="leveradressen-container">
-          <template v-if="filteredLeverAdressen.length">
-            <div v-for="adres in filteredLeverAdressen" :key="adres._id" class="leveradres-card">
-              <div class="adres-info" @click="onEdit(adres)">
-                <strong>{{ adres.naam }}</strong>
-                <div>{{ adres.straat }} {{ adres.huisnummer }}</div>
-                <div>{{ adres.postcode }} {{ adres.gemeente }}</div>
+        <!-- Content -->
+        <div class="drawer-content">
+          <div class="adres-row">
+            <!-- Factuuradres -->
+            <div class="factuuradres">
+              <div class="form-group">
+                <label>Naam</label>
+                <input v-model="localForm.naam" @blur="touched.naam = true" />
+                <p v-if="touched.naam && !localForm.naam" class="error">Naam is verplicht</p>
               </div>
 
-              <div class="card-buttons">
-                <button class="edit-small" @click.stop="onEdit(adres)">✎</button>
-                <button class="delete-small" @click.stop="onDelete(adres)">✕</button>
+              <div class="form-group">
+                <label>Klantnummer</label>
+                <input v-model="localForm.klantNummer" @blur="touched.klantNummer = true" />
+                <p v-if="touched.klantNummer && !localForm.klantNummer" class="error">
+                  Klantnummer is verplicht
+                </p>
+              </div>
+
+              <div class="form-group">
+                <label>Telefoonnummer</label>
+                <input v-model="localForm.telefoonnummer" />
+              </div>
+
+              <div class="form-group">
+                <label>Mailadres</label>
+                <input v-model="localForm.mailadres" />
+              </div>
+
+              <div class="form-group">
+                <label>BTW-nummer</label>
+                <input v-model="localForm.BTWnummer" />
+              </div>
+
+              <h4>Factuuradres</h4>
+              <div class="form-group-inline">
+                <div class="input-large">
+                  <label>Straat</label>
+                  <input v-model="localForm.factuurAdres.straat" />
+                </div>
+                <div class="input-small">
+                  <label>Huisnummer</label>
+                  <input v-model="localForm.factuurAdres.huisnummer" />
+                </div>
+              </div>
+
+              <div class="form-group-inline">
+                <div class="input-small">
+                  <label>Postcode</label>
+                  <input v-model="localForm.factuurAdres.postcode" />
+                </div>
+                <div class="input-large">
+                  <label>Gemeente</label>
+                  <input v-model="localForm.factuurAdres.gemeente" />
+                </div>
+              </div>
+
+              <div class="buttons">
+                <button class="save" :disabled="!isValid" @click="emitSave">Opslaan</button>
+                <button class="delete" v-if="localSelected" @click="$emit('delete')">Verwijderen</button>
               </div>
             </div>
-          </template>
 
-          <p v-else class="no-results">Geen resultaten voor “{{ zoekTerm }}”.</p>
+            <div class="divider"></div>
+
+            <!-- Leveradressen -->
+            <div class="leveradressen">
+              <h4>Leveradressen</h4>
+              <div class="search-row">
+                <input class="search-input" type="search" v-model="zoekTerm" placeholder="Zoek op naam…" />
+                <button @click="$emit('leveradresToevoegen')" class="add-adres">+ Add</button>
+              </div>
+
+              <div class="leveradressen-container">
+                <template v-if="filteredLeverAdressen.length">
+                  <div
+                    v-for="adres in filteredLeverAdressen"
+                    :key="adres._id"
+                    class="leveradres-card"
+                  >
+                    <div class="adres-info" @click="onEdit(adres)">
+                      <strong>{{ adres.naam }}</strong>
+                      <div>{{ adres.straat }} {{ adres.huisnummer }}</div>
+                      <div>{{ adres.postcode }} {{ adres.gemeente }}</div>
+                    </div>
+                    <div class="card-buttons">
+                      <button class="edit-small" @click.stop="onEdit(adres)">✎</button>
+                      <button class="delete-small" @click.stop="onDelete(adres)">✕</button>
+                    </div>
+                  </div>
+                </template>
+
+                <p v-else class="no-results">Geen resultaten voor “{{ zoekTerm }}”.</p>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- Nieuw leveradres modal -->
+        <NieuwLeveradresModal
+          :show="showModal"
+          :model-value="editingAdres"
+          @close="closeModal"
+          @save="saveEditedAdres"
+        />
       </div>
     </div>
-
-    <NieuwLeveradresModal
-      :show="showModal"
-      :model-value="editingAdres"
-      @close="closeModal"
-      @save="saveEditedAdres"
-    />
-  </div>
+  </Transition>
 </template>
 
 <script setup>
-import { reactive, ref, watch, computed } from 'vue'
+import { reactive, ref, watch, computed, onBeforeUnmount } from 'vue'
 import NieuwLeveradresModal from './NieuwLeveradresModal.vue'
 
-/* ================== PROPS ================== */
 const props = defineProps({
-  form: {
-    type: Object,
-    required: true,
-  },
-  selectedKlant: {
-    type: Object,
-    default: null,
-  },
+  form: { type: Object, required: true },
+  selectedKlant: { type: Object, default: null },
+  show: { type: Boolean, default: false },
 })
 
-/* ================== EMITS ================== */
-const emit = defineEmits([
-  'save',
-  'cancel',
-  'delete',
-  'leveradresToevoegen',
-  'update-lever-adres',
-  'remove-lever-adres',
-])
+const emit = defineEmits(['save','cancel','delete','close','leveradresToevoegen','update-lever-adres','remove-lever-adres'])
 
-/* ================== LOCAL STATE ================== */
-// ✅ VEILIGE clone (geen structuredClone crash)
-function clone(data) {
-  return JSON.parse(JSON.stringify(data))
-}
+function clone(data) { return JSON.parse(JSON.stringify(data)) }
 
 const localForm = ref(clone(props.form))
-
-watch(
-  () => props.form,
-  (newVal) => {
-    localForm.value = clone(newVal)
-  },
-  { deep: true },
-)
+watch(() => props.form, (v) => (localForm.value = clone(v)), { deep: true })
 
 const localSelected = ref(props.selectedKlant)
+watch(() => props.selectedKlant, (v) => (localSelected.value = v))
 
-watch(
-  () => props.selectedKlant,
-  (val) => {
-    localSelected.value = val
-  },
-)
+const touched = reactive({ naam:false, klantNummer:false })
+const isValid = computed(() => localForm.value?.naam?.trim() && localForm.value?.klantNummer?.trim())
 
-/* ================== VALIDATIE ================== */
-const touched = reactive({
-  naam: false,
-  klantNummer: false,
-})
-
-const isValid = computed(() => {
-  return localForm.value?.naam?.trim() && localForm.value?.klantNummer?.trim()
-})
-
-/* ================== ZOEK ================== */
 const zoekTerm = ref('')
-
 const filteredLeverAdressen = computed(() => {
   const q = zoekTerm.value.toLowerCase().trim()
   const list = localForm.value?.leverAdressen || []
-
-  if (!q) return list
-
-  return list.filter((a) => (a?.naam || '').toLowerCase().includes(q))
+  return !q ? list : list.filter((a) => (a?.naam||'').toLowerCase().includes(q))
 })
 
-/* ================== ACTIONS ================== */
-function emitSave() {
-  emit('save', clone(localForm.value))
-}
+function emitSave() { emit('save', clone(localForm.value)) }
+function onDelete(adres) { emit('remove-lever-adres', adres) }
 
-function onDelete(adres) {
-  emit('remove-lever-adres', adres)
-}
-
-/* ================== MODAL ================== */
 const showModal = ref(false)
 const editingAdres = ref(null)
 const adresIndex = ref(null)
 
 function onEdit(adres) {
-  adresIndex.value = localForm.value.leverAdressen.findIndex((a) => a === adres)
+  adresIndex.value = localForm.value.leverAdressen.findIndex((a) => a===adres)
   editingAdres.value = { ...adres }
   showModal.value = true
 }
-
-function closeModal() {
-  showModal.value = false
-  adresIndex.value = null
-}
-
-/* ================== SAVE ADRES ================== */
+function closeModal() { showModal.value = false; adresIndex.value = null }
 function saveEditedAdres(adres) {
-  if (adresIndex.value !== null) {
-    if (props.selectedKlant?._id) {
-      // bestaande klant → backend
-      emit('update-lever-adres', { adres })
-    } else {
-      // nieuwe klant → lokaal aanpassen
-      localForm.value.leverAdressen[adresIndex.value] = {
-        ...adres,
-      }
-    }
+  if(adresIndex.value!==null){
+    if(props.selectedKlant?._id) emit('update-lever-adres',{adres})
+    else localForm.value.leverAdressen[adresIndex.value] = {...adres}
   }
-
   closeModal()
 }
+
+// Lock scroll when drawer open
+const lockScroll = () => document.body.style.overflow = 'hidden'
+const unlockScroll = () => document.body.style.overflow = ''
+watch(() => props.show, (val)=> val? lockScroll(): unlockScroll())
+onBeforeUnmount(unlockScroll)
 </script>
 
 <style scoped>
-/* (je styles zijn al goed, ongewijzigd gelaten) */
-</style>
-<style scoped>
-/* Container voor factuur + leveradressen */
+/* WRAPPER */
+.drawer-wrapper {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  z-index: 1000;
+}
+
+/* DRAWER */
+.drawer {
+  width: 50vw;
+  max-width: 100%;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 12px 0 0 12px;
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ANIMATION */
+.drawer-enter-from,
+.drawer-leave-to {
+  transform: translateX(100%);
+}
+.drawer-enter-active,
+.drawer-leave-active {
+  transition: transform 0.32s ease;
+}
+
+/* HEADER */
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 26px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.drawer-header h3 {
+  font-size: 1.55rem;
+  font-weight: 600;
+}
+
+/* Close button */
+.close-btn {
+  width: 38px;
+  height: 38px;
+  border: none;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #475569;
+  transition: 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: #ef4444;
+  color: white;
+}
+
+/* CONTENT */
+.drawer-content {
+  padding: 24px 26px;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* LAYOUT VAN TWEE KOLOMMEN */
 .adres-row {
   display: flex;
-  gap: 24px;
-  margin-bottom: 15px;
+  gap: 32px;
 }
 
-/* Factuuradres 70% */
-.factuuradres {
-  flex: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* Leveradressen 30% */
+.factuuradres,
 .leveradressen {
-  flex: 2;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
 }
 
-/* Divider */
+/* DIVIDER */
 .divider {
   width: 1px;
-  background-color: #e5e7eb;
+  background: #e5e7eb;
 }
 
-/* Inputs moderniseren */
+/* TITELTJES */
+.factuuradres h4,
+.leveradressen h4 {
+  margin: 8px 0 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* FORM GROUPS */
+.form-group,
+.form-group-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group-inline {
+  flex-direction: row;
+  gap: 18px;
+}
+
+/* INPUT SIZES */
+.input-large {
+  flex: 1;
+}
+.input-small {
+  width: 160px;
+}
+
+/* INPUTS */
 input {
   width: 100%;
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
+  padding: 10px 14px;
   font-size: 14px;
-  transition: all 0.2s ease;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  transition: 0.2s;
 }
+
 input:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-/* Form-groups */
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.form-group-inline {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-.input-small {
-  flex: 2;
-}
-.input-large {
-  flex: 5;
-}
-
-/* Foutmelding */
+/* ERROR MESSAGES */
 .error {
-  color: #ef4444;
   font-size: 12px;
-  margin-top: 4px;
+  color: #dc2626;
+  margin-top: -2px;
 }
 
-/* Kopjes */
-h3,
-h4 {
-  margin: 10px 0;
-  font-weight: 600;
+/* BUTTON BALK */
+.buttons {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
 }
 
-/* Buttons */
-button {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 10px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
 .buttons button {
-  margin-right: 10px;
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 10px;
+  transition: 0.2s;
+  min-width: 115px;
 }
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  filter: grayscale(0.2);
-}
-button.save {
+
+.save {
   background: #2563eb;
-  color: white;
+  color: #fff;
 }
-button.save:hover {
+.save:hover {
   background: #1d4ed8;
 }
-button.cancel {
-  background: #9ca3af;
-  color: white;
-}
-button.cancel:hover {
+
+.cancel {
   background: #6b7280;
+  color: #fff;
 }
-button.delete {
+.cancel:hover {
+  background: #4b5563;
+}
+
+.delete {
   background: #ef4444;
-  color: white;
+  color: #fff;
 }
-button.delete:hover {
+.delete:hover {
   background: #dc2626;
 }
 
-/* Leveradressen container modern */
-.leveradressen-container {
-  max-height: 400px;
-  overflow-y: auto;
+/* LEVERADRESSEN */
+.search-row {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 10px;
 }
 
-/* Leveradres kaarten */
-.leveradres-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f9fafb;
-  border-radius: 12px;
-  padding: 12px;
-  transition: all 0.15s ease;
-  cursor: pointer;
-}
-.leveradres-card:hover {
-  background: #f3f4f6;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-.adres-info strong {
-  font-weight: 600;
-  font-size: 14px;
-}
-.card-buttons button {
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 12px;
-}
-.edit-small {
-  background: #3b82f6;
-  color: white;
-}
-.edit-small:hover {
-  background: #2563eb;
-}
-.delete-small {
-  background: #ef4444;
-  color: white;
-}
-.delete-small:hover {
-  background: #dc2626;
-}
-
-/* Zoekbalk leveradressen */
-.search-row {
-  display: flex;
-  gap: 6px;
-}
 .search-input {
   flex: 1;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: 10px;
   border: 1px solid #d1d5db;
-  font-size: 14px;
 }
+
 .add-adres {
   background: #3b82f6;
-  color: white;
-  padding: 8px 12px;
+  color: #fff;
+  padding: 10px 14px;
   border-radius: 10px;
 }
 .add-adres:hover {
   background: #2563eb;
 }
 
-/* Responsive: stacken bij kleinere schermen */
+/* LEVERADRES CARDS */
+.leveradressen-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.leveradres-card {
+  position: relative;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.leveradres-card:hover {
+  background: #f3f4f6;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+}
+
+.adres-info {
+  padding-right: 70px;
+  line-height: 1.38;
+  font-size: 14px;
+}
+
+/* BUTTONS OP KAART */
+.card-buttons {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+}
+
+.card-buttons button {
+  padding: 6px 8px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+.edit-small {
+  background: #3b82f6;
+  color: #fff;
+}
+.edit-small:hover {
+  background: #2563eb;
+}
+
+.delete-small {
+  background: #ef4444;
+  color: #fff;
+}
+.delete-small:hover {
+  background: #dc2626;
+}
+
+/* RESPONSIVE */
 @media (max-width: 1024px) {
+  .drawer{
+    width: 90vw;
+  }
   .adres-row {
     flex-direction: column;
   }
   .divider {
-    width: 100%;
     height: 1px;
-    margin: 16px 0;
-  }
-  .leveradressen-container {
-    max-height: none;
+    width: 100%;
   }
 }
-
-/* Scrollbar styling */
-.leveradressen-container::-webkit-scrollbar {
-  width: 6px;
-}
-.leveradressen-container::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 10px;
-}
-
-/* Detail pane achtergrond en padding */
-.detail-pane {
-  flex: 2;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 20px;
-  background: #fff;
+button{
+  border: none;
 }
 </style>

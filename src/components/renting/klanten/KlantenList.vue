@@ -1,176 +1,213 @@
 <template>
-  <div class="klanten-pane">
-    <div class="table-wrapper">
-      <!-- Header -->
-      <div class="header">
+  <div class="lijstweergave">
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search">
+        <i class="fa fa-search"></i>
         <input
+          type="text"
+          placeholder="Zoek klant..."
           :value="search"
           @input="$emit('update:search', $event.target.value)"
-          placeholder="Zoek klant..."
         />
-        <button @click="$emit('new')">+ Add</button>
       </div>
 
-      <!-- Scrollable table -->
-      <div class="table-scroll">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Klantnummer</th>
-              <th>Naam</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="k in filteredKlanten"
-              :key="k._id || k.id"
-              :class="{ selected: String(k._id) === String(selectedId) }"
-              @click="$emit('select', k)"
-            >
-              <td>{{ k.klantNummer }}</td>
-              <td>{{ k.naam }}</td>
-            </tr>
-
-            <tr v-if="filteredKlanten.length === 0">
-              <td colspan="2" class="empty">Geen resultaten</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="actions">
+        <button class="btn btn-primary" @click="$emit('new')">
+          <i class="fa fa-plus"></i> Add
+        </button>
       </div>
     </div>
+
+    <!-- TABLE HEADER -->
+    <div class="table-header">
+      <div>Klantnummer</div>
+      <div>Naam</div>
+    </div>
+
+    <!-- FIXED HEIGHT LIST (geen scroll!) -->
+    <div class="rows-container">
+      <div
+        v-for="k in filteredKlanten"
+        :key="k._id || k.id"
+        class="table-row"
+        :class="{ selected: String(k._id) === String(selectedId) }"
+        @click="$emit('select', k)"
+      >
+        <div>{{ k.klantNummer || 'N/A' }}</div>
+        <div>{{ k.naam || 'Onbekend' }}</div>
+      </div>
+
+      <div v-if="!filteredKlanten.length" class="no-results">
+        Geen resultaten gevonden
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed } from "vue";
 
 const props = defineProps({
-  klanten: Array,
+  klanten: { type: Array, default: () => [] },
   selectedId: [Number, String],
-  search: String,
-})
+  search: { type: String, default: "" },
+});
+
+defineEmits(["select", "new", "update:search"]);
 
 const filteredKlanten = computed(() => {
-  if (!props.search) return props.klanten
-  const q = props.search.toLowerCase()
-  return props.klanten.filter((k) => k.naam.toLowerCase().includes(q))
-})
+  const term = props.search.toLowerCase();
+  return props.klanten.filter((k) => {
+    return (
+      !term ||
+      k.naam?.toLowerCase().includes(term) ||
+      k.klantNummer?.toLowerCase().includes(term)
+    );
+  });
+});
 </script>
 
 <style scoped>
-.klanten-pane {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-/* Pane wrapper */
-.table-wrapper {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 16px;
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* Header */
-.header {
-  display: flex;
-  gap: 12px;
-  flex: 0 0 auto;
-}
-.header input {
-  flex: 1;
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  font-size: 14px;
-  transition: all 0.2s ease;
-}
-.header input:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
-
-.header button {
-  background: #2563eb;
-  color: #fff;
-  font-weight: 600;
-  border: none;
-  border-radius: 10px;
-  padding: 8px 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.header button:hover {
-  background: #1d4ed8;
-}
-
-/* Scrollable table */
-.table-scroll {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: auto;
-}
-
-/* Table */
-.table {
+.lijstweergave {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  table-layout: fixed;
-}
-.table thead tr {
-  background: #f3f4f6;
-}
-.table th,
-.table td {
-  padding: 12px 16px;
-  text-align: left;
-  font-size: 14px;
-  font-weight: 500;
-  color: #111827;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.table th:first-child {
-  border-top-left-radius: 8px;
-}
-.table th:last-child {
-  border-top-right-radius: 8px;
+  font-family: "Inter", sans-serif;
 }
 
-/* Rows */
-.table tbody tr {
-  transition: all 0.15s ease;
+/* -----------------------------------------
+   TOOLBAR
+----------------------------------------- */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* SEARCH */
+.search {
+  position: relative;
+  flex: 1;
+  max-width: 300px;
+}
+
+.search input {
+  width: 100%;
+  padding: 10px 12px 10px 34px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.search input:focus {
+  outline: none;
+  background: #e8f0ff;
+  box-shadow: 0 0 0 3px rgba(87, 134, 247, 0.2);
+}
+
+.search i {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #1b4965;
+  font-size: 13px;
+}
+
+/* ACTIONS */
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
   cursor: pointer;
-  background: #ffffff;
-  border-radius: 8px;
-  margin-bottom: 2px;
-}
-.table tbody tr:hover {
-  background: #f0f7ff;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-.selected {
-  background: #dbeafe !important;
   font-weight: 600;
 }
 
-/* Empty state */
-.empty {
+.btn-primary {
+  background: #5786f7;
+  color: white;
+  transition: 0.25s ease;
+}
+
+.btn-primary:hover {
+  background: #3b6cf0;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+/* -----------------------------------------
+   TABLE HEADER
+----------------------------------------- */
+.table-header {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  padding: 14px 18px;
+  background: #f0f0f0;
+  backdrop-filter: blur(6px);
+  font-weight: 700;
+  color: #6e6e6e;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+/* -----------------------------------------
+   ROWS CONTAINER (FIXED HEIGHT)
+----------------------------------------- */
+.rows-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  /* 🔥 KEY PART: geen scroll, altijd passend */
+  max-height: calc(100vh - 240px);
+  overflow: hidden;
+}
+
+/* -----------------------------------------
+   ROW
+----------------------------------------- */
+.table-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  padding: 16px 18px;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.table-row:hover {
+  background: #5786f7;
+  color: white;
+  transform: translateY(-3px);
+}
+
+.selected {
+  background: #3b6cf0 !important;
+  color: white;
+  font-weight: 600;
+}
+
+/* EMPTY */
+.no-results {
   text-align: center;
-  padding: 20px;
-  color: #9ca3af;
+  padding: 2rem;
+  font-size: 15px;
+  color: #1b4965;
   font-style: italic;
 }
 </style>

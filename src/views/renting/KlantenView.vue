@@ -1,84 +1,145 @@
 <template>
   <div class="page">
-    <div class="container">
-      <KlantenList
-        :klanten="klanten"
-        :search="search"
-        :selected-id="selectedKlant?._id"
-        @update:search="search = $event"
-        @select="selectKlant"
-        @new="selectNew"
-      />
+    <h2>Klanten</h2>
 
-      <KlantenDetail
-        :form="form"
-        :selected-klant="selectedKlant"
-        @save="saveKlant"
-        @cancel="cancel"
-        @delete="deleteKlant"
-        @leveradres-toevoegen="leveradresToevoegen"
-        @remove-lever-adres="removeLeverAdres"
-        @update-lever-adres="updateLeverAdres"
-      />
+    <!-- LIST -->
+    <KlantenList
+      :klanten="paginatedKlanten"
+      :search="search"
+      :selected-id="selectedKlant?._id"
+      @update:search="search = $event"
+      @select="selectKlant"
+      @new="selectNew"
+    />
 
-      <NieuwLeveradresModal
-        :show="showModal"
-        :model-value="nieuwAdres"
-        @close="showModal = false"
-        @save="addLeverAdres"
-      />
+    <!-- PAGINATION -->
+    <div v-if="klanten.length > pageSize" class="pagination">
+      <button :disabled="currentPage === 1" @click="currentPage--">
+        Vorige
+      </button>
+
+      <span>Pagina {{ currentPage }} van {{ totalPages }}</span>
+
+      <button :disabled="currentPage === totalPages" @click="currentPage++">
+        Volgende
+      </button>
     </div>
+
+    <!-- DETAIL SLIDE-OVER -->
+    <KlantenDetail
+      :show="showDetail"
+      :form="form"
+      :selected-klant="selectedKlant"
+      @save="saveKlant"
+      @cancel="cancel"
+      @delete="deleteKlant"
+      @close="showDetail = false"
+      @leveradresToevoegen="leveradresToevoegen"
+      @update-lever-adres="updateLeverAdres"
+      @remove-lever-adres="removeLeverAdres"
+    />
+
+    <!-- NIEUW ADRES -->
+    <NieuwLeveradresModal
+      :show="showModal"
+      :model-value="nieuwAdres"
+      @close="showModal = false"
+      @save="addLeverAdres"
+    />
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import {
+  reactive,
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount
+} from "vue";
 
-import KlantenList from '@/components/renting/klanten/KlantenList.vue'
-import KlantenDetail from '@/components/renting/klanten/KlantenDetail.vue'
-import NieuwLeveradresModal from '@/components/renting/klanten/NieuwLeveradresModal.vue'
-import { klantApi } from '@/api/klant'
+import KlantenList from "@/components/renting/klanten/KlantenList.vue";
+import KlantenDetail from "@/components/renting/klanten/KlantenDetail.vue";
+import NieuwLeveradresModal from "@/components/renting/klanten/NieuwLeveradresModal.vue";
 
-const klanten = ref([])
-const selectedKlant = ref(null)
-const search = ref('')
-const showModal = ref(false)
+import { klantApi } from "@/api/klant";
 
-const form = reactive({
-  id: null,
-  naam: '',
-  klantNummer: '',
-  telefoonnummer: '',
-  mailadres: '',
-  factuurAdres: { straat: '', huisnummer: '', postcode: '', gemeente: '' },
-  leverAdressen: [],
-  BTWnummer: '',
-})
+const klanten = ref([]);
+const search = ref("");
+const selectedKlant = ref(null);
+const showDetail = ref(false);
 
-const nieuwAdres = reactive({
-  naam: '',
-  straat: '',
-  huisnummer: '',
-  postcode: '',
-  gemeente: '',
-})
+/* -----------------------------
+   PAGINATION (same as toestellen)
+----------------------------- */
+const currentPage = ref(1);
+const pageSize = ref(9);
 
-// Lifecycle
-onMounted(loadKlanten)
+const totalPages = computed(() =>
+  Math.ceil(klanten.value.length / pageSize.value)
+);
 
-// Functions
+const paginatedKlanten = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  const end = start + pageSize.value;
+  return klanten.value.slice(start, end);
+});
+
+function updatePageSize() {
+  const availableHeight = window.innerHeight - 330;
+  const rowHeight = 60;
+  pageSize.value = Math.floor(availableHeight / rowHeight);
+}
+
+onMounted(() => {
+  updatePageSize();
+  window.addEventListener("resize", updatePageSize);
+  loadKlanten();
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", updatePageSize);
+});
+
+/* -----------------------------
+   LOAD KLANTEN
+----------------------------- */
 async function loadKlanten() {
   try {
-    const data = await klantApi.list()
-    klanten.value = Array.isArray(data) ? data : (data.items ?? [])
+    const data = await klantApi.list();
+    klanten.value = Array.isArray(data) ? data : data.items ?? [];
   } catch (e) {
-    console.error(e)
-    alert('Laden van klanten mislukt')
+    console.error("Laden van klanten mislukt", e);
   }
 }
 
+/* -----------------------------
+   FORM + DETAIL
+----------------------------- */
+const form = reactive({
+  id: null,
+  naam: "",
+  klantNummer: "",
+  telefoonnummer: "",
+  mailadres: "",
+  factuurAdres: { straat: "", huisnummer: "", postcode: "", gemeente: "" },
+  leverAdressen: [],
+  BTWnummer: ""
+});
+
+const nieuwAdres = reactive({
+  naam: "",
+  straat: "",
+  huisnummer: "",
+  postcode: "",
+  gemeente: ""
+});
+const showModal = ref(false);
+
 function selectKlant(k) {
-  selectedKlant.value = k
+  selectedKlant.value = k;
+  showDetail.value = true;
+
   Object.assign(form, {
     id: k._id,
     naam: k.naam,
@@ -86,138 +147,120 @@ function selectKlant(k) {
     telefoonnummer: k.telefoonnummer,
     mailadres: k.mailadres,
     factuurAdres: {
-      straat: k.factuurAdres?.straat ?? '',
-      huisnummer: k.factuurAdres?.huisnummer ?? '',
-      postcode: k.factuurAdres?.postcode ?? '',
-      gemeente: k.factuurAdres?.gemeente ?? '',
+      straat: k.factuurAdres?.straat ?? "",
+      huisnummer: k.factuurAdres?.huisnummer ?? "",
+      postcode: k.factuurAdres?.postcode ?? "",
+      gemeente: k.factuurAdres?.gemeente ?? ""
     },
     leverAdressen: k.leverAdressen ?? [],
-    BTWnummer: k.BTWnummer,
-  })
+    BTWnummer: k.BTWnummer
+  });
 }
 
 function selectNew() {
-  selectedKlant.value = null
+  selectedKlant.value = null;
+  showDetail.value = true;
+
   Object.assign(form, {
     id: null,
-    naam: '',
-    klantNummer: '',
-    telefoonnummer: '',
-    mailadres: '',
-    factuurAdres: { straat: '', huisnummer: '', postcode: '', gemeente: '' },
+    naam: "",
+    klantNummer: "",
+    telefoonnummer: "",
+    mailadres: "",
+    factuurAdres: { straat: "", huisnummer: "", postcode: "", gemeente: "" },
     leverAdressen: [],
-    BTWnummer: '',
-  })
+    BTWnummer: ""
+  });
 }
 
 async function saveKlant(data) {
   try {
     if (selectedKlant.value) {
-      await klantApi.update(selectedKlant.value._id, data)
+      await klantApi.update(selectedKlant.value._id, data);
     } else {
-      await klantApi.add(JSON.stringify(data))
+      await klantApi.add(JSON.stringify(data));
     }
-    selectNew()
-    loadKlanten()
-  } catch (error) {
-    console.error('Fout bij opslaan klant:', error)
+
+    loadKlanten();
+    showDetail.value = false;
+  } catch (e) {
+    console.error("Fout bij opslaan klant", e);
   }
 }
 
 function cancel() {
-  selectNew()
+  showDetail.value = false;
 }
 
 function leveradresToevoegen() {
-  showModal.value = true
+  Object.assign(nieuwAdres, {
+    naam: "",
+    straat: "",
+    huisnummer: "",
+    postcode: "",
+    gemeente: ""
+  });
+  showModal.value = true;
 }
 
 async function addLeverAdres(adres) {
   if (selectedKlant.value?._id) {
-    // Bestaande klant → direct naar backend
-    await klantApi.addLeverAdres(selectedKlant.value._id, JSON.stringify(adres))
-    showModal.value = false
-    selectNew()
-    loadKlanten()
+    await klantApi.addLeverAdres(selectedKlant.value._id, JSON.stringify(adres));
+    refreshKlant(selectedKlant.value._id);
+    showModal.value = false;
   } else {
-    // Nieuwe klant → enkel lokaal toevoegen
-    form.leverAdressen.push({ ...adres })
-  }
-
-  showModal.value = false
-}
-
-async function removeLeverAdres(adres) {
-  if (selectedKlant.value?._id) {
-    try {
-      // Bestaande klant → backend verwijderen
-      await klantApi.removeLeverAdres(selectedKlant.value._id, adres._id)
-      selectNew()
-      loadKlanten()
-    } catch (err) {
-      console.error(err)
-    }
-  } else {
-    // Nieuwe klant → lokaal verwijderen
-    form.leverAdressen = form.leverAdressen.filter((a) => a !== adres)
+    form.leverAdressen.push({ ...adres });
   }
 }
 
 async function updateLeverAdres(adres) {
-  try {
-    // Bestaande klant → backend verwijderen
-    await klantApi.updateLeverAdres(selectedKlant.value._id, adres)
-    selectNew()
-    loadKlanten()
-  } catch (err) {
-    console.error(err)
-  }
+  await klantApi.updateLeverAdres(selectedKlant.value._id, adres);
+  refreshKlant(selectedKlant.value._id);
 }
+
+async function removeLeverAdres(adres) {
+  await klantApi.removeLeverAdres(selectedKlant.value._id, adres._id);
+  refreshKlant(selectedKlant.value._id);
+}
+
 async function deleteKlant() {
-  try {
-    await klantApi.remove(selectedKlant.value._id)
-    selectNew()
-    loadKlanten()
-  } catch (e) {
-    console.error(e)
-    alert('Verwijderen van klant mislukt')
-  }
+  await klantApi.remove(selectedKlant.value._id);
+  loadKlanten();
+  showDetail.value = false;
+}
+
+async function refreshKlant(id) {
+  const updated = await klantApi.get(id);
+  selectedKlant.value = updated;
+  Object.assign(form, updated);
 }
 </script>
 
 <style scoped>
 .page {
-  min-height: 90vh;
-  overflow-y: auto;
-  background: #f5f7fa;
-}
-
-.container {
-  display: flex;
-  gap: 20px;
-  padding: 20px;
-  font-family: Arial, sans-serif;
-  height: 90vh;
+  padding: 1rem;
   overflow: hidden;
-  min-height: 0;
 }
 
-.klanten-pane {
-  flex: 1;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #f8f8f8;
+.pagination {
   display: flex;
-  flex-direction: column;
-  min-height: 0;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 12px;
 }
-.detail-pane {
-  flex: 2;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  background: #fff;
-  overflow: auto;
-  min-height: 0;
+
+.pagination button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background-color: #5786f7;
+  color: white;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  background-color: #a1b9f5;
+  cursor: not-allowed;
 }
 </style>
