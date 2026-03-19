@@ -29,7 +29,7 @@
     <!-- FIXED HEIGHT LIST (geen scroll!) -->
     <div class="rows-container">
       <div
-        v-for="k in filteredKlanten"
+        v-for="k in klanten"
         :key="k._id || k.id"
         class="table-row"
         :class="{ selected: String(k._id) === String(selectedId) }"
@@ -39,7 +39,7 @@
         <div>{{ k.naam || 'Onbekend' }}</div>
       </div>
 
-      <div v-if="!filteredKlanten.length" class="no-results">
+      <div v-if="!klanten.length" class="no-results">
         Geen resultaten gevonden
       </div>
     </div>
@@ -48,9 +48,9 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
 
-const props = defineProps({
+
+defineProps({
   klanten: { type: Array, default: () => [] },
   selectedId: [Number, String],
   search: { type: String, default: "" },
@@ -58,16 +58,6 @@ const props = defineProps({
 
 defineEmits(["select", "new", "update:search"]);
 
-const filteredKlanten = computed(() => {
-  const term = props.search.toLowerCase();
-  return props.klanten.filter((k) => {
-    return (
-      !term ||
-      k.naam?.toLowerCase().includes(term) ||
-      k.klantNummer?.toLowerCase().includes(term)
-    );
-  });
-});
 </script>
 
 <style scoped>

@@ -69,21 +69,30 @@ const search = ref("");
 const selectedKlant = ref(null);
 const showDetail = ref(false);
 
+const filteredKlanten = computed(() => {
+  const term = search.value.toLowerCase();
+  return klanten.value.filter(k =>
+    k.naam?.toLowerCase().includes(term) ||
+    k.klantNummer?.toLowerCase().includes(term)
+  );
+});
+
 /* -----------------------------
    PAGINATION (same as toestellen)
 ----------------------------- */
 const currentPage = ref(1);
 const pageSize = ref(9);
 
+
 const totalPages = computed(() =>
-  Math.ceil(klanten.value.length / pageSize.value)
+  Math.ceil(filteredKlanten.value.length / pageSize.value)
 );
 
 const paginatedKlanten = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
-  const end = start + pageSize.value;
-  return klanten.value.slice(start, end);
+  return filteredKlanten.value.slice(start, start + pageSize.value);
 });
+
 
 function updatePageSize() {
   const availableHeight = window.innerHeight - 330;
