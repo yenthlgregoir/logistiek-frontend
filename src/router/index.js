@@ -18,7 +18,6 @@ import BoekingList from '@/components/renting/agenda/BoekingList.vue'
 import AgendaComponent from '@/components/renting/agenda/AgendaComponent.vue'
 import WerfView from '@/views/Logistics/WerfView.vue'
 import ProjectLeidersView from '@/views/Logistics/ProjectLeidersView.vue'
-import SchaarliftenLijstview from '@/views/Logistics/SchaarliftenLijstview.vue'
 
 const routes = [
   {
@@ -142,18 +141,7 @@ const routes = [
     meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
     redirect: '/logistics/schaarlift/planning',
   },
-  {
-    path: '/logistics/schaarlift/lijst',
-    name: 'schaarliftenLijst',
-    component: SchaarliftenLijstview,
-    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
-  },
-  {
-    path: '/logistics/schaarlift/planning',
-    name: 'schaarliftenPlanning',
-    component: SchaarliftenLijstview,
-    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
-  },
+
 ]
 
 const router = createRouter({
