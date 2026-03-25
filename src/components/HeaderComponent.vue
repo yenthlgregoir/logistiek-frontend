@@ -62,12 +62,14 @@ import {
   ChevronLeft,
   ChevronRight,
   User,
-  PlusCircle
+  PlusCircle,
+  Hammer,
+  MoveVertical,
+  Warehouse 
 } from 'lucide-vue-next'
 
 const route = useRoute()
 
-// LINKS
 const linkGroups = {
   purchase: [
     { to: '/purchase', label: 'Bestellingen', icon: ShoppingCart },
@@ -87,6 +89,26 @@ const linkGroups = {
     { to: '/renting/klanten', label: 'Klanten', icon: Users },
     { to: '/renting/toestellen', label: 'Toestellen', icon: Wrench },
   ],
+  logistics: [
+    { to: '/logistics/schaarlift', 
+    label: 'schaarlift', 
+    icon: MoveVertical,  
+    submenu: [
+        { to: '/logistics/schaarlift/planning', label: 'Planning', icon: Calendar },
+        { to: '/logistics/schaarlift/lijst', label: 'Lijst', icon: List },
+      ], 
+    },
+     { to: '/logistics/werfcontainers', 
+    label: 'Werfcontainers', 
+    icon: Warehouse,  
+    submenu: [
+        { to: '/logistics/schaarlift/planning', label: 'Planning', icon: Calendar },
+        { to: '/logistics/schaarlift/lijst', label: 'Lijst', icon: List },
+      ], 
+    },
+    { to: '/logistics/werf' , label: 'Werven' , icon: Hammer },
+    { to: '/logistics/projectleiders', label: 'Projectleiders' , icon: Users}
+  ],
   admin: [
     {
       to: '/admin/users',
@@ -105,6 +127,7 @@ const currentLinks = computed(() => {
   if (route.path.startsWith('/purchase')) return linkGroups.purchase
   if (route.path.startsWith('/renting')) return linkGroups.renting
   if (route.path.startsWith('/admin')) return linkGroups.admin
+  if (route.path.startsWith('/logistics')) return linkGroups.logistics
   return []
 })
 

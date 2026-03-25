@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-const props = defineProps({
+defineProps({
   files: { type: Array, required: true },
 })
 

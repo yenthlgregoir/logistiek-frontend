@@ -16,6 +16,9 @@ import CreateUserPage from '@/views/authentication/createUserPage.vue'
 import ArchiefPage from '@/views/renting/archiefPage.vue'
 import BoekingList from '@/components/renting/agenda/BoekingList.vue'
 import AgendaComponent from '@/components/renting/agenda/AgendaComponent.vue'
+import WerfView from '@/views/Logistics/WerfView.vue'
+import ProjectLeidersView from '@/views/Logistics/ProjectLeidersView.vue'
+import SchaarliftenLijstview from '@/views/Logistics/SchaarliftenLijstview.vue'
 
 const routes = [
   {
@@ -121,35 +124,60 @@ const routes = [
     meta: { requiresAuth: true, roles: ['admin', 'renting'] },
     props: true,
   },
+  {
+    path: '/logistics/werf', 
+    name: 'WerfPage',
+    component: WerfView,
+    meta: {requiresAuth: true, roles: ['admin' , 'logistics']},
+  },
+  {
+    path: '/logistics/projectleiders',
+    name: 'ProjectLeiderPage',
+    component: ProjectLeidersView,
+    meta: {requiresAuth: true , roles: ["admin" , "logistics"]},
+  },
+  {
+    path: '/logistics/schaarlift',
+    name: 'schaarliften',
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
+    redirect: '/logistics/schaarlift/planning',
+  },
+  {
+    path: '/logistics/schaarlift/lijst',
+    name: 'schaarliftenLijst',
+    component: SchaarliftenLijstview,
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
+  },
+  {
+    path: '/logistics/schaarlift/planning',
+    name: 'schaarliftenPlanning',
+    component: SchaarliftenLijstview,
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
+  },
 ]
 
 const router = createRouter({
-  history: createWebHistory('/'), // 🔑 base '/'
+  history: createWebHistory('/'),
   routes,
 })
 
-// 🌐 Global auth guard
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
 
-  // Niet ingelogd
   if (to.meta.requiresAuth && !token) {
     return next({ name: 'login' })
   }
 
-  // Authenticated en role-based check
   if (to.meta.roles && token) {
-    const userRole = localStorage.getItem('role') // role uit login
+    const userRole = localStorage.getItem('role') 
 
     if (!userRole) {
-      // Geen role aanwezig → token mogelijk verlopen of corrupt
       return next({ name: 'login' })
     }
 
     // Admin mag overal
     if (userRole !== 'admin' && !to.meta.roles.includes(userRole)) {
-      // Gebruiker niet toegestaan → naar home of 403 pagina
-      return next({ name: 'home' }) // of maak een ForbiddenView
+      return next({ name: 'home' }) 
     }
   }
 

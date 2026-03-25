@@ -2,7 +2,7 @@
   <div class="lijstweergave">
 
     <!-- ======================= -->
-    <!--      NIEUWE TOOLBAR     -->
+    <!--      TOOLBAR (ONGEWIJZIGD) -->
     <!-- ======================= -->
     <div class="toolbar">
       <h3>Boekingen</h3>
@@ -37,53 +37,51 @@
       </div>
     </div>
 
-    <!-- Table header -->
-    <div class="table-header">
-      <div>REF</div>
-      <div>Toestel</div>
-      <div>Adres</div>
-      <div>Periode</div>
-      <div class="right">Status</div>
-    </div>
-
-    <!-- Rijen -->
-    <div
-      v-for="b in boekingen"
-      :key="b._id"
-      @click="$emit('openBoeking', b._id)"
-      class="table-row"
+    <!-- ✅ ENIGE WIJZIGING: BaseTable -->
+    <BaseTable
+      :items="boekingen"
+      columns="1fr 1.2fr 2fr 1.4fr 1fr"
+      @row-click="b => $emit('openBoeking', b._id)"
     >
-      <div class="col-ref">
-        <strong>{{ b.ref }}</strong>
-      </div>
+      <!-- HEADER -->
+      <template #header>
+        <div>REF</div>
+        <div>Toestel</div>
+        <div>Adres</div>
+        <div>Periode</div>
+        <div class="right">Status</div>
+      </template>
 
-      <div>
-        {{ b.toestel?.Ref || 'Niet toegewezen' }}
-      </div>
+      <!-- ROW -->
+      <template #row="{ item: b }">
+        <div class="col-ref">
+          <strong>{{ b.ref }}</strong>
+        </div>
 
-      <div class="col-adres">
-        {{ formatAdres(b) }}
-      </div>
+        <div>
+          {{ b.toestel?.Ref || 'Niet toegewezen' }}
+        </div>
 
-      <div class="col-periode">
-        {{ formatPeriode(b) }}
-      </div>
+        <div class="col-adres">
+          {{ formatAdres(b) }}
+        </div>
 
-      <div class="col-status" :class="b.status">
-        {{ b.status === 'Opgehaald' ? 'Opgehaald door klant' : b.status }}
-      </div>
-    </div>
+        <div class="col-periode">
+          {{ formatPeriode(b) }}
+        </div>
 
-    <!-- Geen resultaten -->
-    <div v-if="!boekingen.length" class="no-results">
-      Geen resultaten gevonden
-    </div>
+        <div class="col-status" :class="b.status">
+          {{ b.status === 'Opgehaald' ? 'Opgehaald door klant' : b.status }}
+        </div>
+      </template>
+    </BaseTable>
 
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import BaseTable from '@/components/base/BaseTable.vue'
 import 'element-plus/dist/index.css'
 import { ElDatePicker } from 'element-plus'
 
@@ -99,7 +97,7 @@ const emit = defineEmits(['openBoeking', 'addBoeking', 'update:search', 'update:
 const localSearch = ref('')
 const localDateRange = ref([null, null])
 
-// Picker opties
+// ✅ ONGEWIJZIGD
 const pickerOptions = {
   disabledDate(date) {
     const maxDate = new Date()
@@ -121,7 +119,7 @@ function updateDateRange(val) {
   emit('update:dateRange', val || [null, null])
 }
 
-// Helper functies
+// ✅ EXACT dezelfde helpers behouden
 function formatAdres(boeking) {
   const adres = boeking.leverAdresDetails || boeking.klant?.factuurAdres
   if (!adres) return 'Onbekende klant'
@@ -149,17 +147,7 @@ function formatPeriode(b) {
 </script>
 
 <style scoped>
-/* =========================================
-   WRAPPER
-========================================= */
-.lijstweergave {
-  width: 100%;
-  font-family: 'Inter', sans-serif;
-}
-
-/* =========================================
-   NIEUWE TOOLBAR
-========================================= */
+/* toolbar blijft hetzelfde */
 .toolbar {
   display: flex;
   justify-content: space-between;
@@ -173,116 +161,7 @@ function formatPeriode(b) {
   gap: 16px;
 }
 
-/* SEARCH */
-.search {
-  position: relative;
-  width: 260px;
-}
-
-.search input {
-  width: 100%;
-  padding: 8px 10px 8px 32px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  transition: 0.2s ease;
-}
-
-.search input:focus {
-  outline: none;
-  background: #e8f0ff;
-  box-shadow: 0 0 0 3px rgba(87, 134, 247, 0.2);
-}
-
-.search i {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 13px;
-  color: #1b4965;
-}
-
-/* =========================================
-   TABLE HEADER
-========================================= */
-.table-header {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr 2fr 1.4fr 1fr;
-  padding: 14px 18px;
-  background: #f0f0f0;
-  border-radius: 14px;
-  font-weight: 700;
-  color: #6e6e6e;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(6px);
-  margin-bottom: 10px;
-  font-size: 14px;
-}
-
-/* =========================================
-   TABLE ROW
-========================================= */
-.table-row {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr 2fr 1.4fr 1fr;
-  padding: 16px 18px;
-  background: white;
-  border-radius: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: 0.25s ease;
-  cursor: pointer;
-  margin-bottom: 10px;
-}
-
-.table-row:hover  {
-  background: #5786f7;
-  color: white ;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-}
-
-.table-row:hover .col-ref strong,
-.table-row:hover .col-adres,
-.table-row:hover .col-periode {
-  color: white;
-}
-
-/* REF Column */
-.col-ref strong {
-  font-size: 15px;
-  color: #0f172a;
-  letter-spacing: 0.02em;
-}
-
-/* ADRES Column */
-.col-adres {
-  color: #6b7280;
-  font-size: 14px;
-}
-
-/* PERIODE */
-.col-periode {
-  color: #475569;
-  font-weight: 500;
-}
-
-/* =========================================
-   STATUS BADGES
-========================================= */
-.col-status {
-  justify-self: end;
-  padding: 6px 12px;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 13px;
-  text-align: center;
-  min-width: 120px;
-  transition: 0.2s ease;
-}
-
+/* status styling blijft hetzelfde */
 .col-status.Aangevraagd {
   background: #fef3c7;
   color: #92400e;
@@ -305,25 +184,6 @@ function formatPeriode(b) {
   color: #065f46;
 }
 
-/* =========================================
-   NO RESULTS
-========================================= */
-.no-results {
-  text-align: center;
-  padding: 2rem;
-  font-size: 15px;
-  color: #94a3b8;
-  font-style: italic;
-}
-
-/* =========================================
-   RESPONSIVE
-========================================= */
-@media (max-width: 900px) {
-  .toolbar-right {
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-end;
-  }
-}
+/* SEARCH */ .search { position: relative; width: 260px; } .search input { width: 100%; padding: 8px 10px 8px 32px; border-radius: 8px; border: none; background: transparent; transition: 0.2s ease; } .search input:focus { outline: none; background: #e8f0ff; box-shadow: 0 0 0 3px rgba(87, 134, 247, 0.2); } .search i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #1b4965; }
+.col-status { justify-self: end; padding: 6px 12px; border-radius: 10px; font-weight: 600; font-size: 13px; text-align: center; min-width: 120px; transition: 0.2s ease; }
 </style>
