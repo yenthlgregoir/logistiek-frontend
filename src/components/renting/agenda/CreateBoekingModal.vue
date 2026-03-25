@@ -7,6 +7,7 @@
       </div>
 
       <form @submit.prevent="submitBoeking">
+        
         <!-- Type toestel -->
         <div class="form-group">
           <label>Type toestel</label>
@@ -18,15 +19,34 @@
           </select>
         </div>
 
-        <!-- Klantnaam -->
-        <div class="form-group">
+        <!-- ✅ Klant autocomplete select -->
+        <div class="form-group autocomplete" ref="klantBox">
           <label>Klant</label>
-          <select v-model="form.klant" required>
-            <option disabled value="">Selecteer type</option>
-            <option v-for="klant in klanten" :key="klant._id" :value="klant._id">
-              {{ klant.naam }}
-            </option>
-          </select>
+
+          <input
+            type="text"
+            v-model="klantSearch"
+            @focus="showKlantDropdown = true"
+            @input="filterKlanten"
+            placeholder="Zoek klant..."
+            class="autocomplete-input"
+            required
+          />
+
+          <!-- Dropdown list -->
+          <ul v-if="showKlantDropdown" class="autocomplete-list">
+            <li 
+              v-for="k in gefilterdeKlanten" 
+              :key="k._id"
+              @mousedown.prevent="selectKlant(k)"
+            >
+              {{ k.naam }}
+            </li>
+
+            <li v-if="gefilterdeKlanten.length === 0" class="no-results">
+              Geen resultaten
+            </li>
+          </ul>
         </div>
 
         <!-- Periode -->
@@ -62,53 +82,111 @@
     </div>
   </div>
 
+  <!-- Adres select modal -->
   <SelectLeverAdresModal
     v-if="showAdresModal"
     :adressen="beschikbareAdressen"
-    @select="
-      (adres) => {
-        form.leverAdres = adres._id
-      }
-    "
+    @select="adres => form.leverAdres = adres._id"
     @close="showAdresModal = false"
   />
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, onUnmounted, watch } from 'vue'
+import { reactive, ref, onMounted, onUnmounted, } from 'vue'
 import { boekingApi } from '@/api/boeking'
 import { klantApi } from '@/api/klant'
 import SelectLeverAdresModal from './SelectLeverAdresModal.vue'
 
-const showAdresModal = ref(false)
-const beschikbareAdressen = ref([])
+const klantBox = ref(null)
 
-const emit = defineEmits(['close', 'update'])
+// Klik buiten autocomplete → sluiten
+function handleClickOutside(event) {
+  if (klantBox.value && !klantBox.value.contains(event.target)) {
+    showKlantDropdown.value = false
+  }
+}
 
-const form = reactive({
-  toestelType: '',
-  klantNaam: '',
-  beginDatum: '',
-  eindDatum: '',
-  type: '',
-})
-
-const message = ref('')
-const error = ref(false)
-const klanten = ref([])
-
-defineProps({
-  types: Object,
-})
-
-onMounted(async () => {
-  await getKlanten()
-  document.addEventListener('keydown', handleEsc)
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', handleEsc)
+  document.removeEventListener('click', handleClickOutside)
 })
+
+defineProps({ types: Object })
+
+const emit = defineEmits(['close', 'update'])
+
+/* --------------------------
+   STATE
+-------------------------- */
+const form = reactive({
+  toestelType: '',
+  klant: '',        // wordt _id
+  beginDatum: '',
+  eindDatum: '',
+  type: '',
+  leverAdres: ''
+})
+
+/* --------------------------
+   AUTOCOMPLETE STATE
+-------------------------- */
+const klanten = ref([])
+const klantSearch = ref('')
+const gefilterdeKlanten = ref([])
+const showKlantDropdown = ref(false)
+
+/* --------------------------
+   ANDEREN
+-------------------------- */
+const message = ref('')
+const error = ref(false)
+const showAdresModal = ref(false)
+const beschikbareAdressen = ref([])
+
+/* --------------------------
+   LOAD DATA
+-------------------------- */
+onMounted(async () => {
+  await getKlanten()
+  gefilterdeKlanten.value = klanten.value
+  document.addEventListener('keydown', handleEsc)
+})
+
+onUnmounted(() =>
+  document.removeEventListener('keydown', handleEsc)
+)
+
+/* --------------------------
+   AUTOCOMPLETE LOGICA
+-------------------------- */
+function filterKlanten() {
+  const q = klantSearch.value.toLowerCase().trim()
+  gefilterdeKlanten.value = klanten.value.filter(k =>
+    k.naam.toLowerCase().includes(q)
+  )
+}
+
+function selectKlant(k) {
+  form.klant = k._id
+  klantSearch.value = k.naam
+  showKlantDropdown.value = false
+
+  handleKlantAdres(k)
+}
+
+function handleKlantAdres(klant) {
+  if (klant.leverAdressen?.length > 1) {
+    beschikbareAdressen.value = klant.leverAdressen
+    showAdresModal.value = true
+  } else if (klant.leverAdressen?.length === 1) {
+    form.leverAdres = klant.leverAdressen[0]._id
+  } else {
+    form.leverAdres = klant.factuurAdres?._id || null
+  }
+}
 
 function handleEsc(e) {
   if (e.key === 'Escape') close()
@@ -117,25 +195,22 @@ function handleEsc(e) {
 function close() {
   emit('close')
 }
-watch(
-  () => form.klant,
-  async (newKlantId) => {
-    if (!newKlantId) return
 
-    const klant = klanten.value.find((k) => k._id === newKlantId)
-    if (!klant) return
+/* --------------------------
+   GET KLANTEN
+-------------------------- */
+async function getKlanten() {
+  try {
+    const data = await klantApi.list()
+    klanten.value = Array.isArray(data) ? data : (data.items ?? [])
+  } catch (e) {
+    console.error(e)
+  }
+}
 
-    if (klant.leverAdressen?.length > 1) {
-      beschikbareAdressen.value = klant.leverAdressen
-      showAdresModal.value = true
-    } else if (klant.leverAdressen?.length === 1) {
-      form.leverAdres = klant.leverAdressen[0]._id
-    } else {
-      // geen leveradres → fallback naar factuuradres
-      form.leverAdres = klant.factuurAdres?._id || null
-    }
-  },
-)
+/* --------------------------
+   SUBMIT
+-------------------------- */
 async function submitBoeking() {
   if (!form.leverAdres) {
     message.value = 'Kies eerst een leveradres'
@@ -143,23 +218,21 @@ async function submitBoeking() {
     return
   }
 
-  // einddatum automatisch 5 jaar later indien leeg
   if (!form.eindDatum) {
     const begin = new Date(form.beginDatum)
     begin.setFullYear(begin.getFullYear() + 5)
-    form.eindDatum = begin.toISOString().split('T')[0] // yyyy-mm-dd
+    form.eindDatum = begin.toISOString().split('T')[0]
   }
 
   try {
-    // Verstuur het object rechtstreeks, geen JSON.stringify
     await boekingApi.add(JSON.stringify(form))
-
     message.value = 'Boeking succesvol aangemaakt!'
     error.value = false
+
     emit('update')
     setTimeout(() => close(), 800)
+
   } catch (err) {
-    // Pak message van JSON of gewone Error
     try {
       const jsonErr = JSON.parse(err.message)
       message.value = jsonErr.message || 'Er is een fout opgetreden.'
@@ -169,15 +242,8 @@ async function submitBoeking() {
     error.value = true
   }
 }
-async function getKlanten() {
-  try {
-    const data = await klantApi.list()
-    klanten.value = Array.isArray(data) ? data : (data.items ?? [])
-  } catch (e) {
-    console.error(e)
-  }
-}
 </script>
+
 
 <style scoped>
 /* =========================================
@@ -211,6 +277,44 @@ async function getKlanten() {
   animation: slideUp 0.3s ease-out;
   position: relative;
   font-family: 'Inter', sans-serif;
+}
+.autocomplete {
+  position: relative;
+}
+
+.autocomplete-input {
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+}
+
+
+.autocomplete-list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  max-height: 35vh;
+  overflow-y: auto;
+  z-index: 10;
+
+  /* ✅ bullets weg */
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+}
+
+
+.autocomplete-list li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.autocomplete-list li:hover {
+  background: #f1f5f9;
 }
 
 /* =========================================
@@ -342,7 +446,11 @@ p {
 p.error {
   color: #dc2626;
 }
-
+.no-results {
+  padding: 10px 12px;
+  color: #64748b;
+  font-style: italic;
+}
 /* =========================================
    ANIMATIES
 ========================================= */
