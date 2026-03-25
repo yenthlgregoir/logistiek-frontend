@@ -130,6 +130,7 @@ async function loadToestellen() {
         : {}),
     }
     const res = await toestelApi.list(params)
+    console.log(res);
     toestellen.value = res.items || res
   } catch (e) {
     console.error('Fout bij laden toestellen', e)

@@ -20,7 +20,7 @@
       <div>{{ toestel.Ref || 'N/A' }}</div>
       <div>{{ toestel.nrplaat || 'N/A' }}</div>
       <div>{{ toestel.chasisnummer || 'N/A' }}</div>
-      <div>{{ toestel.klant?.naam || 'Niet toegewezen' }}</div>
+      <div>{{ formatAdres(toestel.gnw)|| 'Niet toegewezen' }}</div>
       <div class="col-status right" :class="toestel.status?.statusType">
         {{ toestel.status?.statusType }}
       </div>
@@ -48,11 +48,19 @@ const gefilterdeToestellen = computed(() => {
       t.nrplaat?.toLowerCase().includes(term) ||
       t.chasisnummer?.toLowerCase().includes(term) ||
       t.type?.naam?.toLowerCase().includes(term) ||
-      t.klant?.naam?.toLowerCase().includes(term) ||
+      t.gnw?.toLowerCase().includes(term) ||
       t.status?.statusType?.toLowerCase().includes(term)
     )
   })
 })
+
+function formatAdres(adres) {
+  if (adres === 'vrij') return 'vrij'
+
+  return `${adres.naam  || 'Onbekende klant'}: ${adres.straat || ''} ${
+    adres.huisnummer || ''
+  }, ${adres.postcode || ''} ${adres.gemeente || ''}`
+}
 </script>
 
 <style scoped>
