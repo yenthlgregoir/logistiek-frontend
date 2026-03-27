@@ -8,12 +8,12 @@
     <!-- BODY -->
     <div class="form-group">
       <label>Begin datum</label>
-      <input type="date" v-model="form.beginDatum" required />
+      <input type="date" v-model="form.leverDatum" required />
     </div>
 
     <div class="form-group">
       <label>Eind datum</label>
-      <input type="date" v-model="form.eindDatum" />
+      <input type="date" v-model="form.ophaalDatum" />
     </div>
 
     <div v-if="errorMessage" class="error-box">
@@ -28,57 +28,53 @@
 </template>
 
 <script setup>
-import { reactive, onMounted, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import BaseModal from '@/components/base/BaseModal.vue'
-import { boekingApi } from '@/api/boeking'
 
 const props = defineProps({
   boeking: Object,
 })
 
-const emit = defineEmits(['close', 'update'])
+const emit = defineEmits(['close', 'save'])
 
 const errorMessage = ref('')
+
+// Lokaal kopie van de data
 const form = reactive({
-  beginDatum: '',
-  eindDatum: '',
+  leverDatum: '',
+  ophaalDatum: '',
 })
 
-onMounted(() => {
-  form.beginDatum = props.boeking.beginDatum?.split('T')[0]
-  form.eindDatum = props.boeking.eindDatum?.split('T')[0]
-})
+// Vul lokale kopie bij mount of wanneer boeking verandert
+watch(() => props.boeking, (v) => {
+  if (!v) return
+  form.leverDatum = v.leverDatum?.split('T')[0] || ''
+  form.ophaalDatum = v.ophaalDatum?.split('T')[0] || ''
+}, { immediate: true })
 
 function close() {
   emit('close')
 }
 
-async function save() {
-  errorMessage.value = ''
+// Save stuurt de lokale kopie terug naar de parent (drawer)
+function save() {
+  if (!form.leverDatum) {
+    errorMessage.value = 'Begin datum is verplicht'
+    return
+  }
 
   // Als einddatum leeg is → 5 jaar later
-  if (!form.eindDatum) {
-    const begin = new Date(form.beginDatum)
-    begin.setFullYear(begin.getFullYear() + 5)
-    form.eindDatum = begin.toISOString().split('T')[0]
-  }
+  const lever = form.leverDatum
+  const ophaal = form.ophaalDatum || (() => {
+    const d = new Date(lever)
+    d.setFullYear(d.getFullYear() + 5)
+    return d.toISOString().split('T')[0]
+  })()
 
-  try {
-    await boekingApi.updatePeriode(
-      props.boeking._id,
-      form.beginDatum,
-      form.eindDatum
-    )
-
-    emit('update')
-    emit('close')
-  } catch (e) {
-    const parsed = JSON.parse(e.message)
-    errorMessage.value = parsed.message
-  }
+  emit('save', { leverDatum: lever, ophaalDatum: ophaal })
+  emit('close')
 }
 </script>
-
 <style scoped>
 /* ✅ AL JE ORIGINELE CSS BLIJFT GELDIG — BaseModal vervangt alleen overlay & container */
 

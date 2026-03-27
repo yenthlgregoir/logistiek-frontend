@@ -1,51 +1,58 @@
 <template>
-  <div class="modal-overlay" @click.self="close">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>Kies Toestel</h2>
-        <button class="close-btn" @click="close">✕</button>
-      </div>
+  <BaseModal @close="close">
+    <!-- HEADER -->
+    <template #header>
+      <h2>Kies Toestel</h2>
+    </template>
 
-      <input type="text" v-model="search" placeholder="Zoek toestel..." class="search-input" />
+    <!-- BODY -->
+    <input
+      type="text"
+      v-model="search"
+      placeholder="Zoek toestel..."
+      class="search-input"
+    />
 
-      <ul class="toestel-list">
-        <li
-          v-for="toestel in gefilterdeToestellen"
-          :key="toestel._id"
-          @click="selectToestel(toestel)"
-          class="toestel-item"
-        >
-          <div class="toestel-title">{{ toestel.Ref }}</div>
-        </li>
-      </ul>
+    <ul class="toestel-list">
+      <li
+        v-for="toestel in gefilterdeToestellen"
+        :key="toestel._id"
+        @click="selectToestel(toestel)"
+        class="toestel-item"
+      >
+        <div class="toestel-title">
+          {{ toestel.Ref }}
+        </div>
+      </li>
+    </ul>
 
-      <div class="modal-footer">
-        <button class="btn-cancel" @click="close">Annuleren</button>
-      </div>
-    </div>
-  </div>
+    <!-- FOOTER -->
+    <template #footer>
+      <button class="btn-cancel" @click="close">Annuleren</button>
+    </template>
+  </BaseModal>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import BaseModal from '@/components/base/BaseModal.vue'
 
 const props = defineProps({
-  toestellen: { type: Array, required: true },
+  toestellen: { type: Array, required: true }
 })
 
 const emit = defineEmits(['select', 'close'])
+
 const search = ref('')
 
 const gefilterdeToestellen = computed(() => {
-  let lijst = props.toestellen
-  if (search.value) {
-    const query = search.value.toLowerCase()
-    lijst = lijst.filter(
-      (t) =>
-        (t.Ref && t.Ref.toLowerCase().includes(query)) 
-    )
-  }
-  return lijst
+  if (!search.value) return props.toestellen
+
+  const q = search.value.toLowerCase()
+
+  return props.toestellen.filter(t =>
+    t.Ref?.toLowerCase().includes(q)
+  )
 })
 
 function selectToestel(toestel) {
@@ -59,78 +66,7 @@ function close() {
 </script>
 
 <style scoped>
-/* =========================================
-   OVERLAY
-========================================= */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(8px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1.5rem;
-  z-index: 9999;
-  animation: fadeIn 0.25s ease-out;
-}
-
-/* =========================================
-   MODAL CONTAINER
-========================================= */
-.modal {
-  width: 95%;
-  max-width: 480px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(14px);
-  border-radius: 22px;
-  padding: 28px;
-  box-shadow:
-    0 12px 38px rgba(0, 0, 0, 0.18),
-    0 4px 12px rgba(0, 0, 0, 0.08);
-  animation: slideUp 0.3s ease-out;
-  font-family: 'Inter', sans-serif;
-}
-
-/* =========================================
-   HEADER
-========================================= */
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  margin-bottom: 20px;
-}
-
-.modal-header h2 {
-  font-size: 22px;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0;
-}
-
-/* Close Button */
-.close-btn {
-  width: 38px;
-  height: 38px;
-  border: none;
-  background: rgba(0, 0, 0, 0.06);
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 18px;
-  color: #475569;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 0.25s ease;
-}
-
-.close-btn:hover {
-  background: #ef4444;
-  color: #ffffff;
-}
+/* ✅ AL JE ORIGINELE CSS BLIJFT WERKEN */
 
 /* =========================================
    SEARCH INPUT
@@ -208,7 +144,6 @@ function close() {
   margin-top: 20px;
 }
 
-/* Cancel button */
 .btn-cancel {
   background: rgba(0, 0, 0, 0.06);
   border: none;
@@ -222,28 +157,5 @@ function close() {
 
 .btn-cancel:hover {
   background: rgba(0, 0, 0, 0.12);
-}
-
-/* =========================================
-   ANIMATIONS
-========================================= */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(25px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 </style>

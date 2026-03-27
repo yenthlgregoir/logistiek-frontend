@@ -95,6 +95,7 @@ const linkGroups = {
     icon: MoveVertical,  
     submenu: [
         { to: '/logistics/schaarlift/planning', label: 'Planning', icon: Calendar },
+         {to: '/logistics/schaarlift/verhuur',label: 'Verhuur' , icon:Calendar},
         { to: '/logistics/schaarlift/lijst', label: 'Lijst', icon: List },
       ], 
     },

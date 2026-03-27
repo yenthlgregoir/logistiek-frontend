@@ -18,6 +18,9 @@ import BoekingList from '@/components/renting/agenda/BoekingList.vue'
 import AgendaComponent from '@/components/renting/agenda/AgendaComponent.vue'
 import WerfView from '@/views/Logistics/WerfView.vue'
 import ProjectLeidersView from '@/views/Logistics/ProjectLeidersView.vue'
+import SchaarliftenLijstview from '@/views/Logistics/SchaarliftenLijstView.vue'
+import SchaarliftenPlanningView from '@/views/Logistics/SchaarliftenPlanningView.vue'
+import VerhuurlijstView from '@/views/Logistics/VerhuurlijstView.vue'
 
 const routes = [
   {
@@ -140,6 +143,24 @@ const routes = [
     name: 'schaarliften',
     meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
     redirect: '/logistics/schaarlift/planning',
+  },
+   {
+    path: '/logistics/schaarlift/lijst',
+    name: 'schaarliftenLijst',
+    component: SchaarliftenLijstview,
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
+  },
+  {
+    path: '/logistics/schaarlift/verhuur',
+    name: 'schaarliftenverhuur',
+    component: VerhuurlijstView,
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
+  },
+  {
+    path: '/logistics/schaarlift/planning',
+    name: 'schaarliftenPlanning',
+    component: SchaarliftenPlanningView,
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
   },
 
 ]

@@ -20,7 +20,7 @@
             <div class="icon">🛠️</div>
             <span>Tools</span>
           </RouterLink>
-          <RouterLink v-if="role === 'admin' || role === 'logistiek'" to="/logistics" class="card">
+          <RouterLink v-if="role === 'admin' || role === 'logistiek'" to="/logistics/schaarlift/planning" class="card">
             <div class="icon">🚚</div>
             <span>Logistiek</span>
           </RouterLink>

@@ -38,6 +38,7 @@ async function getLiften() {
   try {
     const params = { search: undefined }
     const response = await schaarliftenApi.list(params)
+    console.log(response)
     liften.value = response
   } catch (error) {
     console.error(error)
