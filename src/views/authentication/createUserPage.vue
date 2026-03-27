@@ -5,6 +5,7 @@ import { loginApi } from '@/api/login'
 const email = ref('')
 const role = ref('purchase')
 const message = ref('')
+const naam = ref('')
 const loading = ref(false)
 
 async function createUser() {
@@ -12,10 +13,11 @@ async function createUser() {
     loading.value = true
     message.value = ''
 
-    await loginApi.createUser(email.value, role.value)
+    await loginApi.createUser(email.value, role.value , naam.value)
 
     message.value = 'User created successfully'
     email.value = ''
+    naam.value = ''
     role.value = 'purchase'
   } catch (err) {
     message.value = err.response?.data?.message || 'Server error'
@@ -35,9 +37,14 @@ async function createUser() {
       </div>
 
       <div class="form-group">
+        <input v-model="naam" type="naam" placeholder="Naam" />
+      </div>
+
+      <div class="form-group">
         <select v-model="role">
           <option value="purchase">Purchase</option>
           <option value="renting">Renting</option>
+          <option value="logistics">Logistics</option>
           <option value="admin">Admin</option>
         </select>
       </div>
