@@ -1,22 +1,21 @@
 <template>
   <div class="page">
-    <h2>Schaarliften</h2>
-
+    <h2>Assets</h2>
 
     <!-- LIST -->
     <SchaarliftenLijst
-      :liften="liften"
-      @search="searchLiften"
-      @open-add="showDrawer = true"
+      :assets="assets"
+      @search="searchAssets"
+      @open-add="openCreate"
       @edit-schaarlift="openEdit"
     />
 
     <!-- DRAWER -->
     <SchaarliftenDrawer
       :show="showDrawer"
-      :model="selectedLift"
+      :model="selectedAsset"
       @close="closeDrawer"
-      @save="addLift"
+      @save="saveAsset"
     />
   </div>
 </template>
@@ -24,65 +23,69 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { schaarliftenApi } from "@/api/schaarliften.js"
+
 import SchaarliftenLijst from '@/components/Logistics/Schaarliften/SchaarliftenLijst.vue'
 import SchaarliftenDrawer from '@/components/Logistics/Schaarliften/SchaarliftenDrawer.vue'
 
-const liften = ref([])
+// --- STATE ---
+const assets = ref([])
 const showDrawer = ref(false)
-const selectedLift = ref(null)  // <-- belangrijk!
-// INIT
-onMounted(getLiften)
+const selectedAsset = ref(null)
 
-// GET ALL
-async function getLiften() {
-  try {
-    const params = { search: undefined }
-    const response = await schaarliftenApi.list(params)
-    console.log(response)
-    liften.value = response
-  } catch (error) {
-    console.error(error)
-  }
-}
+// --- INIT ---
+onMounted(fetchAssets)
 
-// SEARCH
-async function searchLiften(query) {
+// --- FETCH ---
+async function fetchAssets(query = undefined) {
   try {
     const params = { search: query || undefined }
     const response = await schaarliftenApi.list(params)
-    liften.value = response
-  } catch (err) {
-    console.error(err)
+
+    // 🔥 altijd array veilig maken
+    assets.value = response;
+  } catch (error) {
+    console.error('Fout bij ophalen assets:', error)
   }
 }
 
-// ADD
-async function addLift(data) {
+// --- SEARCH ---
+function searchAssets(query) {
+  fetchAssets(query)
+}
+
+// --- OPEN CREATE ---
+function openCreate() {
+  selectedAsset.value = null
+  showDrawer.value = true
+}
+
+// --- OPEN EDIT ---
+function openEdit(asset) {
+  selectedAsset.value = { ...asset }
+  showDrawer.value = true
+}
+
+// --- SAVE (CREATE + UPDATE) ---
+async function saveAsset(data) {
   try {
-    if (selectedLift.value?._id) {
-      // ✅ BEWERKEN
-      await schaarliftenApi.update(selectedLift.value._id, data)
+    if (selectedAsset.value?._id) {
+      await schaarliftenApi.update(selectedAsset.value._id, data)
     } else {
       await schaarliftenApi.create(data)
     }
 
-    await getLiften()
+    await fetchAssets()
     closeDrawer()
   } catch (err) {
-    console.error(err)
+    console.error('Fout bij opslaan asset:', err)
   }
 }
-function closeDrawer(){
-    showDrawer.value = false;
-    selectedLift.value = null
+
+// --- CLOSE ---
+function closeDrawer() {
+  showDrawer.value = false
+  selectedAsset.value = null
 }
-
-
-function openEdit(lift) {
-  selectedLift.value = { ...lift }   
-  showDrawer.value = true
-}
-
 </script>
 
 <style scoped>

@@ -56,7 +56,7 @@
           <strong>{{ v.reference }}</strong>
         </div>
         <div>
-          {{ v.toestel?.nummer || 'Geen toestel toegewezen' }}
+          {{ v.asset?.nummer || 'Geen toestel toegewezen' }}
         </div>
         <div class="col-adres">
           {{ formatAdres(v) }}

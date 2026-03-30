@@ -1,4 +1,3 @@
-
 <template>
   <BaseDrawer
     :show="show"
@@ -6,7 +5,8 @@
     @close="$emit('close')"
   >
     <div class="form-container">
-      <!-- Reference -->
+
+      <!-- Logistieke referentie -->
       <div class="info-block">
         <label>Logistieke referentie</label>
         <div v-if="isEditMode && !isEditing">
@@ -15,27 +15,33 @@
         <input v-else v-model="verhuurCopy.logistiekeReferentie" />
       </div>
 
-      <!-- Machine type -->
+      <!-- Asset selectie -->
       <div class="info-block">
-        <label>Machine type</label>
+        <label>Asset</label>
         <div v-if="isEditMode && !isEditing">
-          {{ verhuurCopy.machineType?.naam }}
+          {{ verhuurCopy.assetType?.nummer }}
         </div>
-        <select v-else v-model="verhuurCopy.machineType">
-          <option disabled value="">Selecteer type</option>
-          <option v-for="t in machineTypes" :key="t._id" :value="t">
-            {{ t.naam }} ({{ t.type }})
-          </option>
+        <select v-else v-model="verhuurCopy.assetType">
+          <option disabled value="">Selecteer Schaarlift / Knikarm</option>
+          <option value="Schaarlift">Schaarlift</option>
+          <option value="Knikarm">Knikarm</option>
         </select>
       </div>
 
-      <!-- Werkhoogte -->
+      <!-- Werkhoogte verplicht -->
       <div class="info-block">
-        <label>Werkhoogte</label>
+        <label>Werkhoogte (m)</label>
         <div v-if="isEditMode && !isEditing">
           {{ verhuurCopy.werkhoogte }}
         </div>
-        <input v-else v-model="verhuurCopy.werkhoogte" type="number" />
+        <input
+          v-else
+          v-model="verhuurCopy.werkhoogte"
+          type="number"
+          min="0"
+          step="0.1"
+          placeholder="Verplicht"
+        />
       </div>
 
       <!-- Werf -->
@@ -73,16 +79,16 @@
       </div>
 
       <div class="info-block">
-  <label>Einddatum (optioneel)</label>
-  <input type="date" v-model="verhuurCopy.ophaalDatum" />
-</div>
-<!-- ERROR -->
+        <label>Einddatum (optioneel)</label>
+        <input type="date" v-model="verhuurCopy.ophaalDatum" />
+      </div>
+
+      <!-- Error -->
       <div v-if="error" class="error-box">
-        {{ error.message }}
+        {{ error }}
       </div>
     </div>
 
-      
     <template #footer>
       <button class="btn btn-secondary" @click="$emit('close')">Cancel</button>
       <button class="btn btn-primary" @click="saveVerhuur" :disabled="loading">
@@ -93,79 +99,79 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
-import BaseDrawer from '@/components/base/BaseDrawer.vue'
+import { ref, watch } from "vue";
+import BaseDrawer from "@/components/base/BaseDrawer.vue";
 
 const props = defineProps({
   show: Boolean,
   verhuur: Object,
-  machineTypes: Array,
+  assets: Array, 
   werven: Array,
   projectleiders: Array,
   error: String,
-})
+});
 
-const emit = defineEmits(['close', 'save', 'edit', 'delete'])
+const emit = defineEmits(["close", "save", "edit"]);
 
-const isEditMode = ref(false)
-const isEditing = ref(true)
-const loading = ref(false)
+const isEditMode = ref(false);
+const isEditing = ref(true);
+const loading = ref(false);
+const verhuurCopy = ref({});
 
-const verhuurCopy = ref({})
 
 watch(
   () => props.verhuur,
   (val) => {
     if (val) {
-      isEditMode.value = true
-      verhuurCopy.value = JSON.parse(JSON.stringify(val))
-      isEditing.value = false
+      isEditMode.value = true;
+      verhuurCopy.value = JSON.parse(JSON.stringify(val));
+      isEditing.value = false;
     } else {
-      isEditMode.value = false
-      resetForm()
-      isEditing.value = true
+      isEditMode.value = false;
+      resetForm();
+      isEditing.value = true;
     }
   },
   { immediate: true }
-)
+);
 
 function resetForm() {
   verhuurCopy.value = {
-    logistiekeReferentie: '',
-    machineType: null,
+    logistiekeReferentie: "",
+    assetModel: 'Hoogtewerker',
+    assetType: null,
     werf: null,
     projectleider: null,
-    ophaalDatum: '',
-    leverDatum: '',
-    werkhoogte: ''
-  }
+    leverDatum: "",
+    ophaalDatum: "",
+    werkhoogte: "",
+  };
 }
 
 async function saveVerhuur() {
-  // Leverdatum is verplicht
-  if (!verhuurCopy.value.leverDatum) {
-    return alert('Startdatum is verplicht');
-  }
+  if (!verhuurCopy.value.leverDatum) return alert("Startdatum is verplicht");
 
-  // Alleen checken als er een einddatum is
   if (
     verhuurCopy.value.ophaalDatum &&
     new Date(verhuurCopy.value.ophaalDatum) <= new Date(verhuurCopy.value.leverDatum)
-  ) {
-    return alert('Einddatum moet na de startdatum liggen');
-  }
+  )
+    return alert("Einddatum moet na de startdatum liggen");
+
+  if (!verhuurCopy.value.assetModel) return alert("Selecteer een Schaarlift of Knikarm");
+
+  if (!verhuurCopy.value.werkhoogte) return alert("Werkhoogte is verplicht voor Schaarlift/Knikarm");
 
   try {
-    loading.value = true
+    loading.value = true;
 
     if (isEditMode.value) {
-      emit('edit', verhuurCopy.value)
+      emit("edit", verhuurCopy.value);
     } else {
-      emit('save', verhuurCopy.value)
-      resetForm()
+      emit("save", verhuurCopy.value);
+      resetForm();
     }
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 </script>
@@ -177,7 +183,6 @@ async function saveVerhuur() {
   padding: 10px;
   border-radius: 8px;
 }
-
 
 .form-container {
   display: flex;
@@ -201,28 +206,5 @@ select {
   padding: 8px;
   border-radius: 8px;
   border: 1px solid #d1d5db;
-}
-
-/* knoppen identiek */
-.edit-btn,
-.delete-btn,
-.close-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-}
-
-.delete-btn {
-  background: #fee2e2;
-}
-
-.edit-btn {
-  background: #e0e7ff;
-}
-
-.close-btn {
-  background: #f3f4f6;
 }
 </style>

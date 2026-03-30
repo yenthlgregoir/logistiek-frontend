@@ -7,32 +7,49 @@
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Search schaarliften..."
+          placeholder="Search assets..."
           class="search-input"
         />
       </div>
       <button class="btn btn-primary" @click="emit('openAdd')">
-        + Schaarlift
+        + Asset
       </button>
     </div>
 
     <!-- Table -->
-    <ExpandedBaseTable :items="liften" :expand-on-row-click="true" columns="1fr 1fr 2fr 1fr 1fr" itemKey="_id" >
+    <ExpandedBaseTable
+      :items="assets"
+      :expand-on-row-click="true"
+      columns="1fr 1fr 2fr 1fr 1fr"
+      itemKey="_id"
+    >
       <template #header>
-        <div>Nummer</div>
+        <div>Naam / Nummer</div>
         <div>Type</div>
         <div>Serienummer</div>
-        <div>Werkhoogte</div>
+        <div>Extra</div>
         <div class="right">Status</div>
       </template>
 
       <template #row="{ item }">
         <div @click="toggleRow(item)" class="clickable">
-          {{ item.nummer }}
+          {{ item.nummer || item.naam }}
         </div>
-        <div>{{ item.Type?.naam || 'Onbekend' }}</div>
+
+        <div>{{ item.Type?.naam || item.type || 'Onbekend' }}</div>
+
         <div>{{ item.serienummer || '-' }}</div>
-        <div>{{ item.werkhoogte }} m</div>
+
+        <!-- 🔥 CONDITIONEEL -->
+        <div>
+          <template v-if="isSchaarlift(item)">
+            {{ item.werkhoogte }} m
+          </template>
+          <template v-else>
+            —
+          </template>
+        </div>
+
         <div class="right">
           <span :class="['status', getStatus(item)]">
             {{ getStatusLabel(item) }}
@@ -40,39 +57,54 @@
         </div>
       </template>
 
-      <!-- EXPANDED ROW -->
+      <!-- EXPANDED -->
       <template #expanded="{ item }">
         <div class="expanded-row-container">
-          <!-- LINKS: Toestel info -->
+
+          <!-- LINKS -->
           <div class="expanded-row-left">
             <div class="section-header">
-              <div class="section-title">Toestel info</div>
-              <button class="edit-btn" title="Bewerk Toestel info" @click="editSchaarlift(item)">✏️</button>
+              <div class="section-title">Asset info</div>
+              <button class="edit-btn" @click="editAsset(item)">✏️</button>
             </div>
-            
+
             <div class="devider"></div>
+
             <div class="info-grid">
               <div class="column">
-                <div><strong>Nummer</strong></div><div>{{ item.nummer }}</div>
-                <div><strong>Type</strong></div><div>{{ item.Type?.naam || '-' }}</div>
-                <div><strong>Serienummer</strong></div><div>{{ item.serienummer || '-' }}</div>
-              </div>
-              <div class="column">
-                <div><strong>Werkhoogte</strong></div><div>{{ item.werkhoogte }} m</div>
-                <div><strong>Platformhoogte</strong></div><div>{{ item.platformhoogte }} m</div>
-                <div><strong>Bouwjaar</strong></div><div>{{ item.bouwjaar || '-' }}</div>
+                <div><strong>Naam / Nummer</strong></div>
+                <div>{{ item.nummer || item.naam }}</div>
+
+                <div><strong>Type</strong></div>
+                <div>{{ item.Type?.naam || '-' }}</div>
+
+                <div><strong>Serienummer</strong></div>
+                <div>{{ item.serienummer || '-' }}</div>
               </div>
 
-              <div class="keuring">
+              <!-- 🔥 ALLEEN VOOR MACHINES -->
+              <div v-if="isSchaarlift(item)" class="column">
+                <div><strong>Werkhoogte</strong></div>
+                <div>{{ item.werkhoogte }} m</div>
+
+                <div><strong>Platformhoogte</strong></div>
+                <div>{{ item.platformhoogte }} m</div>
+
+                <div><strong>Bouwjaar</strong></div>
+                <div>{{ item.bouwjaar || '-' }}</div>
+              </div>
+
+              <!-- KEURING -->
+              <div v-if="isSchaarlift(item)" class="keuring">
                 <div class="keuring-title"><strong>Keuring</strong></div>
-                
+
                 <div v-if="isKeuringVerlopen(item.keuringDatum)" class="expired-text">
-                  Keuring verlopen
-                  {{ formatDate(item.keuringDatum) }}
+                  Keuring verlopen {{ formatDate(item.keuringDatum) }}
                 </div>
+
                 <template v-else>
                   <div class="keuring-data">
-                    <div>{{ daysUntilKeuring(item.keuringDatum) }} dagen tot keuring</div>
+                    <div>{{ daysUntilKeuring(item.keuringDatum) }} dagen</div>
                     <div>{{ formatDate(item.keuringDatum) }}</div>
                   </div>
                   <progress :value="progressValue(item.keuringDatum)" max="365" />
@@ -81,40 +113,46 @@
             </div>
           </div>
 
-          <!-- RECHTS: Actieve boekingen in dezelfde stijl als toestel info -->
+          <!-- RECHTS -->
           <div class="expanded-row-right">
             <div class="section-header">
               <div class="section-title">Boekingen</div>
             </div>
+
             <div class="devider"></div>
 
             <div v-if="item.huidigeBoekingen?.length > 0">
-              <div v-for="(boeking, index) in item.huidigeBoekingen" :key="index" class="info-grid">
+              <div
+                v-for="(boeking, index) in item.huidigeBoekingen"
+                :key="index"
+                class="info-grid"
+              >
                 <div class="column">
-                  <div><strong>Leverdatum</strong></div><div>{{ formatDate(boeking.leverDatum) }}</div>
-                  <div><strong>Ophaaldatum</strong></div><div>{{ formatDate(boeking.ophaalDatum) || 'Geen ophaaldatum bekend'}} </div>
-                  <div><strong>logistieke referentie</strong></div><div>{{ boeking.logistiekeReferentie || '-' }}</div>
+                  <div><strong>Leverdatum</strong></div>
+                  <div>{{ formatDate(boeking.leverDatum) }}</div>
 
+                  <div><strong>Ophaaldatum</strong></div>
+                  <div>{{ formatDate(boeking.ophaalDatum) || 'Geen' }}</div>
+
+                  <div><strong>Ref</strong></div>
+                  <div>{{ boeking.reference }}</div>
                 </div>
+
                 <div class="column">
-                  <div><strong>Projectleider</strong></div><div>{{ boeking.projectleider?.naam || '-' }}</div>
-                  <div><strong>Werf</strong></div><div>{{ boeking.werf?.naam || '-' }}</div>
-                  <div><strong>Entiteit</strong></div><div>{{boeking.projectleider?.entiteit.naam}}</div>
+                  <div><strong>Projectleider</strong></div>
+                  <div>{{ boeking.projectleider?.naam || '-' }}</div>
+
+                  <div><strong>Werf</strong></div>
+                  <div>{{ boeking.werf?.naam || '-' }}</div>
                 </div>
-                 <div class="boeking-extra">
-                <div class="boeking-title"><strong>Adres</strong></div>
-                  <div class="boeking-data">
-                    <div>{{ boeking.werf?.adres.straat }} {{ boeking.werf?.adres.huisnummer }} , {{ boeking.werf?.adres.postcode }} {{ boeking.werf?.adres.gemeente }}</div>
-                  </div>
-                  
-              </div>
               </div>
             </div>
 
             <div v-else class="coming-soon-placeholder">
-              <p>Geen actieve boekingen</p>
+              Geen actieve boekingen
             </div>
           </div>
+
         </div>
       </template>
     </ExpandedBaseTable>
@@ -126,19 +164,25 @@ import { ref, watch } from 'vue'
 import ExpandedBaseTable from '@/components/base/ExpandedBaseTable.vue'
 
 defineProps({
-  liften: { type: Array, default: () => [] }
+  assets: { type: Array, default: () => [] }
 })
 
-const searchQuery = ref('')
-const openRowId = ref(null) 
-const emit = defineEmits(['search', 'openAdd' , "edit-schaarlift"])
+const emit = defineEmits(['search', 'openAdd', 'edit-asset'])
 
-function toggleRow(lift) {
-  const id = lift._id
+const searchQuery = ref('')
+const openRowId = ref(null)
+
+function toggleRow(asset) {
+  const id = asset._id
   openRowId.value = openRowId.value === id ? null : id
 }
 
-// debounce search
+// 🔥 TYPE CHECK
+function isSchaarlift(item) {
+  return item.werkhoogte !== undefined
+}
+
+// 🔍 SEARCH
 let timeout = null
 watch(searchQuery, () => {
   clearTimeout(timeout)
@@ -147,6 +191,7 @@ watch(searchQuery, () => {
   }, 400)
 })
 
+// STATUS
 function getStatus(item) {
   if (item.status === 'Kapot') return 'kapot'
   if (item.status === 'Ongekeurd') return 'ongekeurd'
@@ -161,40 +206,33 @@ function getStatusLabel(item) {
   return 'Vrij'
 }
 
+// KEURING
 function daysUntilKeuring(dateStr) {
   if (!dateStr) return 0
-  const today = new Date(); today.setHours(0,0,0,0)
-  const keuringDate = new Date(dateStr); keuringDate.setHours(0,0,0,0)
-  const diffTime = keuringDate.getTime() - today.getTime()
-  const diffDays = Math.ceil(diffTime / (1000*60*60*24))
-  return diffDays > 0 ? diffDays : 0
+  const today = new Date()
+  const keuringDate = new Date(dateStr)
+  return Math.ceil((keuringDate - today) / (1000 * 60 * 60 * 24))
 }
 
 function isKeuringVerlopen(dateStr) {
   if (!dateStr) return false
-  const today = new Date(); today.setHours(0,0,0,0)
-  const keuringDate = new Date(dateStr); keuringDate.setHours(0,0,0,0)
-  return keuringDate < today
+  return new Date(dateStr) < new Date()
 }
 
 function progressValue(dateStr) {
-  if (!dateStr) return 0
-  const daysLeft = daysUntilKeuring(dateStr)
-  const progress = 365 - daysLeft
-  return progress > 0 ? progress : 0
+  const days = daysUntilKeuring(dateStr)
+  return 365 - days
 }
 
 function formatDate(dateStr) {
   if (!dateStr) return ''
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('nl-BE', { day:'2-digit', month:'2-digit', year:'numeric' })
+  return new Date(dateStr).toLocaleDateString('nl-BE')
 }
 
-function editSchaarlift(lift){
-  emit("edit-schaarlift" , lift)
+function editAsset(asset) {
+  emit('edit-asset', asset)
 }
 </script>
-
 <style scoped>
 .page { width: 100%; }
 .toolbar { display: flex; justify-content: space-between; margin-bottom: 15px; }

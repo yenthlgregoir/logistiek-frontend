@@ -1,6 +1,6 @@
 <template>
   <div class="agenda-container">
-    <h1>Planning Schaarliften</h1>
+    <h1>Planning Assets</h1>
 
     <!-- TOOLBAR -->
     <div class="agenda-toolbar">
@@ -31,7 +31,7 @@
 
     <!-- HEADER -->
     <div class="header-row">
-      <div class="corner-cell">Schaarlift</div>
+      <div class="corner-cell">Asset</div>
       <div v-for="dag in dagen" :key="dag" class="header-cell">
         {{ formatDatum(dag) }}
       </div>
@@ -44,18 +44,14 @@
 
     <!-- RIJEN -->
     <div v-else class="rows">
-      <div
-        v-for="lift in gefilterdeLiften"
-        :key="lift._id"
-        class="row"
-      >
+      <div v-for="asset in gefilterdeAssets" :key="getAssetId(asset)" class="row">
         <div class="label">
-          {{ lift.nummer }}
+          {{ asset?.nummer || asset?.naam || 'Onbekend' }}
         </div>
 
         <div class="timeline">
           <div
-            v-for="boek in boekingenPerLift(lift._id)"
+            v-for="boek in boekingenPerAsset(getAssetId(asset))"
             :key="boek._id"
             class="boek-block"
             :class="boek.status"
@@ -98,14 +94,16 @@ const dateRange = ref([
 
 const dagen = ref([])
 const selectedType = ref('')
-const liften = ref([])
 
 onMounted(() => generateDays())
 
-// 🔥 stuur type naar parent
 watch(selectedType, (val) => {
   emit('filterType', val)
 })
+
+// 🔥 Helper (BELANGRIJK)
+const getAssetId = (asset) =>
+  typeof asset === 'string' ? asset : asset?._id
 
 // 📅 dagen genereren
 function generateDays() {
@@ -132,30 +130,29 @@ function onDateChange(val) {
   generateDays()
 }
 
-// ✅ Liften bepalen (GEEN type filtering meer hier!)
-const gefilterdeLiften = computed(() => {
+// ✅ Assets bepalen
+const gefilterdeAssets = computed(() => {
   const map = new Map()
 
   props.boekingen.forEach(b => {
-    if (!b.toestel) return
+    const assetId = getAssetId(b.asset)
+    if (!assetId) return
 
     const bs = new Date(b.leverDatum)
     const be = b.ophaalDatum ? new Date(b.ophaalDatum) : end.value
 
     if (bs <= end.value && be >= start.value) {
-      map.set(b.toestel._id, b.toestel)
+      map.set(assetId, b.asset)
     }
   })
 
-  const arr = Array.from(map.values())
-  liften.value = arr
-  return arr
+  return Array.from(map.values())
 })
 
-// ✅ Boekingen per lift
-function boekingenPerLift(liftId) {
+// ✅ Boekingen per asset
+function boekingenPerAsset(assetId) {
   return props.boekingen
-    .filter(b => b.toestel && b.toestel._id === liftId)
+    .filter(b => getAssetId(b.asset) === assetId)
     .filter(b => {
       const bs = new Date(b.leverDatum)
       const be = b.ophaalDatum ? new Date(b.ophaalDatum) : end.value
@@ -195,13 +192,13 @@ function getBlokStyle(boek) {
   }
 }
 
-// 📅 datum formatter
+// 📅 formatter
 function formatDatum(d) {
   const dt = new Date(d)
   return `${dt.getDate()}/${dt.getMonth() + 1}`
 }
 
-const heeftBoekingen = computed(() => gefilterdeLiften.value.length > 0)
+const heeftBoekingen = computed(() => gefilterdeAssets.value.length > 0)
 
 const pickerOptions = {
   disabledDate(date) {

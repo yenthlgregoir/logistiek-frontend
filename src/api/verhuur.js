@@ -9,9 +9,9 @@ export const verhuurApi = {
   getById: (id) => api.get(`/logistics/verhuur/${id}`),
   remove: (id) => api.del(`/logistics/verhuur/${id}`),
   update: (id, data) => api.patch(`/logistics/verhuur/update/${id}`, data),
-  vrijeToestellen: ({ ophaalDatum, leverDatum, machineType, werkhoogte }) => {
-    const params = new URLSearchParams({ ophaalDatum, leverDatum, machineType, werkhoogte })
-    return api.get(`/logistics/verhuur/vrije-toestellen?${params.toString()}`)
+  vrijeToestellen: ({ ophaalDatum, leverDatum, assetModel, werkhoogte }) => {
+    const params = new URLSearchParams({ ophaalDatum, leverDatum, assetModel, werkhoogte })
+    return api.get(`/logistics/verhuur/vrije-assets?${params.toString()}`)
   }, 
   assignToestel : (data) => api.patch(`/logistics/verhuur/assignToestel` , data),
   exportVerhuur: (id) => api.get(`/logistics/verhuur/export-pdf/${id}`, { responseType: 'blob' }),
