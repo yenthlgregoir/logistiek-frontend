@@ -92,21 +92,21 @@
               <div v-for="(boeking, index) in item.huidigeBoekingen" :key="index" class="info-grid">
                 <div class="column">
                   <div><strong>Leverdatum</strong></div><div>{{ formatDate(boeking.leverDatum) }}</div>
-                  <div><strong>Ophaaldatum</strong></div><div>{{ formatDate(boeking.ophaalDatum) }}</div>
+                  <div><strong>Ophaaldatum</strong></div><div>{{ formatDate(boeking.ophaalDatum) || 'Geen ophaaldatum bekend'}} </div>
+                  <div><strong>logistieke referentie</strong></div><div>{{ boeking.logistiekeReferentie || '-' }}</div>
+
                 </div>
                 <div class="column">
                   <div><strong>Projectleider</strong></div><div>{{ boeking.projectleider?.naam || '-' }}</div>
                   <div><strong>Werf</strong></div><div>{{ boeking.werf?.naam || '-' }}</div>
+                  <div><strong>Entiteit</strong></div><div>{{boeking.projectleider?.entiteit.naam}}</div>
                 </div>
-                 <div class="keuring">
-                <div class="keuring-title"><strong>Adres</strong></div>
+                 <div class="boeking-extra">
+                <div class="boeking-title"><strong>Adres</strong></div>
                   <div class="boeking-data">
                     <div>{{ boeking.werf?.adres.straat }} {{ boeking.werf?.adres.huisnummer }} , {{ boeking.werf?.adres.postcode }} {{ boeking.werf?.adres.gemeente }}</div>
                   </div>
-                  <div class="keuring-title"><strong>Eniteit</strong></div>
-                  <div class="boeking-data">
-                    <div>{{ boeking.projectleider?.entiteit.naam }}</div>
-                  </div>
+                  
               </div>
               </div>
             </div>
@@ -233,6 +233,23 @@ progress::-webkit-progress-value { background-color: #3b82f6; border-radius: 5px
 /* Boekingen grid */
 .boeking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 40px; padding: 10px 0; border-bottom: 1px solid #ddd; margin-bottom: 10px; }
 .boeking-grid:last-child { border-bottom: none; margin-bottom: 0; }
-.boeking-data { grid-column: 1 / -1; width: 80%; display: flex; justify-content: space-between; font-weight: lighter; }
+.boeking-extra {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin-top: 0; /* belangrijk */
+}
 
+.boeking-title {
+  font-weight: 700;
+  margin-top: 8px; /* kleine spacing tussen blokken */
+}
+
+.boeking-data {
+  font-weight: 400;
+  display: flex;
+  justify-content: flex-start; /* geen space-between hier */
+  width: 100%;
+}
 </style>

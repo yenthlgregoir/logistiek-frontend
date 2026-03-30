@@ -31,7 +31,8 @@
     <!-- FOOTER -->
     <template #footer>
       <button class="btn btn-blue" @click="saveVerhuur" :disabled="loading">opslaan</button>
-      <button class="btn btn-gray" disabled>D</button>
+      <button class="btn btn-gray"  @click="donwloadPDF">            <i class="fa fa-download"></i>
+</button>
       <button class="btn btn-red" @click="onDelete">verwijderen</button>
     </template>
 
@@ -179,6 +180,20 @@ function formatAdres(v) {
   return v.werf?.naam || 'Onbekende werf'
 }
 
+async function donwloadPDF(){
+   try {
+    
+    const blob = await verhuurApi.exportVerhuur(verhuurCopy._id)
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'boekingen.pdf'
+    a.click()
+    window.URL.revokeObjectURL(url)
+  } catch (err) {
+    console.log(err)
+  }
+}
 // BLOCKS
 const blocks = computed(() => [
   {

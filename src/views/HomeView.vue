@@ -6,7 +6,6 @@
 
         <h1>Ops Platform</h1>
         <p class="subtitle">Welkom bij het centrale dashboard</p>
-
         <div class="cards">
           <RouterLink v-if="role === 'admin' || role === 'purchase'" to="/purchase" class="card">
             <div class="icon">🛒</div>
@@ -37,7 +36,6 @@
             <span>Admin</span>
           </RouterLink>
         </div>
-
         <div class="logout-btn" @click="logout()">Logout</div>
       </div>
     </main>

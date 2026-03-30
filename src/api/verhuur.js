@@ -14,4 +14,6 @@ export const verhuurApi = {
     return api.get(`/logistics/verhuur/vrije-toestellen?${params.toString()}`)
   }, 
   assignToestel : (data) => api.patch(`/logistics/verhuur/assignToestel` , data),
+  exportVerhuur: (id) => api.get(`/logistics/verhuur/export-pdf/${id}`, { responseType: 'blob' }),
+
 }
