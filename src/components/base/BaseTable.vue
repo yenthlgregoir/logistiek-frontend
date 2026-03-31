@@ -145,7 +145,27 @@ function getKey(item) {
   color: #94a3b8;
   font-style: italic;
 }
+::v-deep(.search) {
+  position: relative;
+  flex: 1;
+  max-width: 300px;
+}
 
+::v-deep(.search input) {
+  padding: 8px 12px 8px 32px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+}
+
+::v-deep(.search i) {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  color: #1b4965;
+}
 /* =========================================
    RESPONSIVE
 ========================================= */

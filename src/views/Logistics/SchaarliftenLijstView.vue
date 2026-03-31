@@ -7,7 +7,7 @@
       :assets="assets"
       @search="searchAssets"
       @open-add="openCreate"
-      @edit-schaarlift="openEdit"
+      @edit-asset="openEdit"
     />
 
     <!-- DRAWER -->
@@ -61,6 +61,7 @@ function openCreate() {
 
 // --- OPEN EDIT ---
 function openEdit(asset) {
+  console.log("edit")
   selectedAsset.value = { ...asset }
   showDrawer.value = true
 }
