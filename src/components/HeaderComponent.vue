@@ -103,8 +103,8 @@ const linkGroups = {
     label: 'Werfcontainers', 
     icon: Warehouse,  
     submenu: [
-        { to: '/logistics/schaarlift/planning', label: 'Planning', icon: Calendar },
-        { to: '/logistics/schaarlift/lijst', label: 'Lijst', icon: List },
+        { to: '/logistics/werfcontainers/planning', label: 'Planning', icon: Calendar },
+        { to: '/logistics/werfcontainers/lijst', label: 'Lijst', icon: List },
       ], 
     },
     { to: '/logistics/werf' , label: 'Werven' , icon: Hammer },
