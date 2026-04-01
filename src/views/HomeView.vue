@@ -1,51 +1,9 @@
 <template>
   <div class="page">
     <main class="center-wrapper">
-      
-      <!-- Loading screen -->
-      <div v-if="showLoading" class="loading-screen">
-        <div class="loader"></div>
-        <p>{{ currentMessage }}</p>
-      </div>
-
-      <!-- Error screen -->
-      <div v-if="showError" class="error-popup">
-        <div class="error-content">
-          <p>Steven je hebt weer op vieze sites gezeten! 😱</p>
-          <button @click="showAprilFoolPopup">OK</button>
-          <button @click="showAprilFoolPopup">NEE</button>
-        </div>
-      </div>
-
-      <!-- April Fool image -->
-      <div v-if="showAprilFool" class="april-popup prank-cursor">
-  <div class="april-content">
-
-    <!-- Eerste afbeelding -->
-    <template v-if="!showSecondImage && !showThirdImage">
-      <img src="/image.png" alt="April Fools" />
-      <button @click="goToSecondImage">Ga verder naar renting</button>
-    </template>
-
-    <!-- Tweede afbeelding -->
-    <template v-else-if="showSecondImage && !showThirdImage">
-      <img src="/image2.jpeg" alt="Second Image" />
-      <p>Bijna daar... 👀</p>
-      <button @click="goToThirdImage">Naar renting</button>
-    </template>
-
-    <!-- Derde afbeelding -->
-    <template v-else>
-      <img src="/image3.jpeg" alt="Third Image" />
-      <p>hier ne zwarte</p>
-    </template>
-
-  </div>
-</div>
-
-      <!-- Main content -->
-      <div v-if="!showLoading && !showError && !showAprilFool" class="content">
+      <div class="content">
         <img src="../assets/logo-bumacogroup.svg" alt="Bumaco" class="logo-large" />
+
         <h1>Ops Platform</h1>
         <p class="subtitle">Welkom bij het centrale dashboard</p>
         <div class="cards">
@@ -53,18 +11,18 @@
             <div class="icon">🛒</div>
             <span>Purchase</span>
           </RouterLink>
-          <div v-if="role === 'admin' || role === 'renting'" @click="jokes" class="card">
+          <RouterLink v-if="role === 'admin' || role === 'renting'" to="/renting/agenda/planning" class="card">
             <div class="icon">❄️</div>
             <span>Renting</span>
-          </div>
+          </RouterLink>
           <RouterLink v-if="role === 'admin' || role === 'tools'" to="/tools" class="card">
             <div class="icon">🛠️</div>
             <span>Tools</span>
           </RouterLink>
-          <div v-if="role === 'admin' || role === 'logistics'" @click="jokes" class="card">
+          <RouterLink v-if="role === 'admin' || role === 'logistics'" to="/logistics/schaarlift/planning" class="card">
             <div class="icon">🚚</div>
             <span>Logistiek</span>
-          </div>
+          </RouterLink>
           <RouterLink
             v-if="role === 'admin' || role === 'facilities'"
             to="/facilities"
@@ -83,68 +41,14 @@
     </main>
   </div>
 </template>
+
 <script setup>
 import router from '@/router'
-import { ref } from 'vue'
-
 const role = localStorage.getItem('role')
-
-const messages = [
-  "Loading renting data...",
-  "Connecting to server...",
-  "Fetching schedules...",
-  "Syncing database...",
-  "Almost there...",
-  "Dirty sites detected"
-]
-
-const currentMessage = ref(messages[0])
-const showAprilFool = ref(false)
-const showLoading = ref(false)
-const showError = ref(false)
-const showSecondImage = ref(false)
-const showThirdImage = ref(false)
-
-const audio = new Audio('/sound.mp3')
 
 function logout() {
   localStorage.removeItem('token')
   router.push('/login')
-}
-function goToSecondImage() {
-  audio.play().catch(() => console.log('Autoplay geblokkeerd'))
-  showSecondImage.value = true
-}
-
-function goToThirdImage() {
-  showThirdImage.value = true
-}
-
-function jokes() {
-  if (role === "admin") {
-    // start audio en loading
-    showLoading.value = true
-
-    const interval = setInterval(() => {
-      const randomIndex = Math.floor(Math.random() * messages.length)
-      currentMessage.value = messages[randomIndex]
-    }, 400)
-
-    // na 2 sec: stop loading, toon error
-    setTimeout(() => {
-      clearInterval(interval)
-      showLoading.value = false
-      showError.value = true
-    }, 2000)
-  } else {
-    router.push("/renting/agenda/planning")
-  }
-}
-
-// wordt aangeroepen bij OK of NEE knop
-function showAprilFoolPopup() {
-  showError.value = false
-  showAprilFool.value = true
 }
 </script>
 
@@ -238,9 +142,7 @@ h1 {
 .card:hover .icon {
   color: #2563c9;
 }
-body {
-  cursor: url('/cursor.png'), auto;
-}
+
 .logout-btn {
   margin: 0 auto;
   display: inline-block;
@@ -271,7 +173,7 @@ body {
   .cards {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 16px;
-    justify-items: center; 
+    justify-items: center; /* centreren van de kaarten per kolom */
   }
 }
 @media (max-width: 600px) {
@@ -279,111 +181,5 @@ body {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 16px;
   }
-}
-
-/* jokes*/
-
-.april-popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(15, 46, 77, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-.april-content {
-  background: white;
-  padding: 20px;
-  border-radius: 16px;
-  text-align: center;
-  width: 80vw;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-
-.april-content img {
-  width: 100%;
-  border-radius: 10px;
-  margin-bottom: 12px;
-}
-
-.april-content button {
-  background: #2f80ed;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 20px;
-  cursor: pointer;
-}
-
-.loading-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #0f2e4d;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-/* simpele spinner */
-.loader {
-  border: 6px solid rgba(255, 255, 255, 0.2);
-  border-top: 6px solid #2f80ed;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  animation: spin 1s linear infinite;
-  margin-bottom: 20px;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.error-popup {
-  position: fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background: rgba(0,0,0,0.8);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-}
-
-.error-content {
-  background: white;
-  padding: 20px;
-  border-radius: 16px;
-  text-align:center;
-  max-width: 400px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-
-.error-content p {
-  font-size:18px;
-  margin-bottom:20px;
-}
-
-.error-content button {
-  background:#2f80ed;
-  color:white;
-  border:none;
-  padding:10px 20px;
-  border-radius:20px;
-  margin:0 10px;
-  cursor:pointer;
 }
 </style>
