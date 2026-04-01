@@ -29,14 +29,14 @@
 
     <!-- Tweede afbeelding -->
     <template v-else-if="showSecondImage && !showThirdImage">
-      <img src="/image2.png" alt="Second Image" />
+      <img src="/image2.jpeg" alt="Second Image" />
       <p>Bijna daar... 👀</p>
       <button @click="goToThirdImage">Naar renting</button>
     </template>
 
     <!-- Derde afbeelding -->
     <template v-else>
-      <img src="/image3.png" alt="Third Image" />
+      <img src="/image3.jpeg" alt="Third Image" />
       <p>hier ne zwarte</p>
     </template>
 

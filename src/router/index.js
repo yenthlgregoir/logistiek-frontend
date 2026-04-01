@@ -21,7 +21,7 @@ import ProjectLeidersView from '@/views/Logistics/ProjectLeidersView.vue'
 import SchaarliftenLijstview from '@/views/Logistics/SchaarliftenLijstView.vue'
 import SchaarliftenPlanningView from '@/views/Logistics/SchaarliftenPlanningView.vue'
 import VerhuurlijstView from '@/views/Logistics/VerhuurlijstView.vue'
-
+import WerfcontainerLijstView from '@/views/Logistics/WerfcontainerLijstView.vue'
 const routes = [
   {
     path: '/',
@@ -160,6 +160,12 @@ const routes = [
     path: '/logistics/schaarlift/planning',
     name: 'schaarliftenPlanning',
     component: SchaarliftenPlanningView,
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
+  },
+   {
+    path: '/logistics/werfcontainers/lijst',
+    name: 'werfContainerLijst',
+    component: WerfcontainerLijstView,
     meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
   },
 
