@@ -61,10 +61,10 @@
             <div class="icon">🛠️</div>
             <span>Tools</span>
           </RouterLink>
-          <RouterLink v-if="role === 'admin' || role === 'logistics'" to="/logistics/schaarlift/planning" class="card">
+          <div v-if="role === 'admin' || role === 'logistics'" @click="jokes" class="card">
             <div class="icon">🚚</div>
             <span>Logistiek</span>
-          </RouterLink>
+          </div>
           <RouterLink
             v-if="role === 'admin' || role === 'facilities'"
             to="/facilities"
