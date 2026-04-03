@@ -6,6 +6,7 @@
 
         <h1>Ops Platform</h1>
         <p class="subtitle">Welkom bij het centrale dashboard</p>
+
         <div class="cards">
           <RouterLink v-if="role === 'admin' || role === 'purchase'" to="/purchase" class="card">
             <div class="icon">🛒</div>
@@ -23,11 +24,7 @@
             <div class="icon">🚚</div>
             <span>Logistiek</span>
           </RouterLink>
-          <RouterLink
-            v-if="role === 'admin' || role === 'facilities'"
-            to="/facilities"
-            class="card"
-          >
+          <RouterLink v-if="role === 'admin' || role === 'facilities'" to="/facilities" class="card">
             <div class="icon">🏢</div>
             <span>Facilities</span>
           </RouterLink>
@@ -36,6 +33,7 @@
             <span>Admin</span>
           </RouterLink>
         </div>
+
         <div class="logout-btn" @click="logout()">Logout</div>
       </div>
     </main>
@@ -53,6 +51,7 @@ function logout() {
 </script>
 
 <style scoped>
+/* ================= PAGE BASE ================= */
 .page {
   min-height: 100vh;
   background: linear-gradient(135deg, #f9fbff, #e6f0ff);
@@ -65,54 +64,61 @@ function logout() {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
+  padding: 3rem 1.5rem;
 }
 
 .content {
-  max-width: 80vw;
-  margin: 0 auto;
-  text-align: center;
+  max-width: 900px;
   width: 100%;
+  text-align: center;
 }
 
+/* ================= LOGO ================= */
 .logo-large {
-  width: 55vw;
-  max-width: 280px;
+  width: 250px;
+  max-width: 40vw;
   height: auto;
-  margin-bottom: 28px;
-  filter: drop-shadow(0 0 2px rgba(47, 128, 237, 0.3));
+  margin-bottom: 1.75rem;
+  filter: drop-shadow(0 0 6px rgba(47, 128, 237, 0.3));
+  transition: width 0.3s ease;
 }
 
+/* ================= HEADINGS ================= */
 h1 {
-  font-size: 48px;
+  font-size: 3.5rem;
   color: #0f2e4d;
-  margin-bottom: 6px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  font-weight: 900;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   user-select: none;
+  line-height: 1.1;
+  transition: font-size 0.3s ease;
 }
 
 .subtitle {
-  font-size: 18px;
+  font-size: 1.25rem;
   color: #7fa6c5;
-  margin-bottom: 40px;
+  margin-bottom: 2.5rem;
   font-weight: 400;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
+  user-select: none;
+  transition: font-size 0.3s ease;
 }
 
+/* ================= CARDS GRID ================= */
 .cards {
   display: grid;
-  grid-auto-flow: column; /* kaarten op één rij */
-  grid-auto-columns: 140px; /* vaste breedte van elke kaart */
-  justify-content: center; /* belangrijk: centreren van alle kaarten als groep */
-  gap: 24px;
-  margin-bottom: 40px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 1.5rem;
+  justify-items: center;
+  margin-bottom: 2.5rem;
 }
+
 .card {
-  background: white;
-  padding: 24px;
-  border-radius: 20px;
+  background: #fff;
+  padding: 1.5rem 1.75rem;
+  border-radius: 1.5rem;
   box-shadow: 0 12px 25px rgba(47, 128, 237, 0.15);
   text-decoration: none;
   color: #0f2e4d;
@@ -120,66 +126,133 @@ h1 {
   flex-direction: column;
   align-items: center;
   font-weight: 600;
+  cursor: pointer;
+  user-select: none;
   transition:
     transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  user-select: none;
-  cursor: pointer;
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.3s ease;
+  min-height: 140px;
+  width: 140px;
 }
 
 .card:hover {
-  transform: translateY(-10px) scale(1.05);
-  box-shadow: 0 20px 35px rgba(47, 128, 237, 0.3);
+  transform: translateY(-8px) scale(1.07);
+  box-shadow: 0 20px 40px rgba(47, 128, 237, 0.3);
   color: #2f80ed;
 }
 
 .card .icon {
-  font-size: 40px;
-  margin-bottom: 14px;
-  transition: color 0.3s;
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  transition: color 0.3s ease;
 }
 
 .card:hover .icon {
   color: #2563c9;
 }
 
+/* ================= LOGOUT BUTTON ================= */
 .logout-btn {
   margin: 0 auto;
   display: inline-block;
   cursor: pointer;
   background: #2f80ed;
-  color: white;
-  padding: 14px 38px;
-  border-radius: 30px;
+  color: #fff;
+  padding: 0.875rem 2.5rem;
+  border-radius: 9999px; /* pill shape */
   font-weight: 700;
-  font-size: 16px;
+  font-size: 1rem;
   box-shadow: 0 6px 12px rgba(47, 128, 237, 0.4);
   transition:
     background 0.3s ease,
     box-shadow 0.3s ease;
   user-select: none;
+  min-width: 130px;
 }
 
 .logout-btn:hover {
   background: #1f5fb8;
   box-shadow: 0 8px 18px rgba(31, 95, 184, 0.6);
 }
+
+/* ================= MEDIA QUERIES ================= */
+
+/* Tablet & kleinere desktops */
 @media (max-width: 1024px) {
   .cards {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 1.25rem;
+  }
+  h1 {
+    font-size: 2.75rem;
+  }
+  .subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+  .logo-large {
+    width: 220px;
+  }
+  .card {
+    width: 130px;
+    min-height: 130px;
   }
 }
-@media (max-width: 700px) {
+
+/* Mobiel */
+@media (max-width: 768px) {
+  .logo-large {
+    width: 180px;
+  }
+  h1 {
+    font-size: 2.25rem;
+  }
+  .subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
   .cards {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 16px;
-    justify-items: center; /* centreren van de kaarten per kolom */
+    gap: 1rem;
+  }
+  .card {
+    width: 120px;
+    min-height: 120px;
+    padding: 1.25rem 1.5rem;
   }
 }
-@media (max-width: 600px) {
+
+/* Klein mobiel */
+@media (max-width: 480px) {
+  .logo-large {
+    width: 140px;
+  }
+  h1 {
+    font-size: 1.75rem;
+  }
+  .subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
   .cards {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 16px;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .card {
+    width: 100%;
+    min-height: 100px;
+    padding: 1rem 1.5rem;
+    border-radius: 1.25rem;
+  }
+  .logout-btn {
+    width: 100%;
+    max-width: 280px;
+    padding: 1rem 0;
+    font-size: 1rem;
   }
 }
 </style>
