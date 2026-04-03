@@ -47,9 +47,6 @@ const selectedBoekingId = ref(null)
 
 // WATCH FILTERS
 watch([() => store.search, () => store.dateRange], () => {
-  
-  store.setViewMode('archief')
-
   store.loadBoekingen(true) 
 })
 

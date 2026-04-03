@@ -114,6 +114,7 @@ async function saveComment(boeking) {
 
 // INIT
 onMounted(() => {
+  store.setViewMode('actief')
   store.loadBoekingen()
   store.loadTypes()
 })
