@@ -40,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import SchaarliftenAgenda from '@/components/Logistics/Schaarliften/SchaarliftenAgenda.vue'
 import VerhuurDrawer from '@/components/Logistics/Schaarliften/VerhuurDrawer.vue'
 import AddVerhuurDrawer from '@/components/Logistics/Schaarliften/AddVerhuurDrawer.vue'
@@ -66,10 +66,7 @@ const filters = ref({
 })
 
 // --- Computed helpers ---
-const filteredBoekingen = computed(() => {
-  if (!filters.value.type) return boekingen.value
-  return boekingen.value.filter((b) => b.machineType?._id === filters.value.type)
-})
+
 
 // --- Load data ---
 async function loadData() {
