@@ -1,4 +1,7 @@
 import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/authentication/auth.store.js'
+
+//views
 import HomeView from '../views/HomeView.vue'
 import PurchaseView from '../views/purchase/PurchaseView.vue'
 import ArchiefView from '../views/purchase/ArchiefView.vue'
@@ -170,30 +173,37 @@ const routes = [
   },
 
 ]
-
 const router = createRouter({
   history: createWebHistory('/'),
   routes,
 })
 
+// 🔥 Eén centrale router guard met Pinia
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
+  const auth = useAuthStore()
 
-  if (to.meta.requiresAuth && !token) {
+  // 1️⃣ Route vereist auth maar gebruiker is niet ingelogd
+  if (to.meta.requiresAuth && !auth.isLoggedIn) {
     return next({ name: 'login' })
   }
 
-  if (to.meta.roles && token) {
-    const userRole = localStorage.getItem('role') 
+  // 2️⃣ Route heeft rolbeperking
+  if (to.meta.roles && auth.isLoggedIn) {
+    const userRole = auth.user?.role
 
     if (!userRole) {
-      return next({ name: 'login' })
+      return next({ name: 'login' }) // fallback
     }
 
     // Admin mag overal
     if (userRole !== 'admin' && !to.meta.roles.includes(userRole)) {
-      return next({ name: 'home' }) 
+      return next({ name: 'home' }) // niet toegestane rol
     }
+  }
+
+  // 3️⃣ Gebruiker al ingelogd en probeert login pagina te openen → redirect home
+  if (to.name === 'login' && auth.isLoggedIn) {
+    return next({ name: 'home' })
   }
 
   next()

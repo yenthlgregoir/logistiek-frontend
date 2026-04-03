@@ -30,7 +30,6 @@
 <script setup>
 import { reactive, onMounted, ref } from 'vue'
 import BaseModal from '@/components/base/BaseModal.vue'
-import { boekingApi } from '@/api/boeking'
 
 const props = defineProps({
   boeking: Object,
@@ -56,26 +55,18 @@ function close() {
 async function save() {
   errorMessage.value = ''
 
-  // Als einddatum leeg is → 5 jaar later
   if (!form.eindDatum) {
     const begin = new Date(form.beginDatum)
     begin.setFullYear(begin.getFullYear() + 5)
     form.eindDatum = begin.toISOString().split('T')[0]
   }
 
-  try {
-    await boekingApi.updatePeriode(
-      props.boeking._id,
-      form.beginDatum,
-      form.eindDatum
-    )
+  emit('update', {
+    beginDatum: form.beginDatum,
+    eindDatum: form.eindDatum
+  })
 
-    emit('update')
-    emit('close')
-  } catch (e) {
-    const parsed = JSON.parse(e.message)
-    errorMessage.value = parsed.message
-  }
+  emit('close')
 }
 </script>
 

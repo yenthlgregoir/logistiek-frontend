@@ -24,9 +24,9 @@
       itemKey="_id"
     >
       <template #header>
-        <div>Nummer</div>
-        <div>Type</div>
-        <div class="right">Status</div>
+        <div>nummer</div>
+        <div>type</div>
+        <div class="right">status</div>
       </template>
 
       <template #row="{ item }">
@@ -58,16 +58,22 @@
 
             <div class="info-grid">
               <div class="column">
-                <div><strong>Nummer</strong></div>
+                <div><strong>nummer</strong></div>
                 <div>{{ item.nummer }}</div>
 
-                <div><strong>Type</strong></div>
+                <div><strong>type</strong></div>
                 <div>{{ item.Type?.naam || '-' }}</div>
-
-                <div><strong>Status</strong></div>
-                <div>{{ getStatusLabel(item) }}</div>
               </div>
+              <div class="column">
+                <div><strong>status</strong></div>
+                <div>{{ getStatusLabel(item) }}</div>
+
+                <div><strong>entiteit</strong></div>
+                <div>{{ item.entiteit.naam || '-' }}</div>
             </div>
+        
+            </div>
+            
           </div>
 
           <!-- RECHTS -->

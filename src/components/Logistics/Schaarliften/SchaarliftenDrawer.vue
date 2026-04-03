@@ -5,17 +5,17 @@
     <form @submit.prevent="handleSubmit" class="lift-form">
 
       <div class="info-block">
-        <label>Nummer *</label>
+        <label>nummer *</label>
         <input type="text" v-model="form.nummer" placeholder="Bijv. LFT-001" required />
       </div>
 
       <!-- TYPE SELECT + ADD -->
       <div class="info-block type-block">
-        <label>Type *</label>
+        <label>type *</label>
         <div class="type-select-wrapper">
           <select v-model="form.Type" v-bind="form.Type._id"  required>
             <option v-for="type in types" :key="type._id" :value="type._id">
-              {{ type.naam }} ({{ type.type }})
+              {{ type.naam }} ({{ type.type.toLowerCase() }})
             </option>
           </select>
           <button type="button" class="btn-add" @click="showTypeForm = !showTypeForm">+</button>
@@ -25,45 +25,45 @@
         <div v-if="showTypeForm" class="new-type-form">
           <input type="text" v-model="newType.naam" placeholder="Naam type" />
           <select v-model="newType.type">
-            <option value="Knikarm">Knikarm</option>
-            <option value="Schaarlift">Schaarlift</option>
+            <option value="Knikarm">knikarm</option>
+            <option value="Schaarlift">schaarlift</option>
           </select>
           <button type="button" class="btn-save-type" @click="addType">Opslaan</button>
         </div>
       </div>
 
       <div class="info-block">
-        <label>Serienummer</label>
+        <label>serienummer</label>
         <input type="text" v-model="form.serienummer" placeholder="Serienummer" />
       </div>
 
       <div class="info-block">
-        <label>Bouwjaar</label>
+        <label>bouwjaar</label>
         <input type="number" v-model="form.bouwjaar" placeholder="Bouwjaar" />
       </div>
 
       <div class="info-block">
-        <label>Platformhoogte (m) *</label>
+        <label>platformhoogte (m) *</label>
         <input type="number" v-model="form.platformhoogte" placeholder="Bijv. 1.5" required />
       </div>
 
       <div class="info-block">
-        <label>Werkhoogte (m) *</label>
+        <label>werkhoogte (m) *</label>
         <input type="number" v-model="form.werkhoogte" placeholder="Bijv. 12" required />
       </div>
 
       <div class="info-block">
-        <label>Keuring Datum</label>
+        <label>keuring Datum</label>
         <input type="date" v-model="form.keuringDatum" />
       </div>
 
       <div class="info-block">
-        <label>Status</label>
+        <label>status</label>
         <select v-model="form.status">
-          <option value="Vrij">Vrij</option>
-          <option value="Bezet">Bezet</option>
-          <option value="Kapot">Kapot</option>
-          <option value="Ongekeurd">Ongekeurd</option>
+          <option value="Vrij">vrij</option>
+          <option value="Bezet">bezet</option>
+          <option value="Kapot">kapot</option>
+          <option value="Ongekeurd">ongekeurd</option>
         </select>
       </div>
 

@@ -20,9 +20,7 @@
 
     <!-- EMPTY -->
     <div v-if="!items.length" class="no-results">
-      <slot name="empty">
-        Geen resultaten gevonden
-      </slot>
+      <slot name="empty">Geen resultaten gevonden</slot>
     </div>
 
   </div>
@@ -32,22 +30,10 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  items: {
-    type: Array,
-    default: () => [],
-  },
-  columns: {
-    type: String,
-    default: '1fr 1fr',
-  },
-  itemKey: {
-    type: String,
-    default: '_id',
-  },
-  hover: {
-    type: Boolean,
-    default: true,
-  },
+  items: { type: Array, default: () => [] },
+  columns: { type: String, default: '1fr 1fr' },
+  itemKey: { type: String, default: '_id' },
+  hover: { type: Boolean, default: true },
 })
 
 defineEmits(['row-click'])
@@ -68,10 +54,11 @@ function getKey(item) {
 .lijstweergave {
   width: 100%;
   font-family: 'Inter', sans-serif;
+  overflow-x: hidden; /* ✅ prevent horizontal scroll */
 }
 
 /* =========================================
-   HEADER
+   HEADER (Desktop)
 ========================================= */
 .table-header {
   display: grid;
@@ -87,7 +74,7 @@ function getKey(item) {
 }
 
 /* =========================================
-   ROW
+   ROW (Desktop)
 ========================================= */
 .table-row {
   display: grid;
@@ -100,9 +87,10 @@ function getKey(item) {
   cursor: pointer;
   margin-bottom: 10px;
   align-items: center;
+  overflow-x: hidden; /* ✅ prevents overflow */
 }
 
-/* Hover effect */
+/* Hover */
 .table-row:hover {
   background: #5786f7;
   color: white;
@@ -110,7 +98,6 @@ function getKey(item) {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* Disable hover */
 .table-row.no-hover:hover {
   background: #ffffff;
   color: inherit;
@@ -136,7 +123,7 @@ function getKey(item) {
 }
 
 /* =========================================
-   EMPTY STATE
+   EMPTY
 ========================================= */
 .no-results {
   text-align: center;
@@ -145,35 +132,66 @@ function getKey(item) {
   color: #94a3b8;
   font-style: italic;
 }
-::v-deep(.search) {
-  position: relative;
-  flex: 1;
-  max-width: 300px;
-}
 
-::v-deep(.search input) {
-  padding: 8px 12px 8px 32px;
-  border-radius: 6px;
-  border: none;
-  background: transparent;
-}
-
-::v-deep(.search i) {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-
-  color: #1b4965;
-}
 /* =========================================
-   RESPONSIVE
+   MOBILE CARD LAYOUT
 ========================================= */
-@media (max-width: 900px) {
-  .table-header,
+@media (max-width: 768px) {
+
+  /* Header weg */
+  .table-header {
+    display: none !important;
+  }
+
+  /* ✅ VOLLEDIG weg van grid op mobiel */
   .table-row {
-    grid-template-columns: 1fr 1fr !important;
+    display: flex !important;
+    flex-direction: column;
+    grid-template-columns: none !important;
+
+    width: 100%;
+    padding: 18px;
     row-gap: 10px;
+
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    transform: none !important;
+    color: inherit !important;
+  }
+
+  .table-row:hover {
+    transform: none;
+    background: white;
+    color: inherit;
+  }
+
+  /* ✅ Cards moeten nooit overflowen */
+  .table-row > div {
+    width: 100%;
+    box-sizing: border-box;
+    word-break: break-word;
+    text-align: left !important;
+  }
+
+  /* ========= LABEL SUPPORT ========= */
+  .table-row > div[data-label] {
+    position: relative;
+    padding-left: 90px;
+    min-height: 20px;
+  }
+
+  .table-row > div[data-label]::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80px;
+    white-space: normal;
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 13px;
+    line-height: 1.2;
   }
 }
 </style>

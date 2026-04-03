@@ -24,11 +24,11 @@
       itemKey="_id"
     >
       <template #header>
-        <div>Naam / Nummer</div>
-        <div>Type</div>
-        <div>Serienummer</div>
-        <div>Extra</div>
-        <div class="right">Status</div>
+        <div>nummer</div>
+        <div>type</div>
+        <div>serienummer</div>
+        <div>werkhoogte</div>
+        <div class="right">status</div>
       </template>
 
       <template #row="{ item }">
@@ -72,25 +72,25 @@
 
             <div class="info-grid">
               <div class="column">
-                <div><strong>Naam / Nummer</strong></div>
+                <div><strong>nummer</strong></div>
                 <div>{{ item.nummer || item.naam }}</div>
 
-                <div><strong>Type</strong></div>
+                <div><strong>type</strong></div>
                 <div>{{ item.Type?.naam || '-' }}</div>
 
-                <div><strong>Serienummer</strong></div>
+                <div><strong>serienummer</strong></div>
                 <div>{{ item.serienummer || '-' }}</div>
               </div>
 
               <!-- 🔥 ALLEEN VOOR MACHINES -->
               <div v-if="isSchaarlift(item)" class="column">
-                <div><strong>Werkhoogte</strong></div>
+                <div><strong>werkhoogte</strong></div>
                 <div>{{ item.werkhoogte }} m</div>
 
-                <div><strong>Platformhoogte</strong></div>
+                <div><strong>platformhoogte</strong></div>
                 <div>{{ item.platformhoogte }} m</div>
 
-                <div><strong>Bouwjaar</strong></div>
+                <div><strong>bouwjaar</strong></div>
                 <div>{{ item.bouwjaar || '-' }}</div>
               </div>
 
@@ -128,21 +128,21 @@
                 class="info-grid"
               >
                 <div class="column">
-                  <div><strong>Leverdatum</strong></div>
+                  <div><strong>leverdatum</strong></div>
                   <div>{{ formatDate(boeking.leverDatum) }}</div>
 
-                  <div><strong>Ophaaldatum</strong></div>
+                  <div><strong>ophaaldatum</strong></div>
                   <div>{{ formatDate(boeking.ophaalDatum) || 'Geen' }}</div>
 
-                  <div><strong>Ref</strong></div>
+                  <div><strong>reference</strong></div>
                   <div>{{ boeking.reference }}</div>
                 </div>
 
                 <div class="column">
-                  <div><strong>Projectleider</strong></div>
+                  <div><strong>projectleider</strong></div>
                   <div>{{ boeking.projectleider?.naam || '-' }}</div>
 
-                  <div><strong>Werf</strong></div>
+                  <div><strong>werf</strong></div>
                   <div>{{ boeking.werf?.naam || '-' }}</div>
                 </div>
               </div>

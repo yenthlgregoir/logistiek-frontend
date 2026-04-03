@@ -20,30 +20,24 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { loginApi } from '@/api/login.js'
-import { jwtDecode } from 'jwt-decode' // ✅ frontend compatible
+import { useAuthStore } from '@/stores/authentication/auth.store.js'
 
 const email = ref('')
 const password = ref('')
 const error = ref(null)
 const router = useRouter()
+const auth = useAuthStore() // 🔥 hier gebruik je Pinia store
+
 const handleLogin = async () => {
   try {
-    const response = await loginApi.login(email.value, password.value)
-    const token = response.token
-    localStorage.setItem('token', token)
-
-    const decoded = jwtDecode(token)
-    localStorage.setItem('role', decoded.role)
-
-    router.push({ name: 'home' })
+    await auth.login(email.value, password.value) // Pinia store login
+    router.push({ name: 'home' }) // redirect na login
   } catch (err) {
     console.error(err)
     error.value = 'Login mislukt'
   }
 }
 </script>
-
 <style scoped>
 /* Wrapper with soft gradient and subtle animation */
 .login-wrapper {

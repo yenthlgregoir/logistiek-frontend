@@ -8,14 +8,13 @@
       </div>
 
       <!-- BODY -->
-      <div v-if="boeking" class="modal-body">
-        <!-- TOP INFO -->
+      <div v-if="boekingenStore.currentBoeking" class="modal-body">
         <div class="top-info">
           <div>
             <div class="title">
-              {{ boeking.leverAdresDetails?.naam || boeking.klant?.naam || 'Onbekende klant' }}
+              {{ boekingenStore.currentBoeking.leverAdresDetails?.naam || boekingenStore.currentBoeking.klant?.naam || 'Onbekende klant' }}
             </div>
-            <div class="ref">Ref: {{ boeking.ref }}</div>
+            <div class="ref">Ref: {{ boekingenStore.currentBoeking.ref }}</div>
           </div>
         </div>
 
@@ -28,9 +27,11 @@
               <button class="ghost-btn" @click="showLeveradresModal = true">Wijzigen</button>
             </div>
             <div class="card-value">
-              {{ boeking.leverAdresDetails?.straat }} {{ boeking.leverAdresDetails?.huisnummer }}
+              {{ boekingenStore.currentBoeking.leverAdresDetails?.straat }}
+              {{ boekingenStore.currentBoeking.leverAdresDetails?.huisnummer }}
               <br />
-              {{ boeking.leverAdresDetails?.postcode }} {{ boeking.leverAdresDetails?.gemeente }}
+              {{ boekingenStore.currentBoeking.leverAdresDetails?.postcode }}
+              {{ boekingenStore.currentBoeking.leverAdresDetails?.gemeente }}
             </div>
           </div>
 
@@ -39,10 +40,10 @@
             <div class="card-header">
               <span>Periode</span>
               <button class="ghost-btn" @click="showDatumAanpassen = true">Wijzigen</button>
-            </div>
+            </div>s
             <div class="card-value">
-              {{ boeking.beginDatumFormatted || boeking.beginDatum }} —
-              {{ boeking.eindDatumFormatted || boeking.eindDatum }}
+              {{ boekingenStore.currentBoeking.beginDatumFormatted || boekingenStore.currentBoeking.beginDatum }} —
+              {{ boekingenStore.currentBoeking.eindDatumFormatted || boekingenStore.currentBoeking.eindDatum }}
             </div>
           </div>
 
@@ -50,13 +51,13 @@
           <div class="detail-card">
             <div class="card-header">
               <span>Toestel</span>
-              <button class="ghost-btn" @click="$emit('assignToestel', boeking._id)">
+              <button class="ghost-btn" @click="assignToestel(boekingenStore.currentBoeking._id)">
                 Toewijzen
               </button>
             </div>
             <div class="card-value">
-              <template v-if="boeking.toestel">
-                {{ boeking.toestel.Ref }}
+              <template v-if="boekingenStore.currentBoeking.toestel">
+                {{ boekingenStore.currentBoeking.toestel.Ref }}
               </template>
               <template v-else>
                 <span class="muted">Geen toestel toegewezen</span>
@@ -67,14 +68,14 @@
           <!-- TRANSPORT -->
           <div class="detail-card">
             <div class="card-header"><span>Transport</span></div>
-            <div class="card-value">{{ boeking.type }}</div>
+            <div class="card-value">{{ boekingenStore.currentBoeking.type }}</div>
           </div>
 
           <!-- OPMERKINGEN -->
           <div class="detail-card opmerkingen">
             <div class="card-header">Opmerkingen:</div>
             <textarea
-              v-model="boeking.comment"
+              v-model="boekingenStore.currentBoeking.comment"
               class="card-textarea"
               placeholder="Voer hier opmerkingen in"
             ></textarea>
@@ -115,97 +116,68 @@
         <p>Laden...</p>
       </div>
     </div>
-  </div>
 
-  <!-- POPUPS -->
-  <ConfirmationPopup
-    v-if="showConfirmAfgewerkt"
-    title="Afgewerkt"
-    message="Wil je de boeking afronden? De einddatum wordt dan op vandaag gezet."
-    @confirm="confirmAfgewerkt"
-    @cancel="cancelAfgewerkt"
-  />
-  <SelectLeverAdresModal
-    v-if="showLeveradresModal"
-    :adressen="boeking?.klant?.leverAdressen || []"
-    @select="updateLeverAdres"
-    @close="showLeveradresModal = false"
-  />
-  <DatumAanpassenModal
-    v-if="showDatumAanpassen"
-    :boeking="boeking"
-    @close="showDatumAanpassen = false"
-    @update="loadBoeking(boekingId)"
-  />
+    <!-- POPUPS -->
+    <ConfirmationPopup
+      v-if="showConfirmAfgewerkt"
+      title="Afgewerkt"
+      message="Wil je de boeking afronden? De einddatum wordt dan op vandaag gezet."
+      @confirm="confirmAfgewerkt"
+      @cancel="cancelAfgewerkt"
+    />
+    <SelectLeverAdresModal
+      v-if="showLeveradresModal"
+      :adressen="boekingenStore.currentBoeking?.klant?.leverAdressen || []"
+      @select="updateLeverAdres"
+      @close="showLeveradresModal = false"
+    />
+    <DatumAanpassenModal
+      v-if="showDatumAanpassen"
+      :boeking="boekingenStore.currentBoeking"
+      @close="showDatumAanpassen = false"
+      @update="updatePeriode"
+    />
+  </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue'
-import { boekingApi } from '@/api/boeking'
+import { useBoekingenStore } from '@/stores/renting/boekingen.store.js'
 import SelectLeverAdresModal from './SelectLeverAdresModal.vue'
 import DatumAanpassenModal from './DatumAanpassenModal.vue'
-import { uploadApi } from '@/api/upload'
 import ConfirmationPopup from '@/components/popup/ConfirmationPopup.vue'
+import { uploadApi } from '@/api/upload'
 
-const props = defineProps({
-  boekingId: String,
-})
+const props = defineProps({ boekingId: String })
+const emit = defineEmits(['close', 'update', 'verwijderen', 'save', 'assignToestel'])
 
-const emit = defineEmits(['close', 'update', 'assignToestel', 'verwijderen', 'save'])
-
-const boeking = ref(null)
+const boekingenStore = useBoekingenStore()
 const localStatus = ref('')
 const statusError = ref('')
+const pendingStatus = ref(null)
 const showLeveradresModal = ref(false)
 const showDatumAanpassen = ref(false)
 const showConfirmAfgewerkt = ref(false)
-const pendingStatus = ref(null)
 
 watch(
   () => props.boekingId,
-  async (id) => {
-    if (id) await loadBoeking(id)
-    else boeking.value = null
+  (id) => {
+    if (id) boekingenStore.loadBoeking(id)
   },
-  { immediate: true },
+  { immediate: true }
+)
+watch(
+  () => boekingenStore.currentBoeking,
+  (b) => {
+    localStatus.value = b?.status || ''
+  },
+  { immediate: true }
 )
 
-async function updateLeverAdres(adres) {
-  try {
-    await boekingApi.update(boeking.value._id, { leverAdres: adres._id })
-    boeking.value.leverAdresDetails = { ...adres }
-    showLeveradresModal.value = false
-    emit('update')
-  } catch (err) {
-    console.error('Fout bij wijzigen leveradres:', err)
-    alert('Wijzigen leveradres mislukt')
-  }
-}
-
-async function toPDF() {
-  try {
-    const blob = await uploadApi.exportBoeking(props.boekingId)
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'boekingen.pdf'
-    a.click()
-    window.URL.revokeObjectURL(url)
-  } catch (err) {
-    console.log(err)
-  }
-}
-
 async function loadBoeking(id) {
-  try {
-    const res = await boekingApi.get(id)
-    boeking.value = { ...res, comment: res.comment || '' }
-    localStatus.value = boeking.value.status
-    statusError.value = ''
-  } catch (err) {
-    console.error(err)
-    boeking.value = null
-  }
+  await boekingenStore.loadBoeking(id)
+  localStatus.value = boekingenStore.currentBoeking?.status || ''
+  statusError.value = ''
 }
 
 function close() {
@@ -213,64 +185,75 @@ function close() {
 }
 
 function verwijderen() {
-  if (
-    window.confirm(
-      'Weet je zeker dat je deze boeking wilt verwijderen? Dit kan niet ongedaan gemaakt worden.',
-    )
-  ) {
-    emit('verwijderen', props.boekingId)
+  if (window.confirm('Weet je zeker dat je deze boeking wilt verwijderen? Dit kan niet ongedaan gemaakt worden.')) {
+    emit('verwijderen', boekingenStore.currentBoeking._id)
   }
 }
 
 function save() {
-  emit('save', boeking.value)
+  emit('save', boekingenStore.currentBoeking)
 }
 
+async function updateLeverAdres(adres) {
+  await boekingenStore.updateLeverAdres(adres)
+  showLeveradresModal.value = false
+}
+
+async function toPDF() {
+  const blob = await uploadApi.exportBoeking(boekingenStore.currentBoeking._id)
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'boekingen.pdf'
+  a.click()
+  window.URL.revokeObjectURL(url)
+}
+async function updatePeriode({ beginDatum, eindDatum }) {
+  try {
+    await boekingenStore.updatePeriode(
+      boekingenStore.currentBoeking._id,
+      beginDatum,
+      eindDatum
+    )
+  } catch (err) {
+    console.error(err)
+  }
+}
 async function updateStatus() {
-  if (!props.boekingId || !boeking.value) return
+  if (!boekingenStore.currentBoeking) return
 
   if (localStatus.value === 'Afgewerkt') {
-    const beginDatum = new Date(boeking.value.beginDatum)
+    const beginDatum = new Date(boekingenStore.currentBoeking.beginDatum)
     const vandaag = new Date()
-
-    beginDatum.setHours(0, 0, 0, 0)
-    vandaag.setHours(0, 0, 0, 0)
+    beginDatum.setHours(0,0,0,0)
+    vandaag.setHours(0,0,0,0)
 
     if (beginDatum > vandaag) {
-      statusError.value = {
-        message: 'Boeking kan niet op "Afgewerkt" gezet worden voor een toekomstige datum.',
-      }
-      localStatus.value = boeking.value.status
+      statusError.value = { message: 'Boeking kan niet op "Afgewerkt" gezet worden voor een toekomstige datum.' }
+      localStatus.value = boekingenStore.currentBoeking.status
       return
     }
 
-    // Begin datum oké → popup tonen
     pendingStatus.value = 'Afgewerkt'
     showConfirmAfgewerkt.value = true
     return
   }
 
-  await sendStatus(localStatus.value)
+  await boekingenStore.changeStatus(localStatus.value)
 }
-async function sendStatus(status) {
-  try {
-    await boekingApi.changeState(props.boekingId, { status })
-    boeking.value.status = status
-    statusError.value = ''
-    emit('update')
-  } catch (err) {
-    localStatus.value = boeking.value.status
-    statusError.value = err?.response?.data?.message || err?.message || 'Fout bij wijzigen status'
-  }
-}
+
 async function confirmAfgewerkt() {
   showConfirmAfgewerkt.value = false
-  await sendStatus(pendingStatus.value)
+  await boekingenStore.changeStatus(pendingStatus.value)
 }
 
 function cancelAfgewerkt() {
   showConfirmAfgewerkt.value = false
-  localStatus.value = boeking.value.status
+  localStatus.value = boekingenStore.currentBoeking.status
+}
+
+function assignToestel(boekingId) {
+  emit('assignToestel', boekingId)
 }
 </script>
 

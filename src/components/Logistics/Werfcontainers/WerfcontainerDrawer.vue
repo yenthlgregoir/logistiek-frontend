@@ -30,22 +30,19 @@
           <button type="button" class="btn-save-type" @click="addType">Opslaan</button>
         </div>
       </div>
-
       <div class="info-block">
-        <label>Serienummer</label>
-        <input type="text" v-model="form.serienummer" placeholder="Serienummer" />
-      </div>
-
-      <div class="info-block">
-        <label>Status</label>
-        <select v-model="form.status">
-          <option value="Vrij">Vrij</option>
-          <option value="Bezet">Bezet</option>
-          <option value="Kapot">Kapot</option>
-          <option value="Ongekeurd">Ongekeurd</option>
-        </select>
-      </div>
-
+        <label>Entiteit</label>         
+         <select v-model="form.entiteit">
+  <option disabled value="">Selecteer entiteit</option>
+  <option
+    v-for="entiteit in entiteiten"
+    :key="entiteit._id"
+    :value="entiteit._id"
+  >
+    {{ entiteit.naam }}
+  </option>
+</select>
+        </div>
     </form>
 
     <!-- FOOTER -->
@@ -64,7 +61,9 @@ import { werfcontainerApi } from '@/api/werfcontainer.js'
 
 const props = defineProps({
   show: { type: Boolean, default: false },
-  model: { type: Object, default: null } // EDIT MODE
+  model: { type: Object, default: null },
+  entiteiten:  { type: Array, default: () => [] }
+  
 })
 
 const emit = defineEmits(['close', 'save'])
@@ -75,7 +74,7 @@ const emit = defineEmits(['close', 'save'])
 const form = reactive({
   nummer: '',
   Type: '',
-  serienummer: '',
+  entiteit: '',
   status: 'Vrij'
 })
 
@@ -120,20 +119,19 @@ watch(() => props.show, val => {
   getTypes()
 
   if (props.model) {
-    // ✅ FORM INVULLEN VOOR EDIT
     Object.assign(form, {
       ...props.model,
-      Type: props.model.Type?._id || props.model.Type || ''
+      Type: props.model.Type?._id || props.model.Type || '',
+      entiteit: props.model.entiteit?._id || props.model.entiteit || ''
     })
   } else {
     resetForm()
   }
 })
-
 function resetForm() {
   form.nummer = ''
   form.Type = ''
-  form.serienummer = ''
+  form.entiteit = ''
   form.status = 'Vrij'
 }
 
@@ -145,10 +143,9 @@ function handleSubmit() {
     alert('Nummer en Type zijn verplicht.')
     return
   }
-
-  emit('save', { ...form })
   resetForm()
-  emit('close')
+  emit('save', { ...form })
+
 }
 </script>
 
