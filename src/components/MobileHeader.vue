@@ -16,8 +16,8 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%; /* Hele breedte */
-  height: 60px;
+  width: 100%;
+  height: 9vh;
   background: linear-gradient(180deg, #5a89ff, #3553f2);
   color: white;
   display: flex;

@@ -247,9 +247,7 @@ export const useBoekingenStore = defineStore('boekingen', {
       }
     },
 
-    // =========================
-    // ⚙️ EXTRA
-    // =========================
+
     async loadTypes() {
       if (this.typesLoaded) return
 
