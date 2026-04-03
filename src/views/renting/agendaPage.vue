@@ -1,7 +1,6 @@
 <template>
   <div class="page-content">
     <div class="agenda-parent-container">
-      
       <!-- Agenda -->
       <Agenda
         v-if="showAgenda"
@@ -76,13 +75,16 @@ watch([() => store.search, () => store.dateRange], () => {
   store.loadBoekingen()
 })
 
-watch(() => showAgenda.value, (newVal) => {
-  if (newVal) {
-    store.search = ''
-    store.dateRange = [null, null]
-  }
-  store.loadBoekingen()
-})
+watch(
+  () => showAgenda.value,
+  (newVal) => {
+    if (newVal) {
+      store.search = ''
+      store.dateRange = [null, null]
+    }
+    store.loadBoekingen()
+  },
+)
 
 // MODAL FUNCTIONS
 function openBoekingModal(id) {
@@ -103,7 +105,7 @@ async function assignToestel(toestel) {
 
 async function deleteBoeking(id) {
   await store.deleteBoeking(id)
-  await store.loadBoekingen();
+  await store.loadBoekingen()
   showBoekingModal.value = false
 }
 
@@ -124,5 +126,13 @@ onMounted(() => {
 .agenda-parent-container {
   font-family: Arial, sans-serif;
   padding: 1rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .agenda-parent-container {
+    padding: 0.5rem;
+  }
 }
 </style>

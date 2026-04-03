@@ -24,9 +24,7 @@
         </select>
       </div>
 
-      <button class="add-btn" @click="$emit('addBoeking')">
-        + Toevoegen
-      </button>
+      <button class="add-btn" @click="$emit('addBoeking')">+ Toevoegen</button>
     </div>
 
     <!-- HEADER -->
@@ -38,9 +36,7 @@
     </div>
 
     <!-- GEEN DATA -->
-    <div v-if="!heeftBoekingen" class="geen-boekingen">
-      Geen boekingen in deze periode
-    </div>
+    <div v-if="!heeftBoekingen" class="geen-boekingen">Geen boekingen in deze periode</div>
 
     <!-- RIJEN -->
     <div v-else class="rows">
@@ -102,8 +98,7 @@ watch(selectedType, (val) => {
 })
 
 // 🔥 Helper (BELANGRIJK)
-const getAssetId = (asset) =>
-  typeof asset === 'string' ? asset : asset?._id
+const getAssetId = (asset) => (typeof asset === 'string' ? asset : asset?._id)
 
 // 📅 dagen genereren
 function generateDays() {
@@ -118,7 +113,7 @@ function generateDays() {
 // 📅 datum wijzigen
 function onDateChange(val) {
   if (!val) return
-  let [s, e] = val.map(d => new Date(d))
+  let [s, e] = val.map((d) => new Date(d))
 
   if ((e - s) / 86400000 > MAX_DAYS) {
     e = new Date(s)
@@ -134,7 +129,7 @@ function onDateChange(val) {
 const gefilterdeAssets = computed(() => {
   const map = new Map()
 
-  props.boekingen.forEach(b => {
+  props.boekingen.forEach((b) => {
     const assetId = getAssetId(b.asset)
     if (!assetId) return
 
@@ -152,18 +147,16 @@ const gefilterdeAssets = computed(() => {
 // ✅ Boekingen per asset
 function boekingenPerAsset(assetId) {
   return props.boekingen
-    .filter(b => getAssetId(b.asset) === assetId)
-    .filter(b => {
+    .filter((b) => getAssetId(b.asset) === assetId)
+    .filter((b) => {
       const bs = new Date(b.leverDatum)
       const be = b.ophaalDatum ? new Date(b.ophaalDatum) : end.value
       return bs <= end.value && be >= start.value
     })
-    .map(b => ({
+    .map((b) => ({
       ...b,
       beginDatumFormatted: formatDatum(b.leverDatum),
-      eindDatumFormatted: b.ophaalDatum
-        ? formatDatum(b.ophaalDatum)
-        : "nog geen ophaaldatum",
+      eindDatumFormatted: b.ophaalDatum ? formatDatum(b.ophaalDatum) : 'nog geen ophaaldatum',
     }))
 }
 
@@ -345,7 +338,6 @@ const pickerOptions = {
   transform: translateY(-3px);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
-
 
 .boek-block.Afgewerkt {
   background: #fef7c3;

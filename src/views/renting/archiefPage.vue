@@ -1,6 +1,5 @@
 <template>
   <div class="agenda-parent-container">
-
     <BoekingList
       :boekingen="store.boekingen"
       :archief="true"
@@ -47,7 +46,7 @@ const selectedBoekingId = ref(null)
 
 // WATCH FILTERS
 watch([() => store.search, () => store.dateRange], () => {
-  store.loadBoekingen(true) 
+  store.loadBoekingen(true)
 })
 
 // MODAL FUNCTIONS

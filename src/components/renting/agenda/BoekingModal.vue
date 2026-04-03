@@ -12,12 +12,15 @@
         <div class="top-info">
           <div>
             <div class="title">
-              {{ boekingenStore.currentBoeking.leverAdresDetails?.naam || boekingenStore.currentBoeking.klant?.naam || 'Onbekende klant' }}
+              {{
+                boekingenStore.currentBoeking.leverAdresDetails?.naam ||
+                boekingenStore.currentBoeking.klant?.naam ||
+                'Onbekende klant'
+              }}
             </div>
             <div class="ref">Ref: {{ boekingenStore.currentBoeking.ref }}</div>
           </div>
         </div>
-
         <!-- DETAILS GRID -->
         <div class="details-grid">
           <!-- LEVERADRES -->
@@ -40,10 +43,17 @@
             <div class="card-header">
               <span>Periode</span>
               <button class="ghost-btn" @click="showDatumAanpassen = true">Wijzigen</button>
-            </div>s
+            </div>
             <div class="card-value">
-              {{ boekingenStore.currentBoeking.beginDatumFormatted || boekingenStore.currentBoeking.beginDatum }} —
-              {{ boekingenStore.currentBoeking.eindDatumFormatted || boekingenStore.currentBoeking.eindDatum }}
+              {{
+                boekingenStore.currentBoeking.beginDatumFormatted ||
+                boekingenStore.currentBoeking.beginDatum
+              }}
+              —
+              {{
+                boekingenStore.currentBoeking.eindDatumFormatted ||
+                boekingenStore.currentBoeking.eindDatum
+              }}
             </div>
           </div>
 
@@ -164,32 +174,28 @@ watch(
   (id) => {
     if (id) boekingenStore.loadBoeking(id)
   },
-  { immediate: true }
+  { immediate: true },
 )
 watch(
   () => boekingenStore.currentBoeking,
   (b) => {
     localStatus.value = b?.status || ''
   },
-  { immediate: true }
+  { immediate: true },
 )
-
-async function loadBoeking(id) {
-  await boekingenStore.loadBoeking(id)
-  localStatus.value = boekingenStore.currentBoeking?.status || ''
-  statusError.value = ''
-}
 
 function close() {
   emit('close')
 }
-
 function verwijderen() {
-  if (window.confirm('Weet je zeker dat je deze boeking wilt verwijderen? Dit kan niet ongedaan gemaakt worden.')) {
+  if (
+    window.confirm(
+      'Weet je zeker dat je deze boeking wilt verwijderen? Dit kan niet ongedaan gemaakt worden.',
+    )
+  ) {
     emit('verwijderen', boekingenStore.currentBoeking._id)
   }
 }
-
 function save() {
   emit('save', boekingenStore.currentBoeking)
 }
@@ -208,28 +214,28 @@ async function toPDF() {
   a.click()
   window.URL.revokeObjectURL(url)
 }
+
 async function updatePeriode({ beginDatum, eindDatum }) {
   try {
-    await boekingenStore.updatePeriode(
-      boekingenStore.currentBoeking._id,
-      beginDatum,
-      eindDatum
-    )
+    await boekingenStore.updatePeriode(boekingenStore.currentBoeking._id, beginDatum, eindDatum)
   } catch (err) {
     console.error(err)
   }
 }
+
 async function updateStatus() {
   if (!boekingenStore.currentBoeking) return
 
   if (localStatus.value === 'Afgewerkt') {
     const beginDatum = new Date(boekingenStore.currentBoeking.beginDatum)
     const vandaag = new Date()
-    beginDatum.setHours(0,0,0,0)
-    vandaag.setHours(0,0,0,0)
+    beginDatum.setHours(0, 0, 0, 0)
+    vandaag.setHours(0, 0, 0, 0)
 
     if (beginDatum > vandaag) {
-      statusError.value = { message: 'Boeking kan niet op "Afgewerkt" gezet worden voor een toekomstige datum.' }
+      statusError.value = {
+        message: 'Boeking kan niet op "Afgewerkt" gezet worden voor een toekomstige datum.',
+      }
       localStatus.value = boekingenStore.currentBoeking.status
       return
     }
@@ -258,9 +264,6 @@ function assignToestel(boekingId) {
 </script>
 
 <style scoped>
-/* =========================================
-   OVERLAY
-========================================= */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -269,14 +272,11 @@ function assignToestel(boekingId) {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 1.5rem;
-  z-index: 10; /* lager dan popup */
+  padding: 1rem;
+  z-index: 1001;
   animation: fadeIn 0.25s ease-out;
 }
 
-/* =========================================
-   MODAL CONTAINER
-========================================= */
 .modal {
   width: 95%;
   max-width: 720px;
@@ -293,9 +293,6 @@ function assignToestel(boekingId) {
   overflow-y: auto;
 }
 
-/* =========================================
-   HEADER
-========================================= */
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -305,14 +302,6 @@ function assignToestel(boekingId) {
   margin-bottom: 26px;
 }
 
-.modal-header h3 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0;
-}
-
-/* Close button */
 .close-btn {
   width: 38px;
   height: 38px;
@@ -322,47 +311,36 @@ function assignToestel(boekingId) {
   cursor: pointer;
   font-size: 18px;
   color: #475569;
-  transition: 0.25s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: 0.25s ease;
 }
-
 .close-btn:hover {
   background: #ef4444;
   color: white;
 }
 
-/* =========================================
-   TOP INFO
-========================================= */
 .top-info {
   margin-bottom: 26px;
 }
-
 .title {
   font-size: 21px;
   font-weight: 700;
   color: #111827;
   margin-bottom: 2px;
 }
-
 .ref {
   font-size: 14px;
   color: #64748b;
 }
 
-/* =========================================
-   DETAILS GRID
-========================================= */
 .details-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
   margin-bottom: 22px;
 }
-
-/* Card component */
 .detail-card {
   padding: 18px;
   background: rgba(248, 250, 252, 0.85);
@@ -373,15 +351,12 @@ function assignToestel(boekingId) {
     0 2px 6px rgba(0, 0, 0, 0.05);
   transition: 0.25s ease;
 }
-
 .detail-card:hover {
   transform: translateY(-2px);
   box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.12),
     0 2px 6px rgba(0, 0, 0, 0.05);
 }
-
-/* Card header */
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -390,26 +365,19 @@ function assignToestel(boekingId) {
   color: #475569;
   margin-bottom: 8px;
 }
-
-/* Card values */
 .card-value {
   font-size: 15px;
   color: #0f172a;
   font-weight: 600;
   line-height: 1.5;
 }
-
 .muted {
   color: #94a3b8;
   font-style: italic;
 }
-
-/* Full width card */
 .detail-card.opmerkingen {
   grid-column: 1 / -1;
 }
-
-/* Textarea */
 .card-textarea {
   width: 100%;
   min-height: 90px;
@@ -422,16 +390,11 @@ function assignToestel(boekingId) {
   transition: 0.25s ease;
   font-family: inherit;
 }
-
 .card-textarea:focus {
   border-color: #4f73ff;
-  box-shadow: 0px 0px 0 4px rgba(79, 115, 255, 0.25);
+  box-shadow: 0 0 0 4px rgba(79, 115, 255, 0.25);
   outline: none;
 }
-
-/* =========================================
-   GHOST BUTTON
-========================================= */
 .ghost-btn {
   font-size: 12px;
   font-weight: 600;
@@ -440,27 +403,21 @@ function assignToestel(boekingId) {
   border: none;
   cursor: pointer;
 }
-
 .ghost-btn:hover {
   text-decoration: underline;
 }
 
-/* =========================================
-   STATUS SELECT
-========================================= */
 .status-wrapper {
   display: flex;
   flex-direction: column;
   gap: 6px;
   margin-top: 20px;
 }
-
 .status-wrapper label {
   font-size: 14px;
   font-weight: 600;
   color: #475569;
 }
-
 .status-select {
   padding: 12px;
   border-radius: 10px;
@@ -469,8 +426,6 @@ function assignToestel(boekingId) {
   font-size: 14px;
   transition: 0.25s ease;
 }
-
-/* Dynamic colors */
 .status-select.Aangevraagd {
   background: #fef3c7;
 }
@@ -489,75 +444,58 @@ function assignToestel(boekingId) {
 .status-select.Afgewerkt {
   background: #44f097;
 }
-
 .status-select:focus {
   border-color: #4f73ff;
   box-shadow: 0 0 0 4px rgba(79, 115, 255, 0.25);
   outline: none;
 }
 
-/* =========================================
-   FOOTER BUTTONS
-========================================= */
 .modal-footer {
   margin-top: 32px;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
 }
-
-.toevoegen-btn {
+.toevoegen-btn,
+.danger-btn,
+.download {
+  width: auto;
   padding: 9px 16px;
   border-radius: 10px;
   font-weight: 600;
-  background: #4f73ff;
-  color: white;
-  border: none;
   cursor: pointer;
   transition: 0.25s ease;
 }
-
+.toevoegen-btn {
+  background: #4f73ff;
+  color: white;
+  border: none;
+}
 .toevoegen-btn:hover {
   background: #355dff;
   box-shadow: 0 4px 14px rgba(79, 115, 255, 0.25);
 }
-
 .download {
   background: #696d72;
-  border-radius: 10px;
-  padding: 9px 16px;
   border: none;
-  cursor: pointer;
+  color: white;
 }
-
 .danger-btn {
-  padding: 9px 16px;
   background: #ef4444;
   border: none;
-  border-radius: 10px;
-  font-weight: 600;
   color: white;
-  cursor: pointer;
-  transition: 0.25s ease;
 }
-
 .danger-btn:hover {
   background: #dc2626;
   box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25);
 }
 
-/* =========================================
-   ERRORS
-========================================= */
 .error {
   margin-top: 4px;
   font-size: 13px;
   color: #dc2626;
 }
 
-/* =========================================
-   ANIMATIONS
-========================================= */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -566,7 +504,6 @@ function assignToestel(boekingId) {
     opacity: 1;
   }
 }
-
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -575,6 +512,41 @@ function assignToestel(boekingId) {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .modal {
+    width: 95%;
+    padding: 16px;
+  }
+  .modal-header h3 {
+    font-size: 20px;
+  }
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .card-textarea {
+    font-size: 14px;
+    min-height: 80px;
+  }
+  .card-value {
+    font-size: 14px;
+    word-break: break-word;
+  }
+  .modal-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .toevoegen-btn,
+  .danger-btn,
+  .download,
+  .status-select {
+    width: 100%;
+    font-size: 14px;
+    padding: 10px;
   }
 }
 </style>

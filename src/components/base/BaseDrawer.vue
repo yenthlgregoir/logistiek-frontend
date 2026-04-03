@@ -2,7 +2,6 @@
   <Transition name="drawer">
     <div v-if="show" class="drawer-wrapper">
       <div class="drawer">
-
         <!-- HEADER -->
         <div class="drawer-header">
           <h3>{{ title }}</h3>
@@ -33,20 +32,68 @@
 <script setup>
 defineProps({
   show: { type: Boolean, default: false },
-  title: { type: String, default: '' }
+  title: { type: String, default: '' },
 })
 </script>
 
 <style scoped>
-.drawer-wrapper { position: fixed; top: 0; right: 0; height: 100vh; z-index: 1000; }
-.drawer { width: 400px; height: 100%; background: #fff; border-radius: 12px 0 0 12px; box-shadow: -10px 0 30px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
-.drawer-enter-from, .drawer-leave-to { transform: translateX(100%); }
-.drawer-enter-active, .drawer-leave-active { transition: transform 0.3s ease; }
+.drawer-wrapper {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  z-index: 1000;
+}
+.drawer {
+  width: 400px;
+  height: 100%;
+  background: #fff;
+  border-radius: 12px 0 0 12px;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+.drawer-enter-from,
+.drawer-leave-to {
+  transform: translateX(100%);
+}
+.drawer-enter-active,
+.drawer-leave-active {
+  transition: transform 0.3s ease;
+}
 
-.drawer-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #e5e7eb; }
-.header-actions { display: flex; gap: 10px; }
-.drawer-content { padding: 20px; overflow-y: auto; flex:1; }
-.drawer-footer { padding: 20px; display: flex; justify-content: flex-end; gap: 10px; }
-.close-btn { width: 36px; height: 36px; border: none; border-radius: 10px; cursor: pointer; background: #f3f4f6; } 
-.close-btn:hover { background: #ef4444; color: white; }
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+.drawer-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+.drawer-footer {
+  padding: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.close-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #f3f4f6;
+}
+.close-btn:hover {
+  background: #ef4444;
+  color: white;
+}
 </style>

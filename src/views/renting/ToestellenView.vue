@@ -14,27 +14,17 @@
 
     <!-- TABLE -->
     <ToestellenTable
-  :toestellen="paginatedToestellen"
+      :toestellen="paginatedToestellen"
       @update-status="handleStatusUpdate"
       @edit-toestel="editForm"
     />
-<div v-if="toestellen.length > pageSize" class="pagination">
-  <button
-    :disabled="currentPage === 1"
-    @click="currentPage--"
-  >
-    Vorige
-  </button>
+    <div v-if="toestellen.length > pageSize" class="pagination">
+      <button :disabled="currentPage === 1" @click="currentPage--">Vorige</button>
 
-  <span>Pagina {{ currentPage }} van {{ totalPages }}</span>
+      <span>Pagina {{ currentPage }} van {{ totalPages }}</span>
 
-  <button
-    :disabled="currentPage === totalPages"
-    @click="currentPage++"
-  >
-    Volgende
-  </button>
-</div>
+      <button :disabled="currentPage === totalPages" @click="currentPage++">Volgende</button>
+    </div>
     <!-- OVERLAY FORM -->
     <div v-if="showForm" class="overlay">
       <div class="modal">
@@ -52,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch, computed, onBeforeUnmount} from 'vue'
+import { ref, reactive, onMounted, watch, computed, onBeforeUnmount } from 'vue'
 import ToestellenTable from '@/components/toestellen/ToestellenTable.vue'
 import ToestellenToolbar from '@/components/toestellen/ToestellenToolbar.vue'
 import ToestellenForm from '@/components/toestellen/ToestellenForm.vue'
@@ -130,7 +120,7 @@ async function loadToestellen() {
         : {}),
     }
     const res = await toestelApi.list(params)
-    console.log(res);
+    console.log(res)
     toestellen.value = res.items || res
   } catch (e) {
     console.error('Fout bij laden toestellen', e)
@@ -232,7 +222,7 @@ function updatePageSize() {
   // hoogte van viewport min header + toolbar (bijv 200px)
   const availableHeight = window.innerHeight - 350
 
-  const rowHeight = 60 
+  const rowHeight = 60
 
   pageSize.value = Math.floor(availableHeight / rowHeight)
 }
@@ -254,7 +244,7 @@ const paginatedToestellen = computed(() => {
 </script>
 <style scoped>
 /* OVERLAY */
-.page{
+.page {
   padding: 1rem;
 }
 .overlay {

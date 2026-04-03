@@ -5,7 +5,6 @@
     @close="$emit('close')"
   >
     <div class="form-container">
-
       <!-- Logistieke referentie -->
       <div class="info-block">
         <label>Logistieke referentie</label>
@@ -99,79 +98,78 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-import BaseDrawer from "@/components/base/BaseDrawer.vue";
+import { ref, watch } from 'vue'
+import BaseDrawer from '@/components/base/BaseDrawer.vue'
 
 const props = defineProps({
   show: Boolean,
   verhuur: Object,
-  assets: Array, 
+  assets: Array,
   werven: Array,
   projectleiders: Array,
   error: String,
-});
+})
 
-const emit = defineEmits(["close", "save", "edit"]);
+const emit = defineEmits(['close', 'save', 'edit'])
 
-const isEditMode = ref(false);
-const isEditing = ref(true);
-const loading = ref(false);
-const verhuurCopy = ref({});
-
+const isEditMode = ref(false)
+const isEditing = ref(true)
+const loading = ref(false)
+const verhuurCopy = ref({})
 
 watch(
   () => props.verhuur,
   (val) => {
     if (val) {
-      isEditMode.value = true;
-      verhuurCopy.value = JSON.parse(JSON.stringify(val));
-      isEditing.value = false;
+      isEditMode.value = true
+      verhuurCopy.value = JSON.parse(JSON.stringify(val))
+      isEditing.value = false
     } else {
-      isEditMode.value = false;
-      resetForm();
-      isEditing.value = true;
+      isEditMode.value = false
+      resetForm()
+      isEditing.value = true
     }
   },
-  { immediate: true }
-);
+  { immediate: true },
+)
 
 function resetForm() {
   verhuurCopy.value = {
-    logistiekeReferentie: "",
+    logistiekeReferentie: '',
     assetModel: 'Hoogtewerker',
     assetType: null,
     werf: null,
     projectleider: null,
-    leverDatum: "",
-    ophaalDatum: "",
-    werkhoogte: "",
-  };
+    leverDatum: '',
+    ophaalDatum: '',
+    werkhoogte: '',
+  }
 }
 
 async function saveVerhuur() {
-  if (!verhuurCopy.value.leverDatum) return alert("Startdatum is verplicht");
+  if (!verhuurCopy.value.leverDatum) return alert('Startdatum is verplicht')
 
   if (
     verhuurCopy.value.ophaalDatum &&
     new Date(verhuurCopy.value.ophaalDatum) <= new Date(verhuurCopy.value.leverDatum)
   )
-    return alert("Einddatum moet na de startdatum liggen");
+    return alert('Einddatum moet na de startdatum liggen')
 
-  if (!verhuurCopy.value.assetModel) return alert("Selecteer een Schaarlift of Knikarm");
+  if (!verhuurCopy.value.assetModel) return alert('Selecteer een Schaarlift of Knikarm')
 
-  if (!verhuurCopy.value.werkhoogte) return alert("Werkhoogte is verplicht voor Schaarlift/Knikarm");
+  if (!verhuurCopy.value.werkhoogte) return alert('Werkhoogte is verplicht voor Schaarlift/Knikarm')
 
   try {
-    loading.value = true;
+    loading.value = true
 
     if (isEditMode.value) {
-      emit("edit", verhuurCopy.value);
+      emit('edit', verhuurCopy.value)
     } else {
-      emit("save", verhuurCopy.value);
-      resetForm();
+      emit('save', verhuurCopy.value)
+      resetForm()
     }
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 </script>

@@ -1,7 +1,6 @@
 <template>
   <div class="modal-overlay" @click.self="close">
     <div class="modal">
-      
       <div class="modal-header">
         <h2>Kies Schaarlift</h2>
         <button class="close-btn" @click="close">✕</button>
@@ -28,17 +27,12 @@
           </div>
         </li>
 
-        <li v-if="!gefilterdeToestellen.length" class="no-results">
-          Geen toestellen gevonden
-        </li>
+        <li v-if="!gefilterdeToestellen.length" class="no-results">Geen toestellen gevonden</li>
       </ul>
 
       <div class="modal-footer">
-        <button class="btn-cancel" @click="close">
-          Annuleren
-        </button>
+        <button class="btn-cancel" @click="close">Annuleren</button>
       </div>
-
     </div>
   </div>
 </template>
@@ -49,10 +43,10 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 const props = defineProps({
   toestellen: {
     type: Array,
-    required: true
+    required: true,
   },
   // De huidige geselecteerde toestel (optioneel) voor lokale copy
-  selectedToestel: Object
+  selectedToestel: Object,
 })
 
 const emit = defineEmits(['select', 'close'])
@@ -65,9 +59,8 @@ const localToestel = ref(props.selectedToestel || null)
 const gefilterdeToestellen = computed(() => {
   if (!search.value) return props.toestellen
   const q = search.value.toLowerCase()
-  return props.toestellen.filter(t =>
-    t.nummer?.toLowerCase().includes(q) ||
-    t.Type?.naam?.toLowerCase().includes(q)
+  return props.toestellen.filter(
+    (t) => t.nummer?.toLowerCase().includes(q) || t.Type?.naam?.toLowerCase().includes(q),
   )
 })
 
@@ -96,9 +89,12 @@ onUnmounted(() => {
 })
 
 // Watch voor props.selectedToestel zodat lokale copy altijd up-to-date blijft
-watch(() => props.selectedToestel, (v) => {
-  localToestel.value = v || null
-})
+watch(
+  () => props.selectedToestel,
+  (v) => {
+    localToestel.value = v || null
+  },
+)
 </script>
 <style scoped>
 /* =========================================

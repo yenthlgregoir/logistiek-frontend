@@ -1,9 +1,7 @@
 <template>
   <BaseDrawer :show="show" title="Schaarlift Toevoegen / Bewerken" @close="$emit('close')">
-
     <!-- CONTENT -->
     <form @submit.prevent="handleSubmit" class="lift-form">
-
       <div class="info-block">
         <label>nummer *</label>
         <input type="text" v-model="form.nummer" placeholder="Bijv. LFT-001" required />
@@ -13,7 +11,7 @@
       <div class="info-block type-block">
         <label>type *</label>
         <div class="type-select-wrapper">
-          <select v-model="form.Type" v-bind="form.Type._id"  required>
+          <select v-model="form.Type" v-bind="form.Type._id" required>
             <option v-for="type in types" :key="type._id" :value="type._id">
               {{ type.naam }} ({{ type.type.toLowerCase() }})
             </option>
@@ -66,7 +64,6 @@
           <option value="Ongekeurd">ongekeurd</option>
         </select>
       </div>
-
     </form>
 
     <!-- FOOTER -->
@@ -74,7 +71,6 @@
       <button class="btn btn-secondary" @click="$emit('close')">Cancel</button>
       <button class="btn btn-primary" @click="handleSubmit">Opslaan</button>
     </template>
-
   </BaseDrawer>
 </template>
 
@@ -85,7 +81,7 @@ import { schaarliftenApi } from '@/api/schaarliften.js'
 
 const props = defineProps({
   show: { type: Boolean, default: false },
-  model: { type: Object, default: null } // EDIT MODE
+  model: { type: Object, default: null }, // EDIT MODE
 })
 
 const emit = defineEmits(['close', 'save'])
@@ -101,7 +97,7 @@ const form = reactive({
   platformhoogte: '',
   werkhoogte: '',
   keuringDatum: '',
-  status: 'Vrij'
+  status: 'Vrij',
 })
 
 /* -------------------------
@@ -139,24 +135,27 @@ async function addType() {
 /* -------------------------
    WATCH DRAWER OPEN
 ------------------------- */
-watch(() => props.show, val => {
-  if (!val) return
+watch(
+  () => props.show,
+  (val) => {
+    if (!val) return
 
-  getTypes()
+    getTypes()
 
-  if (props.model) {
-    // ✅ FORM INVULLEN VOOR EDIT
-    Object.assign(form, {
-      ...props.model,
-      Type: props.model.Type?._id || props.model.Type || '',
-      keuringDatum: props.model.keuringDatum
-        ? new Date(props.model.keuringDatum).toISOString().substr(0, 10)
-        : ''
-    })
-  } else {
-    resetForm()
-  }
-})
+    if (props.model) {
+      // ✅ FORM INVULLEN VOOR EDIT
+      Object.assign(form, {
+        ...props.model,
+        Type: props.model.Type?._id || props.model.Type || '',
+        keuringDatum: props.model.keuringDatum
+          ? new Date(props.model.keuringDatum).toISOString().substr(0, 10)
+          : '',
+      })
+    } else {
+      resetForm()
+    }
+  },
+)
 
 function resetForm() {
   form.nummer = ''

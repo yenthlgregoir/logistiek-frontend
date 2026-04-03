@@ -6,11 +6,7 @@
   >
     <div class="form-container">
       <!-- Fields except entiteit -->
-      <div
-        class="info-block"
-        v-for="field in visibleFields"
-        :key="field.key"
-      >
+      <div class="info-block" v-for="field in visibleFields" :key="field.key">
         <label>{{ field.label }}</label>
         <div v-if="isEditMode && !isEditing">{{ leaderCopy[field.key] || 'N/A' }}</div>
         <input v-else v-model="leaderCopy[field.key]" :type="field.type" />
@@ -26,16 +22,12 @@
           {{ leaderCopy.entiteit?.naam || 'Onbekend' }}
         </div>
         <div v-else>
-         <select v-model="leaderCopy.entiteit">
-  <option disabled value="">Selecteer entiteit</option>
-  <option
-    v-for="entiteit in entiteiten"
-    :key="entiteit._id"
-    :value="entiteit"
-  >
-    {{ entiteit.naam }}
-  </option>
-</select>
+          <select v-model="leaderCopy.entiteit">
+            <option disabled value="">Selecteer entiteit</option>
+            <option v-for="entiteit in entiteiten" :key="entiteit._id" :value="entiteit">
+              {{ entiteit.naam }}
+            </option>
+          </select>
         </div>
       </div>
     </div>
@@ -65,7 +57,7 @@
         {{ isEditMode ? (isEditing ? 'Save' : 'Edit') : 'Create' }}
       </button>
     </template>
-</BaseDrawer>
+  </BaseDrawer>
 </template>
 
 <script setup>
@@ -76,7 +68,7 @@ import BaseDrawer from '@/components/base/BaseDrawer.vue'
 const props = defineProps({
   leader: { type: Object, default: null },
   show: Boolean,
-  entiteiten: { type: Array, default: () => [] }
+  entiteiten: { type: Array, default: () => [] },
 })
 const emit = defineEmits(['close', 'save', 'edit', 'delete'])
 
@@ -88,13 +80,13 @@ const leaderCopy = ref({
   naam: '',
   mailAdres: '',
   telefoonnummer: '',
-  entiteit: null
+  entiteit: null,
 })
 
 const fields = [
   { key: 'naam', label: 'Naam', type: 'text' },
   { key: 'mailAdres', label: 'Mail', type: 'email' },
-  { key: 'telefoonnummer', label: 'Telefoon', type: 'text' }
+  { key: 'telefoonnummer', label: 'Telefoon', type: 'text' },
 ]
 
 const visibleFields = computed(() => fields)
@@ -109,7 +101,9 @@ watch(
 
       // Vervang entiteit ID/object door volledig object uit props.entiteiten
       if (copy.entiteit) {
-        const fullEntiteit = props.entiteiten.find(e => e._id === copy.entiteit._id || e._id === copy.entiteit)
+        const fullEntiteit = props.entiteiten.find(
+          (e) => e._id === copy.entiteit._id || e._id === copy.entiteit,
+        )
         copy.entiteit = fullEntiteit || null
       } else {
         copy.entiteit = null
@@ -123,7 +117,7 @@ watch(
       isEditing.value = true
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(
@@ -134,7 +128,7 @@ watch(
       isEditing.value = false
       showConfirm.value = false
     }
-  }
+  },
 )
 
 function startEdit() {

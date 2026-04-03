@@ -7,7 +7,6 @@
       </div>
 
       <form @submit.prevent="submitBoeking">
-        
         <!-- Type toestel -->
         <div class="form-group">
           <label>Type toestel</label>
@@ -35,17 +34,11 @@
 
           <!-- Dropdown list -->
           <ul v-if="showKlantDropdown" class="autocomplete-list">
-            <li 
-              v-for="k in gefilterdeKlanten" 
-              :key="k._id"
-              @mousedown.prevent="selectKlant(k)"
-            >
+            <li v-for="k in gefilterdeKlanten" :key="k._id" @mousedown.prevent="selectKlant(k)">
               {{ k.naam }}
             </li>
 
-            <li v-if="gefilterdeKlanten.length === 0" class="no-results">
-              Geen resultaten
-            </li>
+            <li v-if="gefilterdeKlanten.length === 0" class="no-results">Geen resultaten</li>
           </ul>
         </div>
 
@@ -86,13 +79,13 @@
   <SelectLeverAdresModal
     v-if="showAdresModal"
     :adressen="beschikbareAdressen"
-    @select="adres => form.leverAdres = adres._id"
+    @select="(adres) => (form.leverAdres = adres._id)"
     @close="showAdresModal = false"
   />
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, onUnmounted, } from 'vue'
+import { reactive, ref, onMounted, onUnmounted } from 'vue'
 import { boekingApi } from '@/api/boeking'
 import { klantApi } from '@/api/klant'
 import SelectLeverAdresModal from './SelectLeverAdresModal.vue'
@@ -123,11 +116,11 @@ const emit = defineEmits(['close', 'update'])
 -------------------------- */
 const form = reactive({
   toestelType: '',
-  klant: '',        // wordt _id
+  klant: '', // wordt _id
   beginDatum: '',
   eindDatum: '',
   type: '',
-  leverAdres: ''
+  leverAdres: '',
 })
 
 /* --------------------------
@@ -155,18 +148,14 @@ onMounted(async () => {
   document.addEventListener('keydown', handleEsc)
 })
 
-onUnmounted(() =>
-  document.removeEventListener('keydown', handleEsc)
-)
+onUnmounted(() => document.removeEventListener('keydown', handleEsc))
 
 /* --------------------------
    AUTOCOMPLETE LOGICA
 -------------------------- */
 function filterKlanten() {
   const q = klantSearch.value.toLowerCase().trim()
-  gefilterdeKlanten.value = klanten.value.filter(k =>
-    k.naam.toLowerCase().includes(q)
-  )
+  gefilterdeKlanten.value = klanten.value.filter((k) => k.naam.toLowerCase().includes(q))
 }
 
 function selectKlant(k) {
@@ -231,7 +220,6 @@ async function submitBoeking() {
 
     emit('update')
     setTimeout(() => close(), 800)
-
   } catch (err) {
     try {
       const jsonErr = JSON.parse(err.message)
@@ -243,7 +231,6 @@ async function submitBoeking() {
   }
 }
 </script>
-
 
 <style scoped>
 /* =========================================
@@ -288,7 +275,6 @@ async function submitBoeking() {
   border: 1px solid #cbd5e1;
 }
 
-
 .autocomplete-list {
   position: absolute;
   left: 0;
@@ -306,7 +292,6 @@ async function submitBoeking() {
   margin: 0;
   padding: 6px 0;
 }
-
 
 .autocomplete-list li {
   padding: 10px;

@@ -16,15 +16,15 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import ProjetLeiderTable from '@/components/Logistics/ProjectLeider/ProjetLeiderTable.vue'
-import { leiderApi } from "@/api/projectLeider.js"
+import { leiderApi } from '@/api/projectLeider.js'
 
 const leaders = ref([])
-const entiteiten = ref([]);
+const entiteiten = ref([])
 
 // Bij component mount data ophalen
-onMounted(getEntiteiten);
+onMounted(getEntiteiten)
 
-onMounted(getLeaders);
+onMounted(getLeaders)
 
 // Haal lijst op van backend
 async function getLeaders() {
@@ -52,8 +52,10 @@ async function searchLeaders(query) {
 async function addLeader(data) {
   try {
     await leiderApi.create(data)
-    await getLeaders();
-  } catch(err) { console.error(err) }
+    await getLeaders()
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 // Projectleider verwijderen
@@ -61,7 +63,9 @@ async function deleteLeader(leaderId) {
   try {
     await leiderApi.remove(leaderId)
     await getLeaders()
-  } catch(err) { console.error(err) }
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 // Projectleider bewerken
@@ -69,29 +73,27 @@ async function editLeader(data) {
   try {
     await leiderApi.update(data._id, data)
     await getLeaders()
-  } catch(err) {
+  } catch (err) {
     console.error(err)
   }
 }
 
-async function getEntiteiten(){
-    try{
-        const res = await leiderApi.getEntiteiten();
-        entiteiten.value = res;
-    }
-    catch  (err) {
-        console.log(err);
-    }
+async function getEntiteiten() {
+  try {
+    const res = await leiderApi.getEntiteiten()
+    entiteiten.value = res
+  } catch (err) {
+    console.log(err)
+  }
 }
 
-async function addEntiteit(data){
-    try{
-        await leiderApi.createEniteit(data);
-        await getEntiteiten();
-    }
-    catch(err){
-        console.log(err);
-    }
+async function addEntiteit(data) {
+  try {
+    await leiderApi.createEniteit(data)
+    await getEntiteiten()
+  } catch (err) {
+    console.log(err)
+  }
 }
 </script>
 

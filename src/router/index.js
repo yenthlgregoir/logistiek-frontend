@@ -30,7 +30,7 @@ const routes = [
     path: '/',
     name: 'home',
     component: HomeView,
-    meta: { requiresAuth: true, noSidebar:true },
+    meta: { requiresAuth: true, noSidebar: true },
   },
   {
     path: '/Purchase',
@@ -66,7 +66,7 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LoginView,
-    meta: { noSidebar:true },
+    meta: { noSidebar: true },
   },
   {
     path: '/admin/create-user',
@@ -130,16 +130,16 @@ const routes = [
     props: true,
   },
   {
-    path: '/logistics/werf', 
+    path: '/logistics/werf',
     name: 'WerfPage',
     component: WerfView,
-    meta: {requiresAuth: true, roles: ['admin' , 'logistics']},
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
   },
   {
     path: '/logistics/projectleiders',
     name: 'ProjectLeiderPage',
     component: ProjectLeidersView,
-    meta: {requiresAuth: true , roles: ["admin" , "logistics"]},
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
   },
   {
     path: '/logistics/schaarlift',
@@ -147,7 +147,7 @@ const routes = [
     meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
     redirect: '/logistics/schaarlift/planning',
   },
-   {
+  {
     path: '/logistics/schaarlift/lijst',
     name: 'schaarliftenLijst',
     component: SchaarliftenLijstview,
@@ -165,13 +165,12 @@ const routes = [
     component: SchaarliftenPlanningView,
     meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
   },
-   {
+  {
     path: '/logistics/werfcontainers/lijst',
     name: 'werfContainerLijst',
     component: WerfcontainerLijstView,
     meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
   },
-
 ]
 const router = createRouter({
   history: createWebHistory('/'),

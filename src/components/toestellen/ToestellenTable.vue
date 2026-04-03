@@ -20,7 +20,7 @@
       <div>{{ toestel.Ref || 'N/A' }}</div>
       <div>{{ toestel.nrplaat || 'N/A' }}</div>
       <div>{{ toestel.chasisnummer || 'N/A' }}</div>
-      <div>{{ formatAdres(toestel.gnw)|| 'Niet toegewezen' }}</div>
+      <div>{{ formatAdres(toestel.gnw) || 'Niet toegewezen' }}</div>
       <div class="col-status right" :class="toestel.status?.statusType">
         {{ toestel.status?.statusType }}
       </div>
@@ -57,7 +57,7 @@ const gefilterdeToestellen = computed(() => {
 function formatAdres(adres) {
   if (adres === 'vrij') return 'vrij'
 
-  return `${adres.naam  || 'Onbekende klant'}: ${adres.straat || ''} ${
+  return `${adres.naam || 'Onbekende klant'}: ${adres.straat || ''} ${
     adres.huisnummer || ''
   }, ${adres.postcode || ''} ${adres.gemeente || ''}`
 }
@@ -73,8 +73,8 @@ function formatAdres(adres) {
 }
 
 .col-status.Actief {
-  background: #A8EEAF;
-  color: #0B7226;
+  background: #a8eeaf;
+  color: #0b7226;
 }
 
 .col-status.Kapot {

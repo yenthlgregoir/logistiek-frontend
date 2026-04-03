@@ -57,14 +57,13 @@ async function loadData() {
       schaarliftenApi.getTypes(),
       werfApi.list(),
       leiderApi.list(),
-      verhuurApi.list() // 🔥 geen filters hier
+      verhuurApi.list(), // 🔥 geen filters hier
     ])
 
     machineTypes.value = typesRes || []
     werven.value = werfRes || []
     projectleiders.value = plRes || []
     allVerhuringen.value = verhuringenRes || []
-
   } catch (err) {
     console.error(err)
   } finally {
@@ -81,17 +80,18 @@ const verhuringen = computed(() => {
   // 🔍 SEARCH
   if (search.value) {
     const term = search.value.toLowerCase()
-    data = data.filter(v =>
-      v.reference?.toLowerCase().includes(term) ||
-      v.machineType?.naam?.toLowerCase().includes(term) ||
-      v.werf?.naam?.toLowerCase().includes(term)
+    data = data.filter(
+      (v) =>
+        v.reference?.toLowerCase().includes(term) ||
+        v.machineType?.naam?.toLowerCase().includes(term) ||
+        v.werf?.naam?.toLowerCase().includes(term),
     )
   }
 
   // 📅 DATUM FILTER
   if (dateRange.value[0] && dateRange.value[1]) {
     const [start, end] = dateRange.value
-    data = data.filter(v => {
+    data = data.filter((v) => {
       const begin = new Date(v.leverDatum)
       const eind = v.ophaalDatum ? new Date(v.ophaalDatum) : new Date()
 
@@ -104,7 +104,7 @@ const verhuringen = computed(() => {
 
 /* ---------------- EVENTS ---------------- */
 function openVerhuur(id) {
-  selectedVerhuur.value = allVerhuringen.value.find(v => v._id === id) || null
+  selectedVerhuur.value = allVerhuringen.value.find((v) => v._id === id) || null
   showDrawer.value = true
   error.value = ''
 }

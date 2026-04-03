@@ -1,9 +1,7 @@
 <template>
   <BaseDrawer :show="show" title="Werfcontainer Toevoegen / Bewerken" @close="$emit('close')">
-
     <!-- CONTENT -->
     <form @submit.prevent="handleSubmit" class="container-form">
-
       <div class="info-block">
         <label>Nummer *</label>
         <input type="text" v-model="form.nummer" placeholder="Bijv. WC-001" required />
@@ -31,18 +29,14 @@
         </div>
       </div>
       <div class="info-block">
-        <label>Entiteit</label>         
-         <select v-model="form.entiteit">
-  <option disabled value="">Selecteer entiteit</option>
-  <option
-    v-for="entiteit in entiteiten"
-    :key="entiteit._id"
-    :value="entiteit._id"
-  >
-    {{ entiteit.naam }}
-  </option>
-</select>
-        </div>
+        <label>Entiteit</label>
+        <select v-model="form.entiteit">
+          <option disabled value="">Selecteer entiteit</option>
+          <option v-for="entiteit in entiteiten" :key="entiteit._id" :value="entiteit._id">
+            {{ entiteit.naam }}
+          </option>
+        </select>
+      </div>
     </form>
 
     <!-- FOOTER -->
@@ -50,7 +44,6 @@
       <button class="btn btn-secondary" @click="$emit('close')">Cancel</button>
       <button class="btn btn-primary" @click="handleSubmit">Opslaan</button>
     </template>
-
   </BaseDrawer>
 </template>
 
@@ -62,8 +55,7 @@ import { werfcontainerApi } from '@/api/werfcontainer.js'
 const props = defineProps({
   show: { type: Boolean, default: false },
   model: { type: Object, default: null },
-  entiteiten:  { type: Array, default: () => [] }
-  
+  entiteiten: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['close', 'save'])
@@ -75,7 +67,7 @@ const form = reactive({
   nummer: '',
   Type: '',
   entiteit: '',
-  status: 'Vrij'
+  status: 'Vrij',
 })
 
 /* -------------------------
@@ -113,21 +105,24 @@ async function addType() {
 /* -------------------------
    WATCH DRAWER OPEN
 ------------------------- */
-watch(() => props.show, val => {
-  if (!val) return
+watch(
+  () => props.show,
+  (val) => {
+    if (!val) return
 
-  getTypes()
+    getTypes()
 
-  if (props.model) {
-    Object.assign(form, {
-      ...props.model,
-      Type: props.model.Type?._id || props.model.Type || '',
-      entiteit: props.model.entiteit?._id || props.model.entiteit || ''
-    })
-  } else {
-    resetForm()
-  }
-})
+    if (props.model) {
+      Object.assign(form, {
+        ...props.model,
+        Type: props.model.Type?._id || props.model.Type || '',
+        entiteit: props.model.entiteit?._id || props.model.entiteit || '',
+      })
+    } else {
+      resetForm()
+    }
+  },
+)
 function resetForm() {
   form.nummer = ''
   form.Type = ''
@@ -145,7 +140,6 @@ function handleSubmit() {
   }
   resetForm()
   emit('save', { ...form })
-
 }
 </script>
 

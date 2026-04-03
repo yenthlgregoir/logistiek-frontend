@@ -6,12 +6,7 @@
     </template>
 
     <!-- BODY -->
-    <input
-      type="text"
-      v-model="search"
-      placeholder="Zoek adres..."
-      class="search-input"
-    />
+    <input type="text" v-model="search" placeholder="Zoek adres..." class="search-input" />
 
     <ul class="list">
       <li
@@ -22,8 +17,7 @@
       >
         <div class="adres-title">{{ adres.naam || 'Onbekend' }}</div>
         <div class="adres-sub">
-          {{ adres.straat }} {{ adres.huisnummer || '' }},
-          {{ adres.postcode }} {{ adres.stad }}
+          {{ adres.straat }} {{ adres.huisnummer || '' }}, {{ adres.postcode }} {{ adres.stad }}
         </div>
       </li>
     </ul>
@@ -51,10 +45,11 @@ const gefilterdeAdressen = computed(() => {
   if (!search.value) return props.adressen
 
   const q = search.value.toLowerCase()
-  return props.adressen.filter(a =>
-    (a.naam && a.naam.toLowerCase().includes(q)) ||
-    (a.straat && a.straat.toLowerCase().includes(q)) ||
-    (a.stad && a.stad.toLowerCase().includes(q))
+  return props.adressen.filter(
+    (a) =>
+      (a.naam && a.naam.toLowerCase().includes(q)) ||
+      (a.straat && a.straat.toLowerCase().includes(q)) ||
+      (a.stad && a.stad.toLowerCase().includes(q)),
   )
 })
 
@@ -72,12 +67,9 @@ function close() {
 /* ✅ AL jouw originele CSS blijft EXACT behouden */
 /* Je hoeft niets aan te passen, alle klasses bestaan nog steeds */
 
-
 /* Alles uit jouw stylesheet kan 1 op 1 blijven staan */
 </style>
 <style scoped>
-
-
 /* =========================================
    ADRES LIJST
 ========================================= */

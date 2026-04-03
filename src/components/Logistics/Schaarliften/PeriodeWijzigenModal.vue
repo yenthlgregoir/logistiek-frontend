@@ -46,11 +46,15 @@ const form = reactive({
 })
 
 // Vul lokale kopie bij mount of wanneer boeking verandert
-watch(() => props.boeking, (v) => {
-  if (!v) return
-  form.leverDatum = v.leverDatum?.split('T')[0] || ''
-  form.ophaalDatum = v.ophaalDatum?.split('T')[0] || ''
-}, { immediate: true })
+watch(
+  () => props.boeking,
+  (v) => {
+    if (!v) return
+    form.leverDatum = v.leverDatum?.split('T')[0] || ''
+    form.ophaalDatum = v.ophaalDatum?.split('T')[0] || ''
+  },
+  { immediate: true },
+)
 
 function close() {
   emit('close')
@@ -65,11 +69,13 @@ function save() {
 
   // Als einddatum leeg is → 5 jaar later
   const lever = form.leverDatum
-  const ophaal = form.ophaalDatum || (() => {
-    const d = new Date(lever)
-    d.setFullYear(d.getFullYear() + 5)
-    return d.toISOString().split('T')[0]
-  })()
+  const ophaal =
+    form.ophaalDatum ||
+    (() => {
+      const d = new Date(lever)
+      d.setFullYear(d.getFullYear() + 5)
+      return d.toISOString().split('T')[0]
+    })()
 
   emit('save', { leverDatum: lever, ophaalDatum: ophaal })
   emit('close')
@@ -151,10 +157,20 @@ function save() {
    ANIMATIONS
 ========================================= */
 @keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-3px); }
-  50% { transform: translateX(3px); }
-  75% { transform: translateX(-3px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+  75% {
+    transform: translateX(-3px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 </style>

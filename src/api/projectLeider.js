@@ -1,7 +1,7 @@
 import { api } from './client'
 
 export const leiderApi = {
-   list: (query = {}) => {
+  list: (query = {}) => {
     const params = new URLSearchParams(query).toString()
     return api.get(`/logistics/projectleider?${params}`)
   },
@@ -10,5 +10,5 @@ export const leiderApi = {
   remove: (id) => api.del(`/logistics/projectleider/${id}`),
   update: (id, data) => api.patch(`/logistics/projectleider/${id}`, data),
   getEntiteiten: () => api.get(`/logistics/projectleider/entiteiten`),
-  createEniteit: (data) => api.post(`/logistics/projectleider/entiteiten` , data),
+  createEniteit: (data) => api.post(`/logistics/projectleider/entiteiten`, data),
 }

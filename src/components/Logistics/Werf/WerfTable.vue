@@ -3,23 +3,21 @@
     <!-- toolbar -->
     <div class="toolbar">
       <div class="search">
-      <i class="fa fa-search"></i>
-      <input  v-model="searchQuery"
-        type="text"
-        placeholder="Search werven..."
-        class="search-input" />
-    </div>
+        <i class="fa fa-search"></i>
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search werven..."
+          class="search-input"
+        />
+      </div>
       <button class="btn btn-primary" @click="openNewWerfDrawer">
         <i class="fa fa-plus"></i> Add
       </button>
     </div>
 
     <!-- tabel -->
-    <BaseTable
-      :items="werven"
-      columns="1fr 2fr 2fr 1fr"
-      @row-click="openWerfDrawer"
-    >
+    <BaseTable :items="werven" columns="1fr 2fr 2fr 1fr" @row-click="openWerfDrawer">
       <!-- header -->
       <template #header>
         <div>Naam</div>
@@ -45,14 +43,10 @@
       @close="closeDrawer"
       @delete="handleDelete"
       @edit="handleEdit"
-          />
+    />
 
     <!-- nieuwe werf drawer -->
-    <NewWerfSideBar
-      :show="showNewWerfDrawer"
-      @close="closeNewWerfDrawer"
-      @save="handleNewWerf"
-    />
+    <NewWerfSideBar :show="showNewWerfDrawer" @close="closeNewWerfDrawer" @save="handleNewWerf" />
   </div>
 </template>
 
@@ -64,17 +58,17 @@ import NewWerfSideBar from './AddWerfSideBar.vue'
 
 // props
 defineProps({
-  werven: { type: Array, default: () => [] }
+  werven: { type: Array, default: () => [] },
 })
 
 // emits
-const emit = defineEmits(['select', 'add', 'delete', 'search' , 'edit'])
+const emit = defineEmits(['select', 'add', 'delete', 'search', 'edit'])
 
 // lokale state
 const selectedWerf = ref(null)
 const showDrawer = ref(false)
 const showNewWerfDrawer = ref(false)
-const searchQuery = ref("")
+const searchQuery = ref('')
 
 let searchTimeout = null
 
@@ -112,35 +106,72 @@ function handleNewWerf(newWerf) {
   closeNewWerfDrawer()
 }
 
-function handleDelete(werfId){
+function handleDelete(werfId) {
   emit('delete', werfId)
   closeDrawer()
 }
-function handleEdit(data){
-    emit('edit' , data);
-    closeDrawer
+function handleEdit(data) {
+  emit('edit', data)
+  closeDrawer
 }
 
 // Debounce search
 watch(searchQuery, () => {
   clearTimeout(searchTimeout)
   searchTimeout = setTimeout(() => {
-    emit('search', searchQuery.value) 
+    emit('search', searchQuery.value)
   }, 400)
 })
 </script>
 
 <style scoped>
-.page { width: 100%; }
-.toolbar { display: flex; justify-content:space-between; margin-bottom: 10px; gap: 10px; }
-.search-input { padding: 6px 12px; border-radius: 6px; border: 1px solid #ccc; flex:1; }
-.col-status { padding: 6px 12px; border-radius: 10px; font-weight: 600; font-size: 13px; text-align: center; }
-.col-status.Bezig { background: #9add91; color: #065f46; }
-.col-status.Afgerond { background: #fee2e2; color: #7f1d1d; }
-.col-status.Onderhoud {background: #5786f7; color:#e0f2fe}
-.btn { padding: 8px 14px; border-radius: 4px; border: none; cursor: pointer; }
-.btn-primary { background: #5786f7; color: white; }
-.btn-primary:hover { background: #5077d3; }
+.page {
+  width: 100%;
+}
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+.search-input {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  flex: 1;
+}
+.col-status {
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  text-align: center;
+}
+.col-status.Bezig {
+  background: #9add91;
+  color: #065f46;
+}
+.col-status.Afgerond {
+  background: #fee2e2;
+  color: #7f1d1d;
+}
+.col-status.Onderhoud {
+  background: #5786f7;
+  color: #e0f2fe;
+}
+.btn {
+  padding: 8px 14px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+.btn-primary {
+  background: #5786f7;
+  color: white;
+}
+.btn-primary:hover {
+  background: #5077d3;
+}
 
 .search {
   position: relative;
@@ -163,5 +194,4 @@ watch(searchQuery, () => {
 
   color: #1b4965;
 }
-
 </style>

@@ -14,15 +14,11 @@
 
     <!-- PAGINATION -->
     <div v-if="klanten.length > pageSize" class="pagination">
-      <button :disabled="currentPage === 1" @click="currentPage--">
-        Vorige
-      </button>
+      <button :disabled="currentPage === 1" @click="currentPage--">Vorige</button>
 
       <span>Pagina {{ currentPage }} van {{ totalPages }}</span>
 
-      <button :disabled="currentPage === totalPages" @click="currentPage++">
-        Volgende
-      </button>
+      <button :disabled="currentPage === totalPages" @click="currentPage++">Volgende</button>
     </div>
 
     <!-- DETAIL SLIDE-OVER -->
@@ -50,75 +46,64 @@
 </template>
 
 <script setup>
-import {
-  reactive,
-  ref,
-  computed,
-  onMounted,
-  onBeforeUnmount
-} from "vue";
+import { reactive, ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
-import KlantenList from "@/components/renting/klanten/KlantenList.vue";
-import KlantenDetail from "@/components/renting/klanten/KlantenDetail.vue";
-import NieuwLeveradresModal from "@/components/renting/klanten/NieuwLeveradresModal.vue";
+import KlantenList from '@/components/renting/klanten/KlantenList.vue'
+import KlantenDetail from '@/components/renting/klanten/KlantenDetail.vue'
+import NieuwLeveradresModal from '@/components/renting/klanten/NieuwLeveradresModal.vue'
 
-import { klantApi } from "@/api/klant";
+import { klantApi } from '@/api/klant'
 
-const klanten = ref([]);
-const search = ref("");
-const selectedKlant = ref(null);
-const showDetail = ref(false);
+const klanten = ref([])
+const search = ref('')
+const selectedKlant = ref(null)
+const showDetail = ref(false)
 
 const filteredKlanten = computed(() => {
-  const term = search.value.toLowerCase();
-  return klanten.value.filter(k =>
-    k.naam?.toLowerCase().includes(term) ||
-    k.klantNummer?.toLowerCase().includes(term)
-  );
-});
+  const term = search.value.toLowerCase()
+  return klanten.value.filter(
+    (k) => k.naam?.toLowerCase().includes(term) || k.klantNummer?.toLowerCase().includes(term),
+  )
+})
 
 /* -----------------------------
    PAGINATION (same as toestellen)
 ----------------------------- */
-const currentPage = ref(1);
-const pageSize = ref(9);
+const currentPage = ref(1)
+const pageSize = ref(9)
 
-
-const totalPages = computed(() =>
-  Math.ceil(filteredKlanten.value.length / pageSize.value)
-);
+const totalPages = computed(() => Math.ceil(filteredKlanten.value.length / pageSize.value))
 
 const paginatedKlanten = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value;
-  return filteredKlanten.value.slice(start, start + pageSize.value);
-});
-
+  const start = (currentPage.value - 1) * pageSize.value
+  return filteredKlanten.value.slice(start, start + pageSize.value)
+})
 
 function updatePageSize() {
-  const availableHeight = window.innerHeight - 330;
-  const rowHeight = 60;
-  pageSize.value = Math.floor(availableHeight / rowHeight);
+  const availableHeight = window.innerHeight - 330
+  const rowHeight = 60
+  pageSize.value = Math.floor(availableHeight / rowHeight)
 }
 
 onMounted(() => {
-  updatePageSize();
-  window.addEventListener("resize", updatePageSize);
-  loadKlanten();
-});
+  updatePageSize()
+  window.addEventListener('resize', updatePageSize)
+  loadKlanten()
+})
 
 onBeforeUnmount(() => {
-  window.removeEventListener("resize", updatePageSize);
-});
+  window.removeEventListener('resize', updatePageSize)
+})
 
 /* -----------------------------
    LOAD KLANTEN
 ----------------------------- */
 async function loadKlanten() {
   try {
-    const data = await klantApi.list();
-    klanten.value = Array.isArray(data) ? data : data.items ?? [];
+    const data = await klantApi.list()
+    klanten.value = Array.isArray(data) ? data : (data.items ?? [])
   } catch (e) {
-    console.error("Laden van klanten mislukt", e);
+    console.error('Laden van klanten mislukt', e)
   }
 }
 
@@ -127,27 +112,27 @@ async function loadKlanten() {
 ----------------------------- */
 const form = reactive({
   id: null,
-  naam: "",
-  klantNummer: "",
-  telefoonnummer: "",
-  mailadres: "",
-  factuurAdres: { straat: "", huisnummer: "", postcode: "", gemeente: "" },
+  naam: '',
+  klantNummer: '',
+  telefoonnummer: '',
+  mailadres: '',
+  factuurAdres: { straat: '', huisnummer: '', postcode: '', gemeente: '' },
   leverAdressen: [],
-  BTWnummer: ""
-});
+  BTWnummer: '',
+})
 
 const nieuwAdres = reactive({
-  naam: "",
-  straat: "",
-  huisnummer: "",
-  postcode: "",
-  gemeente: ""
-});
-const showModal = ref(false);
+  naam: '',
+  straat: '',
+  huisnummer: '',
+  postcode: '',
+  gemeente: '',
+})
+const showModal = ref(false)
 
 function selectKlant(k) {
-  selectedKlant.value = k;
-  showDetail.value = true;
+  selectedKlant.value = k
+  showDetail.value = true
 
   Object.assign(form, {
     id: k._id,
@@ -156,92 +141,92 @@ function selectKlant(k) {
     telefoonnummer: k.telefoonnummer,
     mailadres: k.mailadres,
     factuurAdres: {
-      straat: k.factuurAdres?.straat ?? "",
-      huisnummer: k.factuurAdres?.huisnummer ?? "",
-      postcode: k.factuurAdres?.postcode ?? "",
-      gemeente: k.factuurAdres?.gemeente ?? ""
+      straat: k.factuurAdres?.straat ?? '',
+      huisnummer: k.factuurAdres?.huisnummer ?? '',
+      postcode: k.factuurAdres?.postcode ?? '',
+      gemeente: k.factuurAdres?.gemeente ?? '',
     },
     leverAdressen: k.leverAdressen ?? [],
-    BTWnummer: k.BTWnummer
-  });
+    BTWnummer: k.BTWnummer,
+  })
 }
 
 function selectNew() {
-  selectedKlant.value = null;
-  showDetail.value = true;
+  selectedKlant.value = null
+  showDetail.value = true
 
   Object.assign(form, {
     id: null,
-    naam: "",
-    klantNummer: "",
-    telefoonnummer: "",
-    mailadres: "",
-    factuurAdres: { straat: "", huisnummer: "", postcode: "", gemeente: "" },
+    naam: '',
+    klantNummer: '',
+    telefoonnummer: '',
+    mailadres: '',
+    factuurAdres: { straat: '', huisnummer: '', postcode: '', gemeente: '' },
     leverAdressen: [],
-    BTWnummer: ""
-  });
+    BTWnummer: '',
+  })
 }
 
 async function saveKlant(data) {
   try {
     if (selectedKlant.value) {
-      await klantApi.update(selectedKlant.value._id, data);
+      await klantApi.update(selectedKlant.value._id, data)
     } else {
-      await klantApi.add(JSON.stringify(data));
+      await klantApi.add(JSON.stringify(data))
     }
 
-    loadKlanten();
-    showDetail.value = false;
+    loadKlanten()
+    showDetail.value = false
   } catch (e) {
-    console.error("Fout bij opslaan klant", e);
+    console.error('Fout bij opslaan klant', e)
   }
 }
 
 function cancel() {
-  showDetail.value = false;
+  showDetail.value = false
 }
 
 function leveradresToevoegen() {
   Object.assign(nieuwAdres, {
-    naam: "",
-    straat: "",
-    huisnummer: "",
-    postcode: "",
-    gemeente: ""
-  });
-  showModal.value = true;
+    naam: '',
+    straat: '',
+    huisnummer: '',
+    postcode: '',
+    gemeente: '',
+  })
+  showModal.value = true
 }
 
 async function addLeverAdres(adres) {
   if (selectedKlant.value?._id) {
-    await klantApi.addLeverAdres(selectedKlant.value._id, JSON.stringify(adres));
-    refreshKlant(selectedKlant.value._id);
-    showModal.value = false;
+    await klantApi.addLeverAdres(selectedKlant.value._id, JSON.stringify(adres))
+    refreshKlant(selectedKlant.value._id)
+    showModal.value = false
   } else {
-    form.leverAdressen.push({ ...adres });
+    form.leverAdressen.push({ ...adres })
   }
 }
 
 async function updateLeverAdres(adres) {
-  await klantApi.updateLeverAdres(selectedKlant.value._id, adres);
-  refreshKlant(selectedKlant.value._id);
+  await klantApi.updateLeverAdres(selectedKlant.value._id, adres)
+  refreshKlant(selectedKlant.value._id)
 }
 
 async function removeLeverAdres(adres) {
-  await klantApi.removeLeverAdres(selectedKlant.value._id, adres._id);
-  refreshKlant(selectedKlant.value._id);
+  await klantApi.removeLeverAdres(selectedKlant.value._id, adres._id)
+  refreshKlant(selectedKlant.value._id)
 }
 
 async function deleteKlant() {
-  await klantApi.remove(selectedKlant.value._id);
-  loadKlanten();
-  showDetail.value = false;
+  await klantApi.remove(selectedKlant.value._id)
+  loadKlanten()
+  showDetail.value = false
 }
 
 async function refreshKlant(id) {
-  const updated = await klantApi.get(id);
-  selectedKlant.value = updated;
-  Object.assign(form, updated);
+  const updated = await klantApi.get(id)
+  selectedKlant.value = updated
+  Object.assign(form, updated)
 }
 </script>
 

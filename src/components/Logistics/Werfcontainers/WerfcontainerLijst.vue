@@ -11,9 +11,7 @@
           class="search-input"
         />
       </div>
-      <button class="btn btn-primary" @click="emit('openAdd')">
-        + Werfcontainer
-      </button>
+      <button class="btn btn-primary" @click="emit('openAdd')">+ Werfcontainer</button>
     </div>
 
     <!-- Table -->
@@ -46,7 +44,6 @@
       <!-- EXPANDED -->
       <template #expanded="{ item }">
         <div class="expanded-row-container">
-
           <!-- LINKS -->
           <div class="expanded-row-left">
             <div class="section-header">
@@ -70,10 +67,8 @@
 
                 <div><strong>entiteit</strong></div>
                 <div>{{ item.entiteit.naam || '-' }}</div>
+              </div>
             </div>
-        
-            </div>
-            
           </div>
 
           <!-- RECHTS -->
@@ -85,11 +80,7 @@
             <div class="devider"></div>
 
             <div v-if="item.huidigeBoekingen?.length > 0">
-              <div
-                v-for="(boeking, index) in item.huidigeBoekingen"
-                :key="index"
-                class="info-grid"
-              >
+              <div v-for="(boeking, index) in item.huidigeBoekingen" :key="index" class="info-grid">
                 <div class="column">
                   <div><strong>Leverdatum</strong></div>
                   <div>{{ formatDate(boeking.leverDatum) }}</div>
@@ -111,11 +102,8 @@
               </div>
             </div>
 
-            <div v-else class="coming-soon-placeholder">
-              Geen actieve boekingen
-            </div>
+            <div v-else class="coming-soon-placeholder">Geen actieve boekingen</div>
           </div>
-
         </div>
       </template>
     </ExpandedBaseTable>
@@ -127,7 +115,7 @@ import { ref, watch } from 'vue'
 import ExpandedBaseTable from '@/components/base/ExpandedBaseTable.vue'
 
 defineProps({
-  assets: { type: Array, default: () => [] }
+  assets: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['search', 'openAdd', 'edit-asset'])

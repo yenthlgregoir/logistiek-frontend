@@ -13,7 +13,7 @@ async function createUser() {
     loading.value = true
     message.value = ''
 
-    await loginApi.createUser(email.value, role.value , naam.value)
+    await loginApi.createUser(email.value, role.value, naam.value)
 
     message.value = 'User created successfully'
     email.value = ''

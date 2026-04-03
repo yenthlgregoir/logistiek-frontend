@@ -27,24 +27,24 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted } from 'vue'
 
-const emit = defineEmits(["close"]);
+const emit = defineEmits(['close'])
 
 function close() {
-  emit("close");
+  emit('close')
 }
 
 function handleKey(e) {
-  if (e.key === "Escape") close();
+  if (e.key === 'Escape') close()
 }
 
 onMounted(() => {
-  window.addEventListener("keydown", handleKey);
-});
+  window.addEventListener('keydown', handleKey)
+})
 onUnmounted(() => {
-  window.removeEventListener("keydown", handleKey);
-});
+  window.removeEventListener('keydown', handleKey)
+})
 </script>
 
 <style scoped>

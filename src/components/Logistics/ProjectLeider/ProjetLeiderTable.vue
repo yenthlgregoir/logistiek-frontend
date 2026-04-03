@@ -22,11 +22,7 @@
     </div>
 
     <!-- Table -->
-    <BaseTable
-      :items="leaders"
-      columns="2fr 2fr 1fr 1fr"
-      @row-click="openLeaderDrawer"
-    >
+    <BaseTable :items="leaders" columns="2fr 2fr 1fr 1fr" @row-click="openLeaderDrawer">
       <template #header>
         <div>Naam</div>
         <div>Mail</div>
@@ -38,17 +34,15 @@
         <div>{{ leader.naam || 'Onbekend' }}</div>
         <div>{{ leader.mailAdres || 'Onbekend' }}</div>
         <div>{{ leader.telefoonnummer || 'Onbekend' }}</div>
-<div
-  class="col-entiteit right"
-  :class="leader.entiteit.naam"
-  :style="{
-    backgroundColor: leader.entiteit.color || '#1b4965',
-    color: getContrastColor(leader.entiteit.color || '#1b4965')
-  }"
->          <span
-            v-if="leader.entiteit.icon"
-            class="material-icons entiteit-icon"
-          >
+        <div
+          class="col-entiteit right"
+          :class="leader.entiteit.naam"
+          :style="{
+            backgroundColor: leader.entiteit.color || '#1b4965',
+            color: getContrastColor(leader.entiteit.color || '#1b4965'),
+          }"
+        >
+          <span v-if="leader.entiteit.icon" class="material-icons entiteit-icon">
             {{ leader.entiteit.icon }}
           </span>
           <span>{{ leader.entiteit?.naam || 'Onbekend' }}</span>
@@ -84,7 +78,7 @@ import EntiteitDrawer from './EntiteitDrawer.vue'
 
 defineProps({
   entiteiten: { type: Array, default: () => [] },
-  leaders: { type: Array, default: () => [] }
+  leaders: { type: Array, default: () => [] },
 })
 
 const selectedLeader = ref(null)
@@ -103,10 +97,8 @@ function getContrastColor(hexColor) {
   const g = parseInt(hex.substr(2, 2), 16) / 255
   const b = parseInt(hex.substr(4, 2), 16) / 255
 
-  const [R, G, B] = [r, g, b].map(c =>
-    c <= 0.03928
-      ? c / 12.92
-      : Math.pow((c + 0.055) / 1.055, 2.4)
+  const [R, G, B] = [r, g, b].map((c) =>
+    c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4),
   )
 
   const luminance = 0.2126 * R + 0.7152 * G + 0.0722 * B
@@ -123,7 +115,9 @@ function openLeaderDrawer(leader) {
 function closeDrawer() {
   showDrawer.value = false
   showNewLeaderDrawer.value = false
-  setTimeout(() => { selectedLeader.value = null }, 300)
+  setTimeout(() => {
+    selectedLeader.value = null
+  }, 300)
 }
 
 function openNewLeaderDrawer() {
@@ -158,7 +152,9 @@ function handleAddEntiteit(data) {
 let searchTimeout = null
 watch(searchQuery, () => {
   clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => { emit('search', searchQuery.value) }, 400)
+  searchTimeout = setTimeout(() => {
+    emit('search', searchQuery.value)
+  }, 400)
 })
 </script>
 

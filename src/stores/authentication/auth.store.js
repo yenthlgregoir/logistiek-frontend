@@ -4,10 +4,10 @@ import { loginApi } from '@/api/login.js'
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
-    token: localStorage.getItem('token') || null
+    token: localStorage.getItem('token') || null,
   }),
   getters: {
-    isLoggedIn: (state) => !!state.token
+    isLoggedIn: (state) => !!state.token,
   },
   actions: {
     async login(email, password) {
@@ -32,6 +32,6 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       this.token = null
       localStorage.removeItem('token')
-    }
-  }
+    },
+  },
 })

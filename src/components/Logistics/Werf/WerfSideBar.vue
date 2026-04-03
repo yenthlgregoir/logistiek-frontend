@@ -2,7 +2,6 @@
   <Transition name="drawer">
     <div v-if="show" class="drawer-wrapper">
       <div class="drawer">
-
         <!-- HEADER -->
         <div class="drawer-header">
           <h3>Werf</h3>
@@ -16,7 +15,6 @@
         <!-- CONTENT -->
         <div class="drawer-content">
           <div class="werf-container">
-
             <!-- VIEW MODE -->
             <template v-if="!isEditing">
               <div class="info-block">
@@ -97,16 +95,14 @@
                   :src="mapUrl"
                   width="100%"
                   height="300"
-                  style="border:0"
+                  style="border: 0"
                   allowfullscreen
                   loading="lazy"
                 ></iframe>
               </div>
             </div>
-
           </div>
         </div>
-
       </div>
 
       <!-- DELETE CONFIRM -->
@@ -129,7 +125,7 @@ const API_BASE = import.meta.env.VITE_MAPS_API_KEY
 
 const props = defineProps({
   werf: { type: Object, required: true },
-  show: { type: Boolean, default: false }
+  show: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close', 'delete', 'edit'])
@@ -139,19 +135,23 @@ const isEditing = ref(false)
 const editableWerf = ref({})
 
 // Sync props → editable copy
-watch(() => props.werf, (val) => {
-  editableWerf.value = JSON.parse(JSON.stringify(val))
+watch(
+  () => props.werf,
+  (val) => {
+    editableWerf.value = JSON.parse(JSON.stringify(val))
 
-  // fallback voor adres
-  if (!editableWerf.value.adres) {
-    editableWerf.value.adres = {
-      straat: '',
-      huisnummer: '',
-      postcode: '',
-      gemeente: ''
+    // fallback voor adres
+    if (!editableWerf.value.adres) {
+      editableWerf.value.adres = {
+        straat: '',
+        huisnummer: '',
+        postcode: '',
+        gemeente: '',
+      }
     }
-  }
-}, { immediate: true })
+  },
+  { immediate: true },
+)
 
 function formatLocatie(w) {
   if (!w.adres) return 'Onbekend'
@@ -186,7 +186,7 @@ function cancelEdit() {
 function saveEdit() {
   emit('edit', editableWerf.value)
   isEditing.value = false
-  emit('close');
+  emit('close')
 }
 </script>
 
@@ -204,7 +204,7 @@ function saveEdit() {
   height: 100%;
   background: #fff;
   border-radius: 12px 0 0 12px;
-  box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
 }
@@ -241,14 +241,30 @@ function saveEdit() {
   cursor: pointer;
 }
 
-.close-btn { background: #f3f4f6; }
-.close-btn:hover { background: #ef4444; color: white; }
+.close-btn {
+  background: #f3f4f6;
+}
+.close-btn:hover {
+  background: #ef4444;
+  color: white;
+}
 
-.delete-btn { background: #fee2e2; color: #7f1d1d; }
-.delete-btn:hover { background: #f87171; color: white; }
+.delete-btn {
+  background: #fee2e2;
+  color: #7f1d1d;
+}
+.delete-btn:hover {
+  background: #f87171;
+  color: white;
+}
 
-.edit-btn { background: #e0e7ff; }
-.edit-btn:hover { background: #6366f1; color: white; }
+.edit-btn {
+  background: #e0e7ff;
+}
+.edit-btn:hover {
+  background: #6366f1;
+  color: white;
+}
 
 .drawer-content {
   padding: 20px;
@@ -285,18 +301,29 @@ function saveEdit() {
   width: fit-content;
 }
 
-.status.Bezig { background: #9add91; color: #065f46; }
-.status.Afgerond { background: #fee2e2; color: #7f1d1d; }
-.status.Onderhoud { background: #5786f7; color: #e0f2fe }
+.status.Bezig {
+  background: #9add91;
+  color: #065f46;
+}
+.status.Afgerond {
+  background: #fee2e2;
+  color: #7f1d1d;
+}
+.status.Onderhoud {
+  background: #5786f7;
+  color: #e0f2fe;
+}
 
-input, select {
+input,
+select {
   padding: 8px;
   border-radius: 8px;
   border: 1px solid #d1d5db;
   font-size: 14px;
 }
 
-input:focus, select:focus {
+input:focus,
+select:focus {
   outline: none;
   border-color: #6366f1;
 }

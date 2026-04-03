@@ -12,7 +12,11 @@
             <div class="icon">🛒</div>
             <span>Purchase</span>
           </RouterLink>
-          <RouterLink v-if="role === 'admin' || role === 'renting'" to="/renting/agenda/planning" class="card">
+          <RouterLink
+            v-if="role === 'admin' || role === 'renting'"
+            to="/renting/agenda/planning"
+            class="card"
+          >
             <div class="icon">❄️</div>
             <span>Renting</span>
           </RouterLink>
@@ -20,11 +24,19 @@
             <div class="icon">🛠️</div>
             <span>Tools</span>
           </RouterLink>
-          <RouterLink v-if="role === 'admin' || role === 'logistics'" to="/logistics/schaarlift/planning" class="card">
+          <RouterLink
+            v-if="role === 'admin' || role === 'logistics'"
+            to="/logistics/schaarlift/planning"
+            class="card"
+          >
             <div class="icon">🚚</div>
             <span>Logistiek</span>
           </RouterLink>
-          <RouterLink v-if="role === 'admin' || role === 'facilities'" to="/facilities" class="card">
+          <RouterLink
+            v-if="role === 'admin' || role === 'facilities'"
+            to="/facilities"
+            class="card"
+          >
             <div class="icon">🏢</div>
             <span>Facilities</span>
           </RouterLink>

@@ -1,6 +1,5 @@
 <template>
   <div class="lijstweergave">
-
     <!-- TOOLBAR -->
     <div class="toolbar">
       <div class="search">
@@ -13,16 +12,10 @@
         />
       </div>
 
-      <button class="btn btn-primary" @click="$emit('new')">
-        + Add
-      </button>
+      <button class="btn btn-primary" @click="$emit('new')">+ Add</button>
     </div>
 
-    <BaseTable
-      :items="klanten"
-      columns="1fr 2fr"
-      @row-click="$emit('select', $event)"
-    >
+    <BaseTable :items="klanten" columns="1fr 2fr" @row-click="$emit('select', $event)">
       <template #header>
         <div>Klantnummer</div>
         <div>Naam</div>
@@ -33,7 +26,6 @@
         <div>{{ k.naam || 'Onbekend' }}</div>
       </template>
     </BaseTable>
-
   </div>
 </template>
 
@@ -42,10 +34,10 @@ import BaseTable from '@/components/base/BaseTable.vue'
 
 defineProps({
   klanten: { type: Array, default: () => [] },
-  search: { type: String, default: "" },
+  search: { type: String, default: '' },
 })
 
-defineEmits(["select", "new", "update:search"])
+defineEmits(['select', 'new', 'update:search'])
 </script>
 
 <style scoped>
@@ -61,7 +53,6 @@ defineEmits(["select", "new", "update:search"])
   padding: 10px 16px;
   border-radius: 10px;
 }
-
 
 /* SEARCH */
 .search {

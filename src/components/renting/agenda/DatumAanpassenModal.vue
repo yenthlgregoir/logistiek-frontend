@@ -63,7 +63,7 @@ async function save() {
 
   emit('update', {
     beginDatum: form.beginDatum,
-    eindDatum: form.eindDatum
+    eindDatum: form.eindDatum,
   })
 
   emit('close')
@@ -146,10 +146,20 @@ async function save() {
    ANIMATIONS
 ========================================= */
 @keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-3px); }
-  50% { transform: translateX(3px); }
-  75% { transform: translateX(-3px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+  75% {
+    transform: translateX(-3px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 </style>

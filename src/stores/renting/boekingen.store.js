@@ -14,13 +14,12 @@ function formatDate(date) {
 
 export const useBoekingenStore = defineStore('boekingen', {
   state: () => ({
-
     boekingen: [],
-    currentViewMode: "actief",
+    currentViewMode: 'actief',
 
     listCache: {
       actief: { key: null, time: 0, data: [] },
-      archief: { key: null, time: 0, data: [] }
+      archief: { key: null, time: 0, data: [] },
     },
     listTTL: 1000 * 60 * 5,
 
@@ -47,7 +46,6 @@ export const useBoekingenStore = defineStore('boekingen', {
   }),
 
   actions: {
-
     setViewMode(mode) {
       this.currentViewMode = mode
     },
@@ -56,15 +54,15 @@ export const useBoekingenStore = defineStore('boekingen', {
     // 📦 LIST
     // =========================
     async loadBoekingen() {
-      const archief = this.currentViewMode === "archief"
+      const archief = this.currentViewMode === 'archief'
 
       const key = JSON.stringify({
         search: this.search,
-        range: this.dateRange.map(d => d ? new Date(d).toISOString() : null),
+        range: this.dateRange.map((d) => (d ? new Date(d).toISOString() : null)),
         archief,
       })
 
-      const cache = this.listCache[archief ? "archief" : "actief"]
+      const cache = this.listCache[archief ? 'archief' : 'actief']
 
       if (cache.key === key && Date.now() - cache.time < this.listTTL) {
         this.boekingen = cache.data
@@ -86,7 +84,7 @@ export const useBoekingenStore = defineStore('boekingen', {
           archief,
         })
 
-        const formatted = res.map(b => ({
+        const formatted = res.map((b) => ({
           ...b,
           beginDatumFormatted: formatDate(b.beginDatum),
           eindDatumFormatted: formatDate(b.eindDatum),
@@ -97,7 +95,6 @@ export const useBoekingenStore = defineStore('boekingen', {
         cache.key = key
         cache.time = Date.now()
         cache.data = formatted
-
       } catch (err) {
         console.error(err)
         this.errorList = err
@@ -122,7 +119,7 @@ export const useBoekingenStore = defineStore('boekingen', {
           return
         }
 
-        const inList = this.boekingen.find(b => b._id === id)
+        const inList = this.boekingen.find((b) => b._id === id)
 
         if (inList) {
           this.currentBoeking = inList
@@ -142,7 +139,6 @@ export const useBoekingenStore = defineStore('boekingen', {
         this.currentBoeking = formatted
         this.huidigeBoekingId = id
         this.boekingCache[id] = { data: formatted, time: Date.now() }
-
       } catch (err) {
         console.error(err)
         this.errorDetail = err
@@ -170,7 +166,6 @@ export const useBoekingenStore = defineStore('boekingen', {
         this.listCache.archief.time = 0
 
         await this.loadBoekingen()
-
       } catch (err) {
         console.error(err)
         this.errorAction = err
@@ -197,11 +192,10 @@ export const useBoekingenStore = defineStore('boekingen', {
           Object.assign(this.currentBoeking, update)
         }
 
-        const item = this.boekingen.find(b => b._id === boekingId)
+        const item = this.boekingen.find((b) => b._id === boekingId)
         if (item) Object.assign(item, update)
 
         delete this.boekingCache[boekingId]
-
       } catch (err) {
         console.error(err)
         this.errorAction = err
@@ -217,11 +211,10 @@ export const useBoekingenStore = defineStore('boekingen', {
       try {
         await boekingApi.update(id, { comment })
 
-        const item = this.boekingen.find(b => b._id === id)
+        const item = this.boekingen.find((b) => b._id === id)
         if (item) item.comment = comment
 
         delete this.boekingCache[id]
-
       } catch (err) {
         console.error(err)
         this.errorAction = err
@@ -246,7 +239,6 @@ export const useBoekingenStore = defineStore('boekingen', {
         this.currentBoeking = null
 
         await this.loadBoekingen()
-
       } catch (err) {
         console.error(err)
         this.errorAction = err
@@ -272,7 +264,7 @@ export const useBoekingenStore = defineStore('boekingen', {
 
     async openVrijeToestellen(boekingId) {
       try {
-        const b = this.boekingen.find(b => b._id === boekingId)
+        const b = this.boekingen.find((b) => b._id === boekingId)
         if (!b) return
 
         this.huidigeBoekingId = boekingId
@@ -294,7 +286,7 @@ export const useBoekingenStore = defineStore('boekingen', {
       try {
         await boekingApi.assignToestel(this.huidigeBoekingId, toestel._id)
 
-        const item = this.boekingen.find(b => b._id === this.huidigeBoekingId)
+        const item = this.boekingen.find((b) => b._id === this.huidigeBoekingId)
         if (item) item.toestel = toestel
 
         if (this.currentBoeking?._id === this.huidigeBoekingId) {
@@ -302,7 +294,6 @@ export const useBoekingenStore = defineStore('boekingen', {
         }
 
         delete this.boekingCache[this.huidigeBoekingId]
-
       } catch (err) {
         console.error(err)
         this.errorAction = err

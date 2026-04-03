@@ -1,18 +1,14 @@
 <template>
   <div :class="['app-layout', { 'mobile-padding': isMobile && hasSidebar }]">
- <SidebarComponent
+    <SidebarComponent
       v-if="hasSidebar"
       :class="['sidebar-wrapper', { 'mobile-open': mobileSidebarOpen && isMobile }]"
       @closeSidebar="mobileSidebarOpen = false"
     />
     <!-- MOBILE HEADER -->
-    <MobileHeader
-      v-if="isMobile && hasSidebar"
-      @openSidebar="mobileSidebarOpen = true"
-    />
+    <MobileHeader v-if="isMobile && hasSidebar" @openSidebar="mobileSidebarOpen = true" />
 
     <!-- SIDEBAR -->
-   
 
     <!-- OVERLAY ON MOBILE -->
     <div
@@ -25,16 +21,15 @@
     <main :class="['main-content', mainClass]">
       <router-view />
     </main>
-
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from "vue"
-import { useRoute } from "vue-router"
-import { useSidebarStore } from "@/stores/sidebar"
-import SidebarComponent from "./components/SideBarComponent.vue"
-import MobileHeader from "./components/MobileHeader.vue"
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute } from 'vue-router'
+import { useSidebarStore } from '@/stores/sidebar'
+import SidebarComponent from './components/SideBarComponent.vue'
+import MobileHeader from './components/MobileHeader.vue'
 
 const route = useRoute()
 const store = useSidebarStore()
@@ -51,17 +46,17 @@ function handleResize() {
   if (!isMobile.value) mobileSidebarOpen.value = false
 }
 
-onMounted(() => window.addEventListener("resize", handleResize))
-onBeforeUnmount(() => window.removeEventListener("resize", handleResize))
+onMounted(() => window.addEventListener('resize', handleResize))
+onBeforeUnmount(() => window.removeEventListener('resize', handleResize))
 
 // Sidebar state
 const hasSidebar = computed(() => !route.meta.noSidebar)
 
 // Main content margin
 const mainClass = computed(() => {
-  if (!hasSidebar.value) return "no-sidebar"
-  if (isMobile.value) return "mobile"
-  return store.collapsed ? "collapsed" : "expanded"
+  if (!hasSidebar.value) return 'no-sidebar'
+  if (isMobile.value) return 'mobile'
+  return store.collapsed ? 'collapsed' : 'expanded'
 })
 </script>
 
@@ -85,13 +80,21 @@ const mainClass = computed(() => {
 }
 
 /* Desktop states */
-.main-content.expanded { margin-left: 260px; }
-.main-content.collapsed { margin-left: 80px; }
-.main-content.no-sidebar { margin-left: 0 !important; }
+.main-content.expanded {
+  margin-left: 260px;
+}
+.main-content.collapsed {
+  margin-left: 80px;
+}
+.main-content.no-sidebar {
+  margin-left: 0 !important;
+}
 
 /* Mobile */
 @media (max-width: 768px) {
-  .main-content.mobile { margin-left: 0 !important; }
+  .main-content.mobile {
+    margin-left: 0 !important;
+  }
 }
 
 /* MOBILE SIDEBAR WRAPPER FULLSCREEN */
@@ -104,7 +107,9 @@ const mainClass = computed(() => {
   z-index: 1000;
   transition: transform 0.3s ease;
 }
-.sidebar-wrapper.mobile-open { transform: translateX(0); }
+.sidebar-wrapper.mobile-open {
+  transform: translateX(0);
+}
 @media (max-width: 768px) {
   .sidebar-wrapper {
     width: 100vw;
@@ -119,7 +124,7 @@ const mainClass = computed(() => {
   left: 0;
   width: 100%;
   height: calc(100% - 60px);
-  background: rgba(0,0,0,0.45);
+  background: rgba(0, 0, 0, 0.45);
   z-index: 999;
 }
 </style>

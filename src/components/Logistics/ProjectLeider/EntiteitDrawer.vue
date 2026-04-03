@@ -1,9 +1,5 @@
 <template>
-  <BaseDrawer
-    :show="show"
-    title="Nieuwe Entiteit"
-    @close="$emit('close')"
-  >
+  <BaseDrawer :show="show" title="Nieuwe Entiteit" @close="$emit('close')">
     <div class="form-container">
       <div class="info-block">
         <label>Naam</label>
@@ -17,12 +13,7 @@
 
       <div class="info-block">
         <label>Icon</label>
-        <input
-          v-model="search"
-          placeholder="Zoek icon..."
-          autocomplete="off"
-          spellcheck="false"
-        />
+        <input v-model="search" placeholder="Zoek icon..." autocomplete="off" spellcheck="false" />
         <div class="icon-grid">
           <div
             v-for="icon in filteredIcons"
@@ -57,7 +48,7 @@ const emit = defineEmits(['close', 'created'])
 const form = ref({
   naam: '',
   kleur: '#000000',
-  icon: ''
+  icon: '',
 })
 
 const search = ref('')
@@ -87,14 +78,12 @@ const materialIcons = [
   'local_shipping',
   'engineering',
   'construction',
-  'solar_power'
+  'solar_power',
 ]
 
 const filteredIcons = computed(() => {
   if (!search.value) return materialIcons
-  return materialIcons.filter((i) =>
-    i.toLowerCase().includes(search.value.toLowerCase())
-  )
+  return materialIcons.filter((i) => i.toLowerCase().includes(search.value.toLowerCase()))
 })
 
 function save() {
@@ -110,7 +99,7 @@ function save() {
   const newEntiteit = {
     naam: form.value.naam,
     color: form.value.kleur,
-    icon: form.value.icon
+    icon: form.value.icon,
   }
   emit('created', newEntiteit)
   emit('close')
@@ -130,7 +119,6 @@ function save() {
 
 /* icon-grid max-height kan groter zodat meer icons zichtbaar zijn */
 
-
 .info-block {
   display: flex;
   flex-direction: column;
@@ -144,11 +132,11 @@ function save() {
   user-select: none;
 }
 
-input[type="text"],
-input[type="color"],
-input[type="search"],
-input[type="email"],
-input[type="password"],
+input[type='text'],
+input[type='color'],
+input[type='search'],
+input[type='email'],
+input[type='password'],
 select {
   padding: 10px 14px;
   border-radius: 10px;
@@ -157,16 +145,18 @@ select {
   font-weight: 500;
   color: #111827;
   outline-offset: 2px;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
   background-color: #fafafa;
   box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.06);
 }
 
-input[type="text"]:focus,
-input[type="color"]:focus,
-input[type="search"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus,
+input[type='text']:focus,
+input[type='color']:focus,
+input[type='search']:focus,
+input[type='email']:focus,
+input[type='password']:focus,
 select:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 8px #3b82f6aa;
@@ -199,7 +189,9 @@ select:focus {
   user-select: none;
   border: 2px solid transparent;
   background-color: #f9fafb;
-  transition: background-color 0.3s ease, border-color 0.3s ease,
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
     transform 0.15s ease;
   display: flex;
   flex-direction: column;
@@ -223,7 +215,7 @@ select:focus {
 .material-icons {
   font-size: 30px;
   user-select: none;
-  color: inherit; 
+  color: inherit;
   line-height: 1;
 }
 

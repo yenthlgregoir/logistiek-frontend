@@ -1,28 +1,23 @@
 <template>
   <div class="lijstweergave">
-
     <!-- ======================= -->
     <!--      TOOLBAR (ONGEWIJZIGD) -->
     <!-- ======================= -->
+    <h3>Boekingen</h3>
+
     <div class="toolbar">
-      <h3>Boekingen</h3>
-
-      <div class="toolbar-right">
-
-        <!-- SEARCH -->
-        <div class="search">
-          <i class="fa fa-search"></i>
-          <input
-            v-model="localSearch"
-            type="text"
-            placeholder="Zoek"
-            class="search-input"
-            @input="updateSearch"
-          />
-        </div>
-
-        <!-- DATE RANGE -->
-        <el-date-picker
+      <div class="search">
+        <i class="fa fa-search"></i>
+        <input
+          v-model="localSearch"
+          type="text"
+          placeholder="Zoek"
+          class="search-input"
+          @input="updateSearch"
+        />
+      </div>
+      <div class="item">
+<el-date-picker
           v-model="localDateRange"
           type="daterange"
           start-placeholder="Startdatum"
@@ -35,13 +30,13 @@
           style="width: 260px"
         />
       </div>
+        
     </div>
 
-    <!-- ✅ ENIGE WIJZIGING: BaseTable -->
     <BaseTable
       :items="boekingen"
       columns="1fr 1.2fr 2fr 1.4fr 1fr"
-      @row-click="b => $emit('openBoeking', b._id)"
+      @row-click="(b) => $emit('openBoeking', b._id)"
     >
       <!-- HEADER -->
       <template #header>
@@ -75,7 +70,6 @@
         </div>
       </template>
     </BaseTable>
-
   </div>
 </template>
 
@@ -155,12 +149,6 @@ function formatPeriode(b) {
   margin-bottom: 20px;
 }
 
-.toolbar-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
 /* status styling blijft hetzelfde */
 .col-status.Aangevraagd {
   background: #fef3c7;
@@ -184,6 +172,61 @@ function formatPeriode(b) {
   color: #065f46;
 }
 
-/* SEARCH */ .search { position: relative; width: 260px; } .search input { width: 100%; padding: 8px 10px 8px 32px; border-radius: 8px; border: none; background: transparent; transition: 0.2s ease; } .search input:focus { outline: none; background: #e8f0ff; box-shadow: 0 0 0 3px rgba(87, 134, 247, 0.2); } .search i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #1b4965; }
-.col-status { justify-self: end; padding: 6px 12px; border-radius: 10px; font-weight: 600; font-size: 13px; text-align: center; min-width: 120px; transition: 0.2s ease; }
+/* SEARCH */
+.search {
+  position: relative;
+  width: 260px;
+}
+.search input {
+  width: 100%;
+  padding: 8px 10px 8px 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  transition: 0.2s ease;
+}
+.search input:focus {
+  outline: none;
+  background: #e8f0ff;
+  box-shadow: 0 0 0 3px rgba(87, 134, 247, 0.2);
+}
+.search i {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: #1b4965;
+}
+.col-status {
+  justify-self: end;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  text-align: center;
+  min-width: 120px;
+  transition: 0.2s ease;
+}
+
+/* Mobile responsive toolbar */
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch; /* zodat items 100% breed worden */
+    gap: 12px; /* ruimte tussen search en datepicker */
+  }
+
+  .toolbar .search,
+  .toolbar .item {
+    width: 100%; /* full width op mobiel */
+  }
+
+  /* Optional: de input en datepicker aanpassen zodat ze mooi passen */
+  .toolbar .search input {
+    width: 100%;
+  }
+
+
+}
 </style>

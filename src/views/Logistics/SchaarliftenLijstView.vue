@@ -22,7 +22,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { schaarliftenApi } from "@/api/schaarliften.js"
+import { schaarliftenApi } from '@/api/schaarliften.js'
 
 import SchaarliftenLijst from '@/components/Logistics/Schaarliften/SchaarliftenLijst.vue'
 import SchaarliftenDrawer from '@/components/Logistics/Schaarliften/SchaarliftenDrawer.vue'
@@ -42,7 +42,7 @@ async function fetchAssets(query = undefined) {
     const response = await schaarliftenApi.list(params)
 
     // 🔥 altijd array veilig maken
-    assets.value = response;
+    assets.value = response
   } catch (error) {
     console.error('Fout bij ophalen assets:', error)
   }
@@ -61,7 +61,7 @@ function openCreate() {
 
 // --- OPEN EDIT ---
 function openEdit(asset) {
-  console.log("edit")
+  console.log('edit')
   selectedAsset.value = { ...asset }
   showDrawer.value = true
 }

@@ -1,12 +1,13 @@
 <template>
   <BaseDrawer :show="show" :title="`REF: ${verhuurCopy.reference || '—'}`" @close="$emit('close')">
-
     <!-- INFO BLOCKS -->
     <div class="info-card" v-for="block in blocks" :key="block.label">
       <div class="card-label">{{ block.label }}</div>
       <div class="card-content">
         <div>{{ block.content }}</div>
-        <button v-if="block.action" class="link-btn" @click="block.action">{{ block.actionLabel }}</button>
+        <button v-if="block.action" class="link-btn" @click="block.action">
+          {{ block.actionLabel }}
+        </button>
       </div>
     </div>
 
@@ -43,19 +44,19 @@
     v-if="showToestelModal"
     :toestellen="vrijeToestellen"
     :selectedToestel="verhuurCopy.asset"
-    @select="v => verhuurCopy.asset = v"
+    @select="(v) => (verhuurCopy.asset = v)"
     @close="showToestelModal = false"
   />
   <WerfWijzigenModal
     v-if="showWerfModal"
     :werven="alleWerven"
-    @select="v => verhuurCopy.werf = v"
+    @select="(v) => (verhuurCopy.werf = v)"
     @close="showWerfModal = false"
   />
   <ProjectleiderWijzigenModal
     v-if="showProjectleiderModal"
     :projectleiders="alleProjectleiders"
-    @select="v => verhuurCopy.projectleider = v"
+    @select="(v) => (verhuurCopy.projectleider = v)"
     @close="showProjectleiderModal = false"
   />
   <PeriodeWijzigenModal
@@ -82,7 +83,7 @@ const props = defineProps({
   show: Boolean,
   verhuur: Object,
   loading: Boolean,
-  error: String
+  error: String,
 })
 const emit = defineEmits(['close', 'edit', 'delete'])
 
@@ -112,21 +113,25 @@ const verhuurCopy = reactive({
 })
 
 // --- SYNC PROPS ---
-watch(() => props.verhuur, (v) => {
-  if (!v) return
-  Object.assign(verhuurCopy, {
-    _id: v._id || null,
-    reference: v.reference || '',
-    werf: v.werf || null,
-    projectleider: v.projectleider || null,
-    assetModel: v.assetModel || null,
-    asset: v.asset || null,
-    leverDatum: v.leverDatum || '',
-    ophaalDatum: v.ophaalDatum || '',
-    status: v.status || 'Leveren',
-    werkhoogte: v.werkhoogte || 0,
-  })
-}, { immediate: true })
+watch(
+  () => props.verhuur,
+  (v) => {
+    if (!v) return
+    Object.assign(verhuurCopy, {
+      _id: v._id || null,
+      reference: v.reference || '',
+      werf: v.werf || null,
+      projectleider: v.projectleider || null,
+      assetModel: v.assetModel || null,
+      asset: v.asset || null,
+      leverDatum: v.leverDatum || '',
+      ophaalDatum: v.ophaalDatum || '',
+      status: v.status || 'Leveren',
+      werkhoogte: v.werkhoogte || 0,
+    })
+  },
+  { immediate: true },
+)
 
 // --- BLOCKS ---
 const blocks = computed(() => [
@@ -134,19 +139,19 @@ const blocks = computed(() => [
     label: 'Werf',
     content: verhuurCopy.werf?.naam || 'Onbekende werf',
     actionLabel: 'Wijzigen',
-    action: () => openModal('werf')
+    action: () => openModal('werf'),
   },
   {
     label: 'Projectleider',
     content: verhuurCopy.projectleider?.naam || 'Niet toegewezen',
     actionLabel: 'Wijzigen',
-    action: () => openModal('projectleider')
+    action: () => openModal('projectleider'),
   },
   {
     label: 'Machine',
     content: verhuurCopy.asset?.nummer || 'Geen toegewezen',
     actionLabel: 'Toewijzen',
-    action: () => openModal('machine')
+    action: () => openModal('machine'),
   },
   {
     label: 'Periode',
@@ -154,8 +159,8 @@ const blocks = computed(() => [
       ? `${formatDate(verhuurCopy.leverDatum)} - ${verhuurCopy.ophaalDatum ? formatDate(verhuurCopy.ophaalDatum) : 'nog geen ophaaldatum'}`
       : 'Niet ingesteld',
     actionLabel: 'Wijzigen',
-    action: () => openModal('periode')
-  }
+    action: () => openModal('periode'),
+  },
 ])
 
 // --- FUNCTIES ---
@@ -165,7 +170,7 @@ function formatDate(d) {
 }
 
 async function openModal(field) {
-  switch(field) {
+  switch (field) {
     case 'werf':
       alleWerven.value = await werfApi.list()
       showWerfModal.value = true
@@ -175,12 +180,11 @@ async function openModal(field) {
       showProjectleiderModal.value = true
       break
     case 'machine':
-
       const data = {
         assetModel: verhuurCopy.assetModel,
-        leverDatum: verhuurCopy.leverDatum|| null,
-        ophaalDatum: verhuurCopy.ophaalDatum ,
-        werkhoogte: verhuurCopy.werkhoogte || 0
+        leverDatum: verhuurCopy.leverDatum || null,
+        ophaalDatum: verhuurCopy.ophaalDatum,
+        werkhoogte: verhuurCopy.werkhoogte || 0,
       }
       vrijeToestellen.value = await verhuurApi.vrijeToestellen(data)
       showToestelModal.value = true
@@ -227,13 +231,53 @@ async function downloadPDF() {
   box-shadow: 0 2px 6px rgb(0 0 0 / 8%);
   margin-bottom: 14px;
 }
-.card-label { font-size: 12px; color: #6b7280; font-weight: 600; margin-bottom: 8px; }
-.card-content { display: flex; justify-content: space-between; align-items: center; }
-.link-btn { background: none; border: none; color: #2563eb; cursor: pointer; font-weight: 600; }
-.status-select { padding: 8px; border-radius: 8px; border: 1px solid #d1d5db; }
-.error-box { background: #fee2e2; color: #7f1d1d; padding: 10px; border-radius: 8px; margin-top: 10px; }
-.btn { border: none; padding: 10px 22px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-.btn-blue { background: #2563eb; color: white; }
-.btn-gray { background: #6b7280; color: white; }
-.btn-red { background: #dc2626; color: white; }
+.card-label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.link-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  cursor: pointer;
+  font-weight: 600;
+}
+.status-select {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+}
+.error-box {
+  background: #fee2e2;
+  color: #7f1d1d;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+.btn {
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-blue {
+  background: #2563eb;
+  color: white;
+}
+.btn-gray {
+  background: #6b7280;
+  color: white;
+}
+.btn-red {
+  background: #dc2626;
+  color: white;
+}
 </style>

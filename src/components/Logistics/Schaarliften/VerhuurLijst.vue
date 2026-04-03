@@ -1,12 +1,10 @@
 <template>
   <div class="lijstweergave">
-
     <!-- TOOLBAR -->
     <div class="toolbar">
       <h3>Verhuringen Schaarliften</h3>
 
       <div class="toolbar-right">
-
         <!-- SEARCH -->
         <div class="search">
           <i class="fa fa-search"></i>
@@ -39,14 +37,14 @@
     <BaseTable
       :items="verhuringen"
       columns="1fr 1fr 1.5fr 1fr 1fr"
-      @row-click="v => $emit('openVerhuur', v._id)"
+      @row-click="(v) => $emit('openVerhuur', v._id)"
     >
       <!-- HEADER -->
       <template #header>
         <div>REF</div>
         <div>Toestel</div>
         <div>Adres</div>
-        <div >Periode</div>
+        <div>Periode</div>
         <div class="right">Status</div>
       </template>
 
@@ -62,7 +60,7 @@
           {{ formatAdres(v) }}
         </div>
 
-        <div class="col-periode ">
+        <div class="col-periode">
           {{ formatPeriode(v) }}
         </div>
 
@@ -71,7 +69,6 @@
         </div>
       </template>
     </BaseTable>
-
   </div>
 </template>
 
@@ -181,7 +178,6 @@ function formatPeriode(v) {
   color: #4f73ff;
   white-space: nowrap;
 }
-
 
 .col-status.Afgewerkt {
   background: #fef7c3;

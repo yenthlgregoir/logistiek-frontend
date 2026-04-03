@@ -6,7 +6,7 @@
       @add="addWerf"
       @delete="deleteWerf"
       @search="searchWerven"
-      @edit= "editWerf"
+      @edit="editWerf"
     />
   </div>
 </template>
@@ -14,7 +14,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import WerfTable from '@/components/Logistics/Werf/WerfTable.vue'
-import { werfApi } from "@/api/werf.js"
+import { werfApi } from '@/api/werf.js'
 
 const werven = ref([])
 
@@ -35,7 +35,7 @@ async function getWerven() {
 async function searchWerven(query) {
   try {
     const params = {
-      search: query|| undefined,
+      search: query || undefined,
     }
     const response = await werfApi.list(params)
     werven.value = response
@@ -48,28 +48,35 @@ async function addWerf(data) {
   try {
     await werfApi.create(data)
     getWerven()
-  } catch(err) { console.error(err) }
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 async function deleteWerf(werfId) {
   try {
     await werfApi.remove(werfId)
     getWerven()
-  } catch(err) { console.error(err) }
+  } catch (err) {
+    console.error(err)
+  }
 }
 
-async function editWerf(data){
-    try{
-        await werfApi.update(data._id, data);
-        getWerven()
-    }
-    catch (err){
-        console.log(err);
-    }
+async function editWerf(data) {
+  try {
+    await werfApi.update(data._id, data)
+    getWerven()
+  } catch (err) {
+    console.log(err)
+  }
 }
 </script>
 
 <style scoped>
-.page{ padding: 1rem; }
-.page h2 {padding-left: 2rem}
+.page {
+  padding: 1rem;
+}
+.page h2 {
+  padding-left: 2rem;
+}
 </style>

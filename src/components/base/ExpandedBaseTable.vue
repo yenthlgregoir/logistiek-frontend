@@ -1,16 +1,12 @@
 <template>
   <div class="lijstweergave">
-
     <!-- HEADER -->
     <div class="table-header" :style="gridStyle">
       <slot name="header" />
     </div>
 
     <!-- ROWS -->
-    <div
-      v-for="item in items"
-      :key="getKey(item)"
-    >
+    <div v-for="item in items" :key="getKey(item)">
       <!-- MAIN ROW -->
       <div
         class="table-row"
@@ -22,21 +18,15 @@
       </div>
 
       <!-- EXPANDED ROW -->
-      <div
-        v-if="$slots.expanded && isOpen(item)"
-        class="expanded-container"
-      >
+      <div v-if="$slots.expanded && isOpen(item)" class="expanded-container">
         <slot name="expanded" :item="item" />
       </div>
     </div>
 
     <!-- EMPTY -->
     <div v-if="!items.length" class="no-results">
-      <slot name="empty">
-        Geen resultaten gevonden
-      </slot>
+      <slot name="empty"> Geen resultaten gevonden </slot>
     </div>
-
   </div>
 </template>
 
@@ -44,8 +34,6 @@
 import { computed, ref } from 'vue'
 
 //emits
-
-
 
 // Props
 const props = defineProps({
@@ -162,7 +150,7 @@ function isOpen(item) {
   padding: 14px 18px;
   background: #f9fafb;
   border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 
   /* ✅ New slide animation */
   animation: slideDown 0.28s ease forwards;

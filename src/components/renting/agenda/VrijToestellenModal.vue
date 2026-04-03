@@ -6,12 +6,7 @@
     </template>
 
     <!-- BODY -->
-    <input
-      type="text"
-      v-model="search"
-      placeholder="Zoek toestel..."
-      class="search-input"
-    />
+    <input type="text" v-model="search" placeholder="Zoek toestel..." class="search-input" />
 
     <ul class="toestel-list">
       <li
@@ -38,7 +33,7 @@ import { ref, computed } from 'vue'
 import BaseModal from '@/components/base/BaseModal.vue'
 
 const props = defineProps({
-  toestellen: { type: Array, required: true }
+  toestellen: { type: Array, required: true },
 })
 
 const emit = defineEmits(['select', 'close'])
@@ -50,9 +45,7 @@ const gefilterdeToestellen = computed(() => {
 
   const q = search.value.toLowerCase()
 
-  return props.toestellen.filter(t =>
-    t.Ref?.toLowerCase().includes(q)
-  )
+  return props.toestellen.filter((t) => t.Ref?.toLowerCase().includes(q))
 })
 
 function selectToestel(toestel) {

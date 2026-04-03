@@ -4,20 +4,10 @@
       <h3>Werf wijzigen</h3>
     </template>
 
-    <input
-      v-model="search"
-      placeholder="Zoek werf..."
-      class="search-input"
-      type="text"
-    />
+    <input v-model="search" placeholder="Zoek werf..." class="search-input" type="text" />
 
     <ul class="list">
-      <li
-        v-for="w in filtered"
-        :key="w._id"
-        class="list-item"
-        @click="select(w)"
-      >
+      <li v-for="w in filtered" :key="w._id" class="list-item" @click="select(w)">
         {{ w.naam }}
       </li>
     </ul>
@@ -33,7 +23,7 @@ import { computed, ref } from 'vue'
 import BaseModal from '@/components/base/BaseModal.vue'
 
 const props = defineProps({
-  werven: Array
+  werven: Array,
 })
 
 const emit = defineEmits(['close', 'select'])
@@ -43,9 +33,7 @@ const search = ref('')
 const filtered = computed(() =>
   !search.value
     ? props.werven
-    : props.werven.filter(w =>
-        w.naam.toLowerCase().includes(search.value.toLowerCase())
-      )
+    : props.werven.filter((w) => w.naam.toLowerCase().includes(search.value.toLowerCase())),
 )
 
 function select(w) {

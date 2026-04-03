@@ -1,6 +1,5 @@
 <template>
   <div class="lijstweergave">
-
     <!-- HEADER -->
     <div class="table-header" :style="gridStyle">
       <slot name="header" />
@@ -22,7 +21,6 @@
     <div v-if="!items.length" class="no-results">
       <slot name="empty">Geen resultaten gevonden</slot>
     </div>
-
   </div>
 </template>
 
@@ -137,7 +135,6 @@ function getKey(item) {
    MOBILE CARD LAYOUT
 ========================================= */
 @media (max-width: 768px) {
-
   /* Header weg */
   .table-header {
     display: none !important;
@@ -155,7 +152,7 @@ function getKey(item) {
 
     background: white;
     border-radius: 16px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
     transform: none !important;
     color: inherit !important;
   }
