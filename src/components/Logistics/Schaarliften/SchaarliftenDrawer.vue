@@ -59,7 +59,6 @@
         <label>status</label>
         <select v-model="form.status">
           <option value="Vrij">vrij</option>
-          <option value="Bezet">bezet</option>
           <option value="Kapot">kapot</option>
           <option value="Ongekeurd">ongekeurd</option>
         </select>

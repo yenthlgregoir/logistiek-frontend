@@ -17,6 +17,7 @@
 import { ref, onMounted } from 'vue'
 import ProjetLeiderTable from '@/components/Logistics/ProjectLeider/ProjetLeiderTable.vue'
 import { leiderApi } from '@/api/projectLeider.js'
+import { entiteitApi } from '@/api/entiteit'
 
 const leaders = ref([])
 const entiteiten = ref([])
@@ -80,7 +81,7 @@ async function editLeader(data) {
 
 async function getEntiteiten() {
   try {
-    const res = await leiderApi.getEntiteiten()
+    const res = await entiteitApi.getEntiteiten()
     entiteiten.value = res
   } catch (err) {
     console.log(err)
@@ -89,7 +90,7 @@ async function getEntiteiten() {
 
 async function addEntiteit(data) {
   try {
-    await leiderApi.createEniteit(data)
+    await entiteitApi.createEniteit(data)
     await getEntiteiten()
   } catch (err) {
     console.log(err)

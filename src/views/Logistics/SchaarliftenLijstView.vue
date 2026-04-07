@@ -1,6 +1,6 @@
 <template>
   <div class="page">
-    <h2>Assets</h2>
+    <h2>Hoogtewerkers</h2>
 
     <!-- LIST -->
     <SchaarliftenLijst
@@ -95,7 +95,7 @@ function closeDrawer() {
 }
 
 .page h2 {
-  padding-left: 2rem;
+  padding-left: 1%;
 }
 
 /* actie knop */

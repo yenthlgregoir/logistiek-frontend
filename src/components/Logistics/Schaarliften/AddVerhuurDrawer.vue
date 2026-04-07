@@ -5,6 +5,7 @@
     @close="$emit('close')"
   >
     <div class="form-container">
+
       <!-- Logistieke referentie -->
       <div class="info-block">
         <label>Logistieke referentie</label>
@@ -14,21 +15,25 @@
         <input v-else v-model="verhuurCopy.logistiekeReferentie" />
       </div>
 
-      <!-- Asset selectie -->
+      <!-- Asset Type -->
       <div class="info-block">
-        <label>Asset</label>
+        <label>Type</label>
         <div v-if="isEditMode && !isEditing">
-          {{ verhuurCopy.assetType?.nummer }}
+          {{ verhuurCopy.assetType }}
         </div>
         <select v-else v-model="verhuurCopy.assetType">
-          <option disabled value="">Selecteer Schaarlift / Knikarm</option>
-          <option value="Schaarlift">Schaarlift</option>
-          <option value="Knikarm">Knikarm</option>
+          <option disabled value="">Selecteer type</option>
+          <option v-for="a in assets" :key="a._id" :value="a.naam">
+            {{ a.naam }}
+          </option>
         </select>
       </div>
 
-      <!-- Werkhoogte verplicht -->
-      <div class="info-block">
+      <!-- Werkhoogte -->
+      <div
+        v-if="verhuurCopy.assetModel === 'Hoogtewerker'"
+        class="info-block"
+      >
         <label>Werkhoogte (m)</label>
         <div v-if="isEditMode && !isEditing">
           {{ verhuurCopy.werkhoogte }}
@@ -39,8 +44,24 @@
           type="number"
           min="0"
           step="0.1"
-          placeholder="Verplicht"
         />
+      </div>
+
+      <!-- Entiteit -->
+      <div
+        v-if="verhuurCopy.assetModel === 'WerfContainer'"
+        class="info-block"
+      >
+        <label>Entiteit</label>
+        <div v-if="isEditMode && !isEditing">
+          {{ verhuurCopy.entiteit?.naam }}
+        </div>
+        <select v-else v-model="verhuurCopy.entiteit">
+          <option disabled value="">Selecteer entiteit</option>
+          <option v-for="e in entiteiten" :key="e._id" :value="e">
+            {{ e.naam }}
+          </option>
+        </select>
       </div>
 
       <!-- Werf -->
@@ -78,7 +99,7 @@
       </div>
 
       <div class="info-block">
-        <label>Einddatum (optioneel)</label>
+        <label>Einddatum</label>
         <input type="date" v-model="verhuurCopy.ophaalDatum" />
       </div>
 
@@ -89,17 +110,19 @@
     </div>
 
     <template #footer>
-      <button class="btn btn-secondary" @click="$emit('close')">Cancel</button>
+      <button class="btn btn-secondary" @click="$emit('close')">
+        Cancel
+      </button>
       <button class="btn btn-primary" @click="saveVerhuur" :disabled="loading">
-        {{ loading ? 'Bezig...' : 'Opslaan' }}
+        {{ loading ? "Bezig..." : "Opslaan" }}
       </button>
     </template>
   </BaseDrawer>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
-import BaseDrawer from '@/components/base/BaseDrawer.vue'
+import { ref, watch } from "vue";
+import BaseDrawer from "@/components/base/BaseDrawer.vue";
 
 const props = defineProps({
   show: Boolean,
@@ -107,69 +130,109 @@ const props = defineProps({
   assets: Array,
   werven: Array,
   projectleiders: Array,
+  entiteiten: Array,
   error: String,
-})
+  assetModel: String, // 🔥 belangrijk
+});
 
-const emit = defineEmits(['close', 'save', 'edit'])
+const emit = defineEmits(["close", "save", "edit"]);
 
-const isEditMode = ref(false)
-const isEditing = ref(true)
-const loading = ref(false)
-const verhuurCopy = ref({})
+const isEditMode = ref(false);
+const isEditing = ref(true);
+const loading = ref(false);
+const verhuurCopy = ref({});
 
+
+// 🔥 filter assets per model
+
+
+
+// 🔥 init / edit mode
 watch(
   () => props.verhuur,
   (val) => {
     if (val) {
-      isEditMode.value = true
-      verhuurCopy.value = JSON.parse(JSON.stringify(val))
-      isEditing.value = false
+      isEditMode.value = true;
+      verhuurCopy.value = JSON.parse(JSON.stringify(val));
+      isEditing.value = false;
     } else {
-      isEditMode.value = false
-      resetForm()
-      isEditing.value = true
+      isEditMode.value = false;
+      resetForm();
+      isEditing.value = true;
     }
   },
-  { immediate: true },
-)
+  { immediate: true }
+);
 
+
+// 🔥 reset bij model switch
+watch(
+  () => props.assetModel,
+  () => {
+    resetForm();
+  }
+);
+
+
+// 🔥 reset form
 function resetForm() {
   verhuurCopy.value = {
-    logistiekeReferentie: '',
-    assetModel: 'Hoogtewerker',
+    logistiekeReferentie: "",
+    assetModel: props.assetModel,
     assetType: null,
     werf: null,
     projectleider: null,
-    leverDatum: '',
-    ophaalDatum: '',
-    werkhoogte: '',
-  }
+    leverDatum: "",
+    ophaalDatum: "",
+    werkhoogte: "",
+    entiteit: null,
+  };
 }
 
+
+// 🔥 save
 async function saveVerhuur() {
-  if (!verhuurCopy.value.leverDatum) return alert('Startdatum is verplicht')
+  if (!verhuurCopy.value.leverDatum) {
+    return alert("Startdatum is verplicht");
+  }
 
   if (
     verhuurCopy.value.ophaalDatum &&
     new Date(verhuurCopy.value.ophaalDatum) <= new Date(verhuurCopy.value.leverDatum)
-  )
-    return alert('Einddatum moet na de startdatum liggen')
+  ) {
+    return alert("Einddatum moet na startdatum liggen");
+  }
 
-  if (!verhuurCopy.value.assetModel) return alert('Selecteer een Schaarlift of Knikarm')
+  if (!verhuurCopy.value.assetType) {
+    return alert("Selecteer een type");
+  }
 
-  if (!verhuurCopy.value.werkhoogte) return alert('Werkhoogte is verplicht voor Schaarlift/Knikarm')
+  // 🔥 type-specifieke validatie
+  if (
+    verhuurCopy.value.assetModel === "Hoogtewerker" &&
+    !verhuurCopy.value.werkhoogte
+  ) {
+    return alert("Werkhoogte is verplicht");
+  }
+
+  if (
+    verhuurCopy.value.assetModel === "WerfContainer" &&
+    !verhuurCopy.value.entiteit
+  ) {
+    return alert("Entiteit is verplicht");
+  }
 
   try {
-    loading.value = true
+    loading.value = true;
 
     if (isEditMode.value) {
-      emit('edit', verhuurCopy.value)
+      emit("edit", verhuurCopy.value);
     } else {
-      emit('save', verhuurCopy.value)
-      resetForm()
+      emit("save", verhuurCopy.value);
+      resetForm();
     }
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 </script>

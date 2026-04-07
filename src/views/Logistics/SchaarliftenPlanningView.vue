@@ -1,6 +1,8 @@
 <template>
   <div class="planning-page">
-    <!-- Agenda met boekingen -->
+    <h2>Planning {{ assetModel.toLowerCase() }}</h2>
+
+    <!-- Agenda -->
     <SchaarliftenAgenda
       :boekingen="boekingen"
       :types="machineTypes"
@@ -9,80 +11,119 @@
       @filterType="onFilterType"
     />
 
-    <!-- Verhuur drawer voor bestaande boeking -->
+    <!-- Edit drawer -->
     <VerhuurDrawer
       v-if="showDrawer"
       :show="showDrawer"
       :verhuur="selectedVerhuur"
-      :machineTypes="machineTypes"
+      :assets="machineTypes"
+      :assetModel="assetModel"
       :werven="werven"
       :projectleiders="projectleiders"
+      :entiteiten="entiteiten"
       :error="error"
-      :loading="loading"
       @close="closeDrawer"
       @edit="updateVerhuur"
       @delete="deleteVerhuur"
     />
 
-    <!-- Verhuur drawer voor nieuwe boeking -->
+    <!-- Create drawer -->
     <AddVerhuurDrawer
       v-if="showAddDrawer"
       :show="showAddDrawer"
       :verhuur="selectedBoeking"
-      :machineTypes="machineTypes"
+      :assets="machineTypes"
+      :assetModel="assetModel"
       :werven="werven"
       :projectleiders="projectleiders"
+      :entiteiten="entiteiten"
       :error="error"
       @close="closeAddDrawer"
       @save="createVerhuur"
     />
+    
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+
 import SchaarliftenAgenda from '@/components/Logistics/Schaarliften/SchaarliftenAgenda.vue'
 import VerhuurDrawer from '@/components/Logistics/Schaarliften/VerhuurDrawer.vue'
 import AddVerhuurDrawer from '@/components/Logistics/Schaarliften/AddVerhuurDrawer.vue'
 
 import { verhuurApi } from '@/api/verhuur.js'
-import { schaarliftenApi } from '@/api/schaarliften.js'
 import { werfApi } from '@/api/werf.js'
 import { leiderApi } from '@/api/projectLeider.js'
+import { werfcontainerApi } from '@/api/werfcontainer'
+import { entiteitApi } from '@/api/entiteit'
 
-// --- Reactive state ---
+// 🔥 prop vanuit router
+const props = defineProps({
+  assetModel: {
+    type: String,
+    required: true
+  }
+})
+
+// --- state ---
 const boekingen = ref([])
 const selectedVerhuur = ref(null)
 const selectedBoeking = ref(null)
+
 const showDrawer = ref(false)
 const showAddDrawer = ref(false)
+
 const machineTypes = ref([])
 const werven = ref([])
 const projectleiders = ref([])
+const entiteiten = ref([])
+
 const error = ref('')
 const loading = ref(false)
+
 const filters = ref({
   type: '',
+  assetModel: props.assetModel
 })
 
-// --- Computed helpers ---
+// --- reload bij route switch ---
+watch(
+  () => props.assetModel,
+  async () => {
+    filters.value.assetModel = props.assetModel
+    await loadData()
+  },
+  { immediate: true }
+)
 
-
-// --- Load data ---
+// --- load data ---
 async function loadData() {
   try {
     loading.value = true
-    const [typesRes, werfRes, plRes, boekingenRes] = await Promise.all([
-      schaarliftenApi.getTypes(),
+
+    const [werfRes, plRes, boekingenRes ] = await Promise.all([
       werfApi.list(),
       leiderApi.list(),
       verhuurApi.list(filters.value),
     ])
 
-    machineTypes.value = typesRes || []
+    // 🔥 types + extra data
+    if (props.assetModel === "WerfContainer") {
+      machineTypes.value = await werfcontainerApi.getTypes()
+      entiteiten.value = await entiteitApi.getEntiteiten();
+    } else {
+      machineTypes.value = [
+        {  type: "Schaarlift", naam: "Schaarlift" },
+        { type: "Knikarm", naam: "Knikarm" }
+      ]
+      entiteiten.value = []
+    }
+
     werven.value = werfRes || []
     projectleiders.value = plRes || []
-    boekingen.value = Array.isArray(boekingenRes) ? boekingenRes : boekingenRes.data || []
+    boekingen.value = boekingenRes || []
+
   } catch (err) {
     console.error('Fout bij laden data', err)
     error.value = 'Fout bij laden data'
@@ -91,16 +132,17 @@ async function loadData() {
   }
 }
 
-// --- Filter ---
-function onFilterType(typeId) {
-  filters.value.type = typeId
+// --- filters ---
+function onFilterType(type) {
+  filters.value.type = type
   loadData()
 }
 
-// --- Drawer events ---
+// --- open bestaande ---
 function openBoeking(id) {
   error.value = ''
   const boek = boekingen.value.find((b) => b._id === id)
+
   if (boek) {
     selectedVerhuur.value = boek
     showDrawer.value = true
@@ -108,6 +150,7 @@ function openBoeking(id) {
   }
 }
 
+// --- nieuwe ---
 function nieuweBoeking() {
   error.value = ''
   selectedBoeking.value = null
@@ -115,11 +158,10 @@ function nieuweBoeking() {
   showDrawer.value = false
 }
 
+// --- close ---
 function closeDrawer() {
   showDrawer.value = false
-  showAddDrawer.value = false
   selectedVerhuur.value = null
-  selectedBoeking.value = null
   error.value = ''
 }
 
@@ -129,7 +171,7 @@ function closeAddDrawer() {
   error.value = ''
 }
 
-// --- CRUD operations ---
+// --- CRUD ---
 async function updateVerhuur(data) {
   try {
     error.value = ''
@@ -165,14 +207,15 @@ async function createVerhuur(data) {
   }
 }
 
-// --- Helpers ---
+// --- helpers ---
 function cleanPayload(v) {
   return {
     ...v,
-    machineType: v.machineType?._id || v.machineType,
+    assetType: v.assetType,
     werf: v.werf?._id || v.werf,
     projectleider: v.projectleider?._id || v.projectleider,
-    assetModel: v.assetModel?._id || v.assetModel || null,
+    entiteit: v.entiteit?._id || v.entiteit,
+    assetModel: v.assetModel || props.assetModel,
   }
 }
 
@@ -184,7 +227,7 @@ function parseApiError(err) {
   }
 }
 
-// --- Lifecycle ---
+// --- lifecycle ---
 onMounted(loadData)
 </script>
 

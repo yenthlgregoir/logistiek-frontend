@@ -1,7 +1,6 @@
 <template>
   <div class="page">
     <h2>Werfcontainers</h2>
-
     <!-- LIST -->
     <WerfcontainerLijst
       :assets="assets"
@@ -14,7 +13,7 @@
     <WerfcontainerDrawer
       :show="showDrawer"
       :model="selectedAsset"
-      :entiteiten="entiteiten"
+      :entiteiten= "entiteiten"
       @close="closeDrawer"
       @save="saveAsset"
     />
@@ -23,11 +22,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { werfcontainerApi } from '@/api/werfcontainer.js'
-import { leiderApi } from '@/api/projectLeider.js'
+import { werfcontainerApi } from "@/api/werfcontainer.js"
 
 import WerfcontainerLijst from '@/components/Logistics/Werfcontainers/WerfcontainerLijst.vue'
 import WerfcontainerDrawer from '@/components/Logistics/Werfcontainers/WerfcontainerDrawer.vue'
+import { entiteitApi } from '@/api/entiteit'
 
 // --- STATE ---
 const assets = ref([])
@@ -44,8 +43,7 @@ async function fetchAssets(query = undefined) {
   try {
     const params = { search: query || undefined }
     const response = await werfcontainerApi.list(params)
-
-    // 🔥 altijd array veilig maken
+    console.log(response)
     assets.value = response
   } catch (error) {
     console.error('Fout bij ophalen werfcontainers:', error)
@@ -68,18 +66,18 @@ function openEdit(asset) {
   selectedAsset.value = { ...asset }
   showDrawer.value = true
 }
-async function getEntiteiten() {
-  try {
-    const res = await leiderApi.getEntiteiten()
-    entiteiten.value = res
-  } catch (err) {
-    console.log(err)
-  }
+async function getEntiteiten(){
+    try{
+        const res = await entiteitApi.getEntiteiten();
+        entiteiten.value = res;
+    }
+    catch  (err) {
+        console.log(err);
+    }
 }
 // --- SAVE (CREATE + UPDATE) ---
 async function saveAsset(data) {
   try {
-    console.log(data)
     if (selectedAsset.value?._id) {
       await werfcontainerApi.update(selectedAsset.value._id, data)
     } else {
@@ -106,7 +104,7 @@ function closeDrawer() {
 }
 
 .page h2 {
-  padding-left: 2rem;
+  padding-left: 1rem;
 }
 
 /* actie knop */

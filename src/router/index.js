@@ -157,18 +157,40 @@ const routes = [
     path: '/logistics/schaarlift/verhuur',
     name: 'schaarliftenverhuur',
     component: VerhuurlijstView,
-    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
+    props : {assetType: "Hoogtewerker"},
+    meta: { requiresAuth: true, roles: ['admin', 'logistics']},
   },
   {
     path: '/logistics/schaarlift/planning',
     name: 'schaarliftenPlanning',
     component: SchaarliftenPlanningView,
+    props : {assetModel: "Hoogtewerker"},
     meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
+  },
+  {
+    path: '/logistics/werfcontainers',
+    name: 'werfcontainers',
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
+    redirect: '/logistics/werfcontainers/planning',
   },
   {
     path: '/logistics/werfcontainers/lijst',
     name: 'werfContainerLijst',
     component: WerfcontainerLijstView,
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
+  },
+   {
+    path: '/logistics/werfcontainers/verhuur',
+    name: 'werfcontainerVerhuur',
+    component: VerhuurlijstView,
+    props : {assetType: "WerfContainer"},
+    meta: { requiresAuth: true, roles: ['admin', 'logistics']},
+  },
+  {
+    path: '/logistics/werfcontainers/planning',
+    name: 'werfcontainerPlanning',
+    component: SchaarliftenPlanningView,
+    props : {assetModel: "WerfContainer"},
     meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
   },
 ]
@@ -177,16 +199,13 @@ const router = createRouter({
   routes,
 })
 
-// 🔥 Eén centrale router guard met Pinia
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
 
-  // 1️⃣ Route vereist auth maar gebruiker is niet ingelogd
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
     return next({ name: 'login' })
   }
 
-  // 2️⃣ Route heeft rolbeperking
   if (to.meta.roles && auth.isLoggedIn) {
     const userRole = auth.user?.role
 
@@ -194,13 +213,11 @@ router.beforeEach((to, from, next) => {
       return next({ name: 'login' }) // fallback
     }
 
-    // Admin mag overal
     if (userRole !== 'admin' && !to.meta.roles.includes(userRole)) {
       return next({ name: 'home' }) // niet toegestane rol
     }
   }
 
-  // 3️⃣ Gebruiker al ingelogd en probeert login pagina te openen → redirect home
   if (to.name === 'login' && auth.isLoggedIn) {
     return next({ name: 'home' })
   }

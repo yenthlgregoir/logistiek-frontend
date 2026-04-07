@@ -18,12 +18,13 @@
     <ExpandedBaseTable
       :items="assets"
       :expand-on-row-click="true"
-      columns="2fr 2fr 1fr"
+      columns="2fr 2fr 1fr 1fr"
       itemKey="_id"
     >
       <template #header>
         <div>nummer</div>
         <div>type</div>
+        <div>entiteit</div>
         <div class="right">status</div>
       </template>
 
@@ -33,7 +34,18 @@
         </div>
 
         <div>{{ item.Type?.naam || 'Onbekend' }}</div>
-
+<div
+  class="col-entiteit"
+  :style="{
+    backgroundColor: item.entiteit?.color || '#1b4965',
+    color: getContrastColor(item.entiteit?.color || '#1b4965'),
+  }"
+>
+  <span v-if="item.entiteit?.icon" class="material-icons entiteit-icon">
+    {{ item.entiteit.icon }}
+  </span>
+  <span>{{ item.entiteit?.naam || 'Onbekend' }}</span>
+</div>
         <div class="right">
           <span :class="['status', getStatus(item)]">
             {{ getStatusLabel(item) }}
@@ -60,6 +72,9 @@
 
                 <div><strong>type</strong></div>
                 <div>{{ item.Type?.naam || '-' }}</div>
+
+                <div><strong>verantwoordelijke</strong></div>
+                <div>{{ item.verantwoordelijke || '-' }}</div>
               </div>
               <div class="column">
                 <div><strong>status</strong></div>
@@ -67,6 +82,7 @@
 
                 <div><strong>entiteit</strong></div>
                 <div>{{ item.entiteit.naam || '-' }}</div>
+                
               </div>
             </div>
           </div>
@@ -138,7 +154,19 @@ function getStatus(item) {
   if (item.huidigeBoekingen?.length > 0) return 'bezet'
   return 'vrij'
 }
+function getContrastColor(hex) {
+  if (!hex) return '#fff'
 
+  const c = hex.substring(1)
+  const rgb = parseInt(c, 16)
+  const r = (rgb >> 16) & 0xff
+  const g = (rgb >> 8) & 0xff
+  const b = (rgb >> 0) & 0xff
+
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+
+  return luminance > 0.5 ? '#000' : '#fff'
+}
 function getStatusLabel(item) {
   if (item.status === 'Kapot') return 'Kapot'
   if (item.status === 'Ongekeurd') return 'Ongekeurd'
@@ -259,6 +287,25 @@ function editAsset(asset) {
 
 .column strong {
   font-weight: 600;
+}
+
+.col-entiteit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  background: #e5e7eb;
+}
+
+.entiteit-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Divider */

@@ -37,6 +37,18 @@
           </option>
         </select>
       </div>
+      <div class="info-block">
+        <label>Verandwoordelijke</label>
+        <input type="text" v-model="form.verantwoordelijke" placeholder="Ploeg van Tom"  />
+      </div>
+
+       <div class="info-block">
+        <label>status</label>
+        <select v-model="form.status">
+          <option value="Vrij">vrij</option>
+          <option value="Kapot">kapot</option>
+        </select>
+      </div>
     </form>
 
     <!-- FOOTER -->
@@ -68,6 +80,7 @@ const form = reactive({
   Type: '',
   entiteit: '',
   status: 'Vrij',
+  verantwoordelijke: '',
 })
 
 /* -------------------------
@@ -127,7 +140,8 @@ function resetForm() {
   form.nummer = ''
   form.Type = ''
   form.entiteit = ''
-  form.status = 'Vrij'
+  form.status = 'Vrij',
+  form.verantwoordelijke = ''
 }
 
 /* -------------------------
@@ -138,7 +152,7 @@ function handleSubmit() {
     alert('Nummer en Type zijn verplicht.')
     return
   }
-  resetForm()
+  console.log(form)
   emit('save', { ...form })
 }
 </script>

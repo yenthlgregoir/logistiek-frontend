@@ -124,6 +124,7 @@ const linkGroups = {
       icon: Warehouse,
       submenu: [
         { to: '/logistics/werfcontainers/planning', label: 'Planning', icon: Calendar },
+        { to: '/logistics/werfcontainers/verhuur', label: 'Verhuur', icon: Calendar },
         { to: '/logistics/werfcontainers/lijst', label: 'Lijst', icon: List },
       ],
     },

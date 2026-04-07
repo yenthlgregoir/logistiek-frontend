@@ -1,6 +1,5 @@
 <template>
   <div class="agenda-container">
-    <h1>Planning Assets</h1>
 
     <!-- TOOLBAR -->
     <div class="agenda-toolbar">
@@ -18,7 +17,7 @@
 
         <select v-model="selectedType" class="type-select">
           <option value="">Alle types</option>
-          <option v-for="type in types" :key="type._id" :value="type._id">
+          <option v-for="type in types" :key="type._id" :value="type.naam">
             {{ type.naam }}
           </option>
         </select>
@@ -301,9 +300,6 @@ const pickerOptions = {
   transition: 0.2s ease;
 }
 
-.row:hover {
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.12);
-}
 
 .label {
   width: 200px;

@@ -1,11 +1,25 @@
 <template>
   <div class="lijstweergave">
     <!-- TOOLBAR -->
-    <div class="toolbar">
-      <h3>Verhuringen Schaarliften</h3>
+          
 
-      <div class="toolbar-right">
+    <div class="toolbar">
+
         <!-- SEARCH -->
+        <div class="date-picker"><el-date-picker
+          v-model="localDateRange"
+          type="daterange"
+          start-placeholder="Startdatum"
+          end-placeholder="Einddatum"
+          format="YYYY-MM-DD"
+          value-format="YYYY-MM-DD"
+          :picker-options="pickerOptions"
+          clearable
+          @change="updateDateRange"
+          style="width: 260px"
+        /></div>
+        <!-- DATE RANGE -->
+        
         <div class="search">
           <i class="fa fa-search"></i>
           <input
@@ -17,20 +31,6 @@
           />
         </div>
 
-        <!-- DATE RANGE -->
-        <el-date-picker
-          v-model="localDateRange"
-          type="daterange"
-          start-placeholder="Startdatum"
-          end-placeholder="Einddatum"
-          format="YYYY-MM-DD"
-          value-format="YYYY-MM-DD"
-          :picker-options="pickerOptions"
-          clearable
-          @change="updateDateRange"
-          style="width: 260px"
-        />
-      </div>
     </div>
 
     <!-- TABLE -->
@@ -138,15 +138,10 @@ function formatPeriode(v) {
 .toolbar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   margin-bottom: 20px;
 }
 
-.toolbar-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
+
 
 /* SEARCH */
 .search {

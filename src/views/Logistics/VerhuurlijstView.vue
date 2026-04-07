@@ -1,5 +1,6 @@
 <template>
   <div class="planning-page">
+     <h2>Verhuringen {{assetType.toLowerCase()}}</h2>
     <!-- ====================== -->
     <!--  SCHAARELIFTEN LIST -->
     <!-- ====================== -->
@@ -32,14 +33,19 @@ import VerhuurDrawer from '@/components/Logistics/Schaarliften/VerhuurDrawer.vue
 import { verhuurApi } from '@/api/verhuur.js'
 import { werfApi } from '@/api/werf.js'
 import { leiderApi } from '@/api/projectLeider.js'
-import { schaarliftenApi } from '@/api/schaarliften.js'
+
+const props = defineProps({
+  assetType: {
+    type: String,
+    required: true
+  }
+})
 
 /* ---------------- STATE ---------------- */
 const allVerhuringen = ref([]) // 🔥 originele data
 const selectedVerhuur = ref(null)
 const showDrawer = ref(false)
 
-const machineTypes = ref([])
 const werven = ref([])
 const projectleiders = ref([])
 
@@ -52,18 +58,17 @@ const loading = ref(false)
 async function loadData() {
   try {
     loading.value = true
-
-    const [typesRes, werfRes, plRes, verhuringenRes] = await Promise.all([
-      schaarliftenApi.getTypes(),
+    const [werfRes, plRes, verhuringenRes] = await Promise.all([
       werfApi.list(),
       leiderApi.list(),
-      verhuurApi.list(), // 🔥 geen filters hier
+      verhuurApi.list({assetModel:props.assetType}),
     ])
 
-    machineTypes.value = typesRes || []
     werven.value = werfRes || []
     projectleiders.value = plRes || []
     allVerhuringen.value = verhuringenRes || []
+
+    console.log(verhuringenRes)
   } catch (err) {
     console.error(err)
   } finally {
