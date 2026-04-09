@@ -6,7 +6,12 @@
     </template>
 
     <!-- BODY -->
-    <input type="text" v-model="search" placeholder="Zoek toestel..." class="search-input" />
+    <SearchBar
+      v-model="search"
+      placeholder="Zoek"
+      width="100%"
+      icon="fa fa-search"
+    />
 
     <ul class="toestel-list">
       <li
@@ -31,6 +36,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import BaseModal from '@/components/base/BaseModal.vue'
+import SearchBar from '@/components/base/SearchBar.vue'
 
 const props = defineProps({
   toestellen: { type: Array, required: true },
@@ -44,7 +50,6 @@ const gefilterdeToestellen = computed(() => {
   if (!search.value) return props.toestellen
 
   const q = search.value.toLowerCase()
-
   return props.toestellen.filter((t) => t.Ref?.toLowerCase().includes(q))
 })
 
@@ -61,41 +66,16 @@ function close() {
 <style scoped>
 /* ✅ AL JE ORIGINELE CSS BLIJFT WERKEN */
 
-/* =========================================
-   SEARCH INPUT
-========================================= */
-.search-input {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid #d1d5db;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(6px);
-  font-size: 14px;
-  font-weight: 500;
-  transition: 0.25s ease;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #4f73ff;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(79, 115, 255, 0.2);
-}
-
-/* =========================================
-   TOESTELLEN LIST
-========================================= */
+/* TOESTELLEN LIST */
 .toestel-list {
   max-height: 420px;
   overflow-y: auto;
-  margin: 0;
+  margin: 12px 0 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 12px;
 }
 
 /* High-end toestel card */
@@ -128,9 +108,7 @@ function close() {
   color: #111827;
 }
 
-/* =========================================
-   FOOTER
-========================================= */
+/* FOOTER */
 .modal-footer {
   display: flex;
   justify-content: flex-end;

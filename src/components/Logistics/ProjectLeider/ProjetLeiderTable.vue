@@ -2,15 +2,12 @@
   <div class="page">
     <!-- Toolbar -->
     <div class="toolbar">
-      <div class="search">
-        <i class="material-icons">search</i>
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Search project leaders..."
-          class="search-input"
-        />
-      </div>
+      <SearchBar
+        placeholder="Zoek"
+        width="260px"
+        icon="fa fa-search"
+        @update:modelValue="emit('search', $event)"
+      />
       <div class="buttons">
         <button class="btn btn-primary btn-leader" @click="openNewLeaderDrawer">
           <i class="material-icons">add</i> Add Leader
@@ -21,7 +18,6 @@
       </div>
     </div>
 
-    <!-- Table -->
     <BaseTable :items="leaders" columns="2fr 2fr 1fr 1fr" @row-click="openLeaderDrawer">
       <template #header>
         <div>Naam</div>
@@ -71,10 +67,11 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import BaseTable from '@/components/base/BaseTable.vue'
 import LeaderDrawer from './LeaderSideBar.vue'
 import EntiteitDrawer from './EntiteitDrawer.vue'
+import SearchBar from '@/components/base/SearchBar.vue'
 
 defineProps({
   entiteiten: { type: Array, default: () => [] },
@@ -85,7 +82,6 @@ const selectedLeader = ref(null)
 const showDrawer = ref(false)
 const showNewLeaderDrawer = ref(false)
 const showEntiteitDrawer = ref(false)
-const searchQuery = ref('')
 
 const emit = defineEmits(['select', 'add', 'delete', 'search', 'edit', 'addEntiteit'])
 
@@ -148,14 +144,6 @@ function handleAddEntiteit(data) {
   emit('addEntiteit', data)
 }
 
-// Search debouncing
-let searchTimeout = null
-watch(searchQuery, () => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    emit('search', searchQuery.value)
-  }, 400)
-})
 </script>
 
 <style scoped>
@@ -171,33 +159,6 @@ watch(searchQuery, () => {
   margin-bottom: 15px;
   flex-wrap: wrap;
 }
-
-.search {
-  position: relative;
-  flex: 1;
-  max-width: 300px;
-}
-
-.search input {
-  width: 100%;
-  padding: 8px 12px 8px 36px; /* extra ruimte voor icon */
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  font-size: 14px;
-  line-height: 1.3;
-}
-
-.search i,
-.search .material-icons {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 18px;
-  color: #6b7280;
-  pointer-events: none;
-}
-
 .buttons {
   display: flex;
   gap: 10px;

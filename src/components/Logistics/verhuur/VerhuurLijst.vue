@@ -1,12 +1,11 @@
 <template>
   <div class="lijstweergave">
     <!-- TOOLBAR -->
-          
-
     <div class="toolbar">
 
-        <!-- SEARCH -->
-        <div class="date-picker"><el-date-picker
+      <!-- DATE RANGE PICKER -->
+      <div class="date-picker">
+        <el-date-picker
           v-model="localDateRange"
           type="daterange"
           start-placeholder="Startdatum"
@@ -17,20 +16,17 @@
           clearable
           @change="updateDateRange"
           style="width: 260px"
-        /></div>
-        <!-- DATE RANGE -->
-        
-        <div class="search">
-          <i class="fa fa-search"></i>
-          <input
-            v-model="localSearch"
-            type="text"
-            placeholder="Zoek"
-            class="search-input"
-            @input="updateSearch"
-          />
-        </div>
+        />
+      </div>
 
+      <!-- SEARCHBAR COMPONENT -->
+      <SearchBar
+        placeholder="Zoek"
+        width="260px"
+        icon="fa fa-search"
+        @update:modelValue="emit('update:search', $event)"
+      />
+      
     </div>
 
     <!-- TABLE -->
@@ -50,23 +46,11 @@
 
       <!-- ROW -->
       <template #row="{ item: v }">
-        <div>
-          <strong>{{ v.reference }}</strong>
-        </div>
-        <div>
-          {{ v.asset?.nummer || 'Geen toestel toegewezen' }}
-        </div>
-        <div class="col-adres">
-          {{ formatAdres(v) }}
-        </div>
-
-        <div class="col-periode">
-          {{ formatPeriode(v) }}
-        </div>
-
-        <div class="col-status right" :class="v.status">
-          {{ v.status || 'Onbekend' }}
-        </div>
+        <div><strong>{{ v.reference }}</strong></div>
+        <div>{{ v.asset?.nummer || 'Geen toestel toegewezen' }}</div>
+        <div class="col-adres">{{ formatAdres(v) }}</div>
+        <div class="col-periode">{{ formatPeriode(v) }}</div>
+        <div class="col-status right" :class="v.status">{{ v.status || 'Onbekend' }}</div>
       </template>
     </BaseTable>
   </div>
@@ -75,8 +59,7 @@
 <script setup>
 import { ref } from 'vue'
 import BaseTable from '@/components/base/BaseTable.vue'
-import 'element-plus/dist/index.css'
-import { ElDatePicker } from 'element-plus'
+import SearchBar from '@/components/base/SearchBar.vue'
 
 defineProps({
   verhuringen: {
@@ -87,7 +70,6 @@ defineProps({
 
 const emit = defineEmits(['openVerhuur', 'update:search', 'update:dateRange'])
 
-const localSearch = ref('')
 const localDateRange = ref([null, null])
 
 const pickerOptions = {
@@ -98,15 +80,6 @@ const pickerOptions = {
   },
 }
 
-let timeout
-
-function updateSearch() {
-  clearTimeout(timeout)
-  timeout = setTimeout(() => {
-    emit('update:search', localSearch.value)
-  }, 300)
-}
-
 function updateDateRange(val) {
   emit('update:dateRange', val || [null, null])
 }
@@ -114,7 +87,6 @@ function updateDateRange(val) {
 /* HELPERS */
 function formatAdres(v) {
   if (!v.werf) return 'Onbekende werf'
-
   return `${v.werf.naam || ''} - ${v.werf.adres.straat || ''} ${v.werf.adres.huisnummer || ''}, ${v.werf.adres.postcode || ''} ${v.werf.adres.gemeente || ''}`
 }
 
@@ -126,10 +98,8 @@ function formatDate(dateString) {
 
 function formatPeriode(v) {
   if (!v.leverDatum) return 'Niet ingesteld'
-
   const begin = formatDate(v.leverDatum)
   const eind = v.ophaalDatum ? formatDate(v.ophaalDatum) : 'nog geen ophaaldatum'
-
   return `${begin} - ${eind}`
 }
 </script>
@@ -141,54 +111,18 @@ function formatPeriode(v) {
   margin-bottom: 20px;
 }
 
-
-
-/* SEARCH */
-.search {
-  position: relative;
-  width: 260px;
-}
-
-.search input {
-  width: 100%;
-  padding: 8px 10px 8px 32px;
-  border-radius: 8px;
-  border: none;
-}
-
-.search i {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
+/* COLUMN STYLING */
 .col-periode.right {
   text-align: right;
   white-space: nowrap;
 }
-
 .col-status {
   font-weight: 600;
   color: #4f73ff;
   white-space: nowrap;
 }
-
-.col-status.Afgewerkt {
-  background: #fef7c3;
-  color: #854d0e;
-}
-.col-status.Opgehaald {
-  background: #dbeafe;
-  color: #1e3a8a;
-}
-.col-status.Leveren {
-  background: #fdecc8;
-  color: #78350f;
-}
-
-.col-status.Geleverd {
-  background: #d1fae5;
-  color: #065f46;
-}
+.col-status.Afgewerkt { background: #fef7c3; color: #854d0e; }
+.col-status.Opgehaald { background: #dbeafe; color: #1e3a8a; }
+.col-status.Leveren { background: #fdecc8; color: #78350f; }
+.col-status.Geleverd { background: #d1fae5; color: #065f46; }
 </style>

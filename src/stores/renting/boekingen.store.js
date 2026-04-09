@@ -48,7 +48,7 @@ export const useBoekingenStore = defineStore('boekingen', {
   actions: {
     setViewMode(mode) {
       this.currentViewMode = mode
-    },
+    },  
 
     // =========================
     // 📦 LIST

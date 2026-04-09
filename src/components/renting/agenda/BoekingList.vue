@@ -3,21 +3,17 @@
     <!-- ======================= -->
     <!--      TOOLBAR (ONGEWIJZIGD) -->
     <!-- ======================= -->
-    <h3>Boekingen</h3>
 
     <div class="toolbar">
-      <div class="search">
-        <i class="fa fa-search"></i>
-        <input
-          v-model="localSearch"
-          type="text"
-          placeholder="Zoek"
-          class="search-input"
-          @input="updateSearch"
-        />
-      </div>
+        <SearchBar
+        placeholder="Zoek"
+        width="260px"
+        icon="fa fa-search"
+        @update:modelValue="emit('update:search', $event)"
+      />
+      
       <div class="item">
-<el-date-picker
+        <el-date-picker
           v-model="localDateRange"
           type="daterange"
           start-placeholder="Startdatum"
@@ -76,8 +72,7 @@
 <script setup>
 import { ref } from 'vue'
 import BaseTable from '@/components/base/BaseTable.vue'
-import 'element-plus/dist/index.css'
-import { ElDatePicker } from 'element-plus'
+import SearchBar from '@/components/base/SearchBar.vue'
 
 defineProps({
   boekingen: {
@@ -88,7 +83,6 @@ defineProps({
 
 const emit = defineEmits(['openBoeking', 'addBoeking', 'update:search', 'update:dateRange'])
 
-const localSearch = ref('')
 const localDateRange = ref([null, null])
 
 // ✅ ONGEWIJZIGD
@@ -98,15 +92,6 @@ const pickerOptions = {
     maxDate.setFullYear(maxDate.getFullYear() + 2)
     return date > maxDate
   },
-}
-
-let timeout
-
-function updateSearch() {
-  clearTimeout(timeout)
-  timeout = setTimeout(() => {
-    emit('update:search', localSearch.value)
-  }, 300)
 }
 
 function updateDateRange(val) {
@@ -172,32 +157,7 @@ function formatPeriode(b) {
   color: #065f46;
 }
 
-/* SEARCH */
-.search {
-  position: relative;
-  width: 260px;
-}
-.search input {
-  width: 100%;
-  padding: 8px 10px 8px 32px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  transition: 0.2s ease;
-}
-.search input:focus {
-  outline: none;
-  background: #e8f0ff;
-  box-shadow: 0 0 0 3px rgba(87, 134, 247, 0.2);
-}
-.search i {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 13px;
-  color: #1b4965;
-}
+
 .col-status {
   justify-self: end;
   padding: 6px 12px;

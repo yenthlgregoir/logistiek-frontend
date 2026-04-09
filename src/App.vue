@@ -111,9 +111,7 @@ const mainClass = computed(() => {
   transform: translateX(0);
 }
 @media (max-width: 768px) {
-  .app{
-    max-height: 92vh;
-  }
+
   .sidebar-wrapper {
     width: 100vw;
     transform: translateX(-100%);

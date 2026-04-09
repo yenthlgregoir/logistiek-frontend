@@ -57,8 +57,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { ElDatePicker } from 'element-plus'
-import 'element-plus/dist/index.css'
+
 
 const props = defineProps({
   search: String,

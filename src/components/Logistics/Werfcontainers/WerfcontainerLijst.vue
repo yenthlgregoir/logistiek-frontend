@@ -2,15 +2,14 @@
   <div class="page">
     <!-- Toolbar -->
     <div class="toolbar">
-      <div class="search">
-        <i class="material-icons">search</i>
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Search werfcontainers..."
-          class="search-input"
-        />
-      </div>
+
+      <SearchBar
+        placeholder="Zoek"
+        width="300px"
+        icon="fa fa-search"
+        @update:modelValue="emit('search', $event)"
+      />
+    
       <button class="btn btn-primary" @click="emit('openAdd')">+ Werfcontainer</button>
     </div>
 
@@ -127,8 +126,8 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
 import ExpandedBaseTable from '@/components/base/ExpandedBaseTable.vue'
+import SearchBar from '@/components/base/SearchBar.vue'
 
 defineProps({
   assets: { type: Array, default: () => [] },
@@ -136,16 +135,6 @@ defineProps({
 
 const emit = defineEmits(['search', 'openAdd', 'edit-asset'])
 
-const searchQuery = ref('')
-
-// 🔍 SEARCH
-let timeout = null
-watch(searchQuery, () => {
-  clearTimeout(timeout)
-  timeout = setTimeout(() => {
-    emit('search', searchQuery.value)
-  }, 400)
-})
 
 // STATUS
 function getStatus(item) {
@@ -194,27 +183,6 @@ function editAsset(asset) {
   display: flex;
   justify-content: space-between;
   margin-bottom: 15px;
-}
-
-.search {
-  position: relative;
-  max-width: 300px;
-  width: 100%;
-}
-
-.search input {
-  width: 100%;
-  padding: 8px 12px 8px 36px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-}
-
-.search i {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #6b7280;
 }
 
 /* Table */

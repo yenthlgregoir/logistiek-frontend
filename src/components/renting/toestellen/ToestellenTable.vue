@@ -55,7 +55,7 @@ const gefilterdeToestellen = computed(() => {
 })
 
 function formatAdres(adres) {
-  if (adres === 'vrij') return 'vrij'
+  if (adres === 'vrij' || !adres) return 'vrij'
 
   return `${adres.naam || 'Onbekende klant'}: ${adres.straat || ''} ${
     adres.huisnummer || ''

@@ -2,16 +2,13 @@
   <div class="lijstweergave">
     <!-- TOOLBAR -->
     <div class="toolbar">
-      <div class="search">
-        <i class="fa fa-search"></i>
-        <input
-          type="text"
-          placeholder="Zoek klant..."
-          :value="search"
-          @input="$emit('update:search', $event.target.value)"
-        />
-      </div>
-
+      <SearchBar
+        placeholder="Zoek"
+        width="300px"
+        icon="fa fa-search"
+        @update:modelValue="$emit('update:search', $event)"
+      />
+    
       <button class="btn btn-primary" @click="$emit('new')">+ Add</button>
     </div>
 
@@ -31,6 +28,7 @@
 
 <script setup>
 import BaseTable from '@/components/base/BaseTable.vue'
+import SearchBar from '@/components/base/SearchBar.vue';
 
 defineProps({
   klanten: { type: Array, default: () => [] },
@@ -52,37 +50,5 @@ defineEmits(['select', 'new', 'update:search'])
   color: white;
   padding: 10px 16px;
   border-radius: 10px;
-}
-
-/* SEARCH */
-.search {
-  position: relative;
-  flex: 1;
-  max-width: 300px;
-}
-
-.search input {
-  width: 100%;
-  padding: 10px 12px 10px 34px;
-  border-radius: 10px;
-  border: none;
-  background: transparent;
-  font-size: 14px;
-  transition: 0.2s ease;
-}
-
-.search input:focus {
-  outline: none;
-  background: #e8f0ff;
-  box-shadow: 0 0 0 3px rgba(87, 134, 247, 0.2);
-}
-
-.search i {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #1b4965;
-  font-size: 13px;
 }
 </style>

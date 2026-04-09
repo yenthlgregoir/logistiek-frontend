@@ -19,28 +19,17 @@
         </div>
 
         <!-- ✅ Klant autocomplete select -->
-        <div class="form-group autocomplete" ref="klantBox">
-          <label>Klant</label>
-
-          <input
-            type="text"
-            v-model="klantSearch"
-            @focus="showKlantDropdown = true"
-            @input="filterKlanten"
-            placeholder="Zoek klant..."
-            class="autocomplete-input"
-            required
-          />
-
-          <!-- Dropdown list -->
-          <ul v-if="showKlantDropdown" class="autocomplete-list">
-            <li v-for="k in gefilterdeKlanten" :key="k._id" @mousedown.prevent="selectKlant(k)">
-              {{ k.naam }}
-            </li>
-
-            <li v-if="gefilterdeKlanten.length === 0" class="no-results">Geen resultaten</li>
-          </ul>
-        </div>
+        <!-- NieuweBoekingModal.vue -->
+<div class="form-group">
+  <label>Klant</label>
+  <AutocompleteSelect
+    v-model="form.klant"
+    :options="klanten"
+    label-key="naam"
+    placeholder="Zoek klant..."
+    @select="handleKlantAdres"
+  />
+</div>
 
         <!-- Periode -->
         <div class="form-group">
@@ -69,9 +58,7 @@
         </div>
       </form>
 
-      <p v-if="message" :class="{ error: error }">
-        {{ message }}
-      </p>
+      <p v-if="message" :class="{ error: error }">{{ message }}</p>
     </div>
   </div>
 
@@ -89,26 +76,9 @@ import { reactive, ref, onMounted, onUnmounted } from 'vue'
 import { boekingApi } from '@/api/boeking'
 import { klantApi } from '@/api/klant'
 import SelectLeverAdresModal from './SelectLeverAdresModal.vue'
-
-const klantBox = ref(null)
-
-// Klik buiten autocomplete → sluiten
-function handleClickOutside(event) {
-  if (klantBox.value && !klantBox.value.contains(event.target)) {
-    showKlantDropdown.value = false
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
+import AutocompleteSelect from '@/components/base/AutocompleteSelect.vue'
 
 defineProps({ types: Object })
-
 const emit = defineEmits(['close', 'update'])
 
 /* --------------------------
@@ -123,50 +93,33 @@ const form = reactive({
   leverAdres: '',
 })
 
-/* --------------------------
-   AUTOCOMPLETE STATE
--------------------------- */
 const klanten = ref([])
-const klantSearch = ref('')
-const gefilterdeKlanten = ref([])
-const showKlantDropdown = ref(false)
-
-/* --------------------------
-   ANDEREN
--------------------------- */
 const message = ref('')
 const error = ref(false)
 const showAdresModal = ref(false)
 const beschikbareAdressen = ref([])
 
 /* --------------------------
-   LOAD DATA
+   LEEFTIJD: GET KLANTEN
 -------------------------- */
 onMounted(async () => {
   await getKlanten()
-  gefilterdeKlanten.value = klanten.value
   document.addEventListener('keydown', handleEsc)
 })
 
 onUnmounted(() => document.removeEventListener('keydown', handleEsc))
 
-/* --------------------------
-   AUTOCOMPLETE LOGICA
--------------------------- */
-function filterKlanten() {
-  const q = klantSearch.value.toLowerCase().trim()
-  gefilterdeKlanten.value = klanten.value.filter((k) => k.naam.toLowerCase().includes(q))
+async function getKlanten() {
+  try {
+    const data = await klantApi.list()
+    klanten.value = Array.isArray(data) ? data : data.items ?? []
+  } catch (e) {
+    console.error(e)
+  }
 }
-
-function selectKlant(k) {
-  form.klant = k._id
-  klantSearch.value = k.naam
-  showKlantDropdown.value = false
-
-  handleKlantAdres(k)
-}
-
 function handleKlantAdres(klant) {
+  form.klant = klant._id
+
   if (klant.leverAdressen?.length > 1) {
     beschikbareAdressen.value = klant.leverAdressen
     showAdresModal.value = true
@@ -176,25 +129,20 @@ function handleKlantAdres(klant) {
     form.leverAdres = klant.factuurAdres?._id || null
   }
 }
+/* --------------------------
+   KLANT ADRES LOGICA
+-------------------------- */
 
+
+/* --------------------------
+   ESC EN CLOSE
+-------------------------- */
 function handleEsc(e) {
   if (e.key === 'Escape') close()
 }
 
 function close() {
   emit('close')
-}
-
-/* --------------------------
-   GET KLANTEN
--------------------------- */
-async function getKlanten() {
-  try {
-    const data = await klantApi.list()
-    klanten.value = Array.isArray(data) ? data : (data.items ?? [])
-  } catch (e) {
-    console.error(e)
-  }
 }
 
 /* --------------------------
@@ -217,7 +165,6 @@ async function submitBoeking() {
     await boekingApi.add(JSON.stringify(form))
     message.value = 'Boeking succesvol aangemaakt!'
     error.value = false
-
     emit('update')
     setTimeout(() => close(), 800)
   } catch (err) {
@@ -231,7 +178,6 @@ async function submitBoeking() {
   }
 }
 </script>
-
 <style scoped>
 /* =========================================
    OVERLAY

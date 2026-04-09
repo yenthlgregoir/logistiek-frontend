@@ -70,10 +70,10 @@
 <script setup>
 import { reactive, ref, watch, computed } from 'vue'
 import BaseDrawer from '@/components/base/BaseDrawer.vue'
-import VrijeToestellenModal from './VrijeToestellenModal.vue'
-import WerfWijzigenModal from './WerfWijzigenModal.vue'
-import ProjectleiderWijzigenModal from './ProjectleiderWijzigenModal.vue'
-import PeriodeWijzigenModal from './PeriodeWijzigenModal.vue'
+import VrijeToestellenModal from '@/components/Logistics/verhuur/VrijeToestellenModal.vue'
+import WerfWijzigenModal from '@/components/Logistics/verhuur/WerfWijzigenModal.vue'
+import ProjectleiderWijzigenModal from '@/components/Logistics/verhuur/ProjectleiderWijzigenModal.vue'
+import PeriodeWijzigenModal from '@/components/Logistics/verhuur/PeriodeWijzigenModal.vue'
 
 import { verhuurApi } from '@/api/verhuur.js'
 import { werfApi } from '@/api/werf.js'

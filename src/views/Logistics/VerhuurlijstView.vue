@@ -28,8 +28,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import VerhuurLijst from '@/components/Logistics/Schaarliften/VerhuurLijst.vue'
-import VerhuurDrawer from '@/components/Logistics/Schaarliften/VerhuurDrawer.vue'
+import VerhuurLijst from '@/components/Logistics/verhuur/VerhuurLijst.vue'
+import VerhuurDrawer from '@/components/Logistics/verhuur/VerhuurDrawer.vue'
 import { verhuurApi } from '@/api/verhuur.js'
 import { werfApi } from '@/api/werf.js'
 import { leiderApi } from '@/api/projectLeider.js'

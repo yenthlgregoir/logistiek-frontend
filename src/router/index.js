@@ -1,204 +1,191 @@
-import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/authentication/auth.store.js'
 
-//views
-import HomeView from '../views/HomeView.vue'
-import PurchaseView from '../views/purchase/PurchaseView.vue'
-import ArchiefView from '../views/purchase/ArchiefView.vue'
-import OrderView from '../views/purchase/OrderView.vue'
-import ProductView from '@/views/purchase/ProductView.vue'
-import FilesView from '@/views/purchase/FilesView.vue'
-import LoginView from '@/views/authentication/LoginView.vue' // maak een login page
-import KlantenView from '@/views/renting/KlantenView.vue'
-import ToestellenView from '@/views/renting/ToestellenView.vue'
-import agendaPage from '@/views/renting/agendaPage.vue'
-import DetailView from '@/views/renting/detailView.vue'
-import adminPage from '@/views/authentication/adminPage.vue'
-import ResetPasswordPage from '@/views/authentication/ResetPasswordPage.vue'
-import CreateUserPage from '@/views/authentication/createUserPage.vue'
-import ArchiefPage from '@/views/renting/archiefPage.vue'
-import BoekingList from '@/components/renting/agenda/BoekingList.vue'
-import AgendaComponent from '@/components/renting/agenda/AgendaComponent.vue'
-import WerfView from '@/views/Logistics/WerfView.vue'
-import ProjectLeidersView from '@/views/Logistics/ProjectLeidersView.vue'
-import SchaarliftenLijstview from '@/views/Logistics/SchaarliftenLijstView.vue'
-import SchaarliftenPlanningView from '@/views/Logistics/SchaarliftenPlanningView.vue'
-import VerhuurlijstView from '@/views/Logistics/VerhuurlijstView.vue'
-import WerfcontainerLijstView from '@/views/Logistics/WerfcontainerLijstView.vue'
 const routes = [
+  // Home
   {
     path: '/',
     name: 'home',
-    component: HomeView,
+    component: () => import('@/views/HomeView.vue'),
     meta: { requiresAuth: true, noSidebar: true },
   },
+
+  // Purchase
   {
     path: '/Purchase',
     name: 'purchase',
-    component: PurchaseView,
+    component: () => import('@/views/purchase/PurchaseView.vue'),
     meta: { requiresAuth: true, roles: ['admin', 'purchase'] },
   },
   {
     path: '/Purchase/archive',
     name: 'archive',
-    component: ArchiefView,
+    component: () => import('@/views/purchase/ArchiefView.vue'),
     meta: { requiresAuth: true, roles: ['admin', 'purchase'] },
   },
   {
     path: '/Purchase/order/:id',
     name: 'order',
-    component: OrderView,
+    component: () => import('@/views/purchase/OrderView.vue'),
     meta: { requiresAuth: true, roles: ['admin', 'purchase'] },
   },
   {
     path: '/Purchase/products/:id',
     name: 'products',
-    component: ProductView,
+    component: () => import('@/views/purchase/ProductView.vue'),
     meta: { requiresAuth: true, roles: ['admin', 'purchase'] },
   },
   {
     path: '/Purchase/files/:id',
     name: 'files',
-    component: FilesView,
+    component: () => import('@/views/purchase/FilesView.vue'),
     meta: { requiresAuth: true, roles: ['admin', 'purchase'] },
   },
+
+  // Authentication
   {
     path: '/login',
     name: 'login',
-    component: LoginView,
+    component: () => import('@/views/authentication/LoginView.vue'),
     meta: { noSidebar: true },
   },
   {
     path: '/admin/create-user',
     name: 'createUser',
-    component: CreateUserPage,
+    component: () => import('@/views/authentication/createUserPage.vue'),
     meta: { requiresAuth: true, roles: ['admin'] },
   },
   {
     path: '/admin/users',
     name: 'adminPage',
-    component: adminPage,
+    component: () => import('@/views/authentication/adminPage.vue'),
     meta: { requiresAuth: true, roles: ['admin'] },
   },
   {
     path: '/password-reset/:token',
     name: 'ResetPasswordPage',
-    component: ResetPasswordPage,
+    component: () => import('@/views/authentication/ResetPasswordPage.vue'),
   },
+
+  // Renting
   {
     path: '/renting/klanten',
     name: 'rentingKlanten',
-    component: KlantenView,
+    component: () => import('@/views/renting/KlantenView.vue'),
     meta: { requiresAuth: true, roles: ['admin', 'renting'] },
   },
   {
     path: '/renting/toestellen',
     name: 'rentingToestellen',
-    component: ToestellenView,
+    component: () => import('@/views/renting/ToestellenView.vue'),
     meta: { requiresAuth: true, roles: ['admin', 'renting'] },
   },
   {
     path: '/renting/agenda',
     name: 'renting',
-    component: agendaPage,
+    component: () => import('@/views/renting/agendaPage.vue'),
     meta: { requiresAuth: true, roles: ['admin', 'renting'] },
     redirect: '/renting/agenda/planning',
     children: [
       {
         path: 'planning',
         name: 'rentingPlanning',
-        component: AgendaComponent,
+        component: () => import('@/components/agenda/AgendaComponent.vue'),
       },
       {
         path: 'lijst',
         name: 'rentingLijst',
-        component: BoekingList,
+        component: () => import('@/components/renting/agenda/BoekingList.vue'),
       },
     ],
   },
   {
     path: '/renting/archief',
     name: 'Archief',
-    component: ArchiefPage,
+    component: () => import('@/views/renting/archiefPage.vue'),
     meta: { requiresAuth: true, roles: ['admin', 'renting'] },
   },
   {
     path: '/renting/detail/:boekingId',
     name: 'rentingDetail',
-    component: DetailView,
+    component: () => import('@/views/renting/detailView.vue'),
     meta: { requiresAuth: true, roles: ['admin', 'renting'] },
     props: true,
   },
+
+  // Logistics
   {
     path: '/logistics/werf',
     name: 'WerfPage',
-    component: WerfView,
+    component: () => import('@/views/Logistics/WerfView.vue'),
     meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
   },
   {
     path: '/logistics/projectleiders',
     name: 'ProjectLeiderPage',
-    component: ProjectLeidersView,
+    component: () => import('@/views/Logistics/ProjectLeidersView.vue'),
     meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
   },
   {
     path: '/logistics/schaarlift',
     name: 'schaarliften',
-    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
     redirect: '/logistics/schaarlift/planning',
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
   },
   {
     path: '/logistics/schaarlift/lijst',
     name: 'schaarliftenLijst',
-    component: SchaarliftenLijstview,
+    component: () => import('@/views/Logistics/SchaarliftenLijstView.vue'),
     meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
   },
   {
     path: '/logistics/schaarlift/verhuur',
     name: 'schaarliftenverhuur',
-    component: VerhuurlijstView,
-    props : {assetType: "Hoogtewerker"},
-    meta: { requiresAuth: true, roles: ['admin', 'logistics']},
+    component: () => import('@/views/Logistics/VerhuurlijstView.vue'),
+    props: { assetType: 'Hoogtewerker' },
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
   },
   {
     path: '/logistics/schaarlift/planning',
     name: 'schaarliftenPlanning',
-    component: SchaarliftenPlanningView,
-    props : {assetModel: "Hoogtewerker"},
+    component: () => import('@/views/Logistics/VerhuurPlanningView.vue'),
+    props: { assetModel: 'Hoogtewerker' },
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
+  },
+  {
+    path: '/logistics/werfcontainers/lijst',
+    name: 'werfContainerLijst',
+    component: () => import('@/views/Logistics/WerfcontainerLijstView.vue'),
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
+  },
+  {
+    path: '/logistics/werfcontainers/verhuur',
+    name: 'werfcontainerVerhuur',
+    component: () => import('@/views/Logistics/VerhuurlijstView.vue'),
+    props: { assetType: 'WerfContainer' },
+    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
+  },
+  {
+    path: '/logistics/werfcontainers/planning',
+    name: 'werfcontainerPlanning',
+    component: () => import('@/views/Logistics/VerhuurPlanningView.vue'),
+    props: { assetModel: 'WerfContainer' },
     meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
   },
   {
     path: '/logistics/werfcontainers',
     name: 'werfcontainers',
-    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
     redirect: '/logistics/werfcontainers/planning',
-  },
-  {
-    path: '/logistics/werfcontainers/lijst',
-    name: 'werfContainerLijst',
-    component: WerfcontainerLijstView,
-    meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
-  },
-   {
-    path: '/logistics/werfcontainers/verhuur',
-    name: 'werfcontainerVerhuur',
-    component: VerhuurlijstView,
-    props : {assetType: "WerfContainer"},
-    meta: { requiresAuth: true, roles: ['admin', 'logistics']},
-  },
-  {
-    path: '/logistics/werfcontainers/planning',
-    name: 'werfcontainerPlanning',
-    component: SchaarliftenPlanningView,
-    props : {assetModel: "WerfContainer"},
     meta: { requiresAuth: true, roles: ['admin', 'logistics'] },
   },
 ]
+
 const router = createRouter({
   history: createWebHistory('/'),
   routes,
 })
 
+// --- Auth Guard ---
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
 
@@ -208,13 +195,10 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.roles && auth.isLoggedIn) {
     const userRole = auth.user?.role
-
-    if (!userRole) {
-      return next({ name: 'login' }) // fallback
-    }
+    if (!userRole) return next({ name: 'login' })
 
     if (userRole !== 'admin' && !to.meta.roles.includes(userRole)) {
-      return next({ name: 'home' }) // niet toegestane rol
+      return next({ name: 'home' })
     }
   }
 

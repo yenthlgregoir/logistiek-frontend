@@ -1,13 +1,22 @@
 <template>
   <div class="page-content">
     <div class="agenda-parent-container">
+      <h1>Planning</h1>
       <!-- Agenda -->
       <Agenda
-        v-if="showAgenda"
-        :boekingen="store.boekingen"
-        @openBoeking="openBoekingModal"
-        @addBoeking="showCreateModal = true"
-      />
+  v-if="showAgenda"
+  :items="store.boekingen.map(b => b.toestel).filter(Boolean)"
+  :bookings="store.boekingen"
+  :typeOptions="store.types"
+  :t
+  item-label="Toestel"
+  :get-item-id="t => t._id"
+  :get-booking-start="b => new Date(b.beginDatum)"
+  :get-booking-end="b => new Date(b.eindDatum)"
+  :get-booking-title="b => b.klant?.naam || b.leverAdresDetails?.naam"
+  @addBoeking="showCreateModal = true"
+  @openBoeking="openBoekingModal"
+/>
 
       <!-- Lijst -->
       <BoekingList
@@ -46,12 +55,13 @@
     </div>
   </div>
 </template>
+
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useBoekingenStore } from '@/stores/renting/boekingen.store.js'
 
-import Agenda from '@/components/renting/agenda/AgendaComponent.vue'
+import Agenda from '@/components/agenda/AgendaComponent.vue'
 import BoekingList from '@/components/renting/agenda/BoekingList.vue'
 import CreateBoekingModal from '@/components/renting/agenda/CreateBoekingModal.vue'
 import BoekingModal from '@/components/renting/agenda/BoekingModal.vue'
@@ -63,6 +73,11 @@ const store = useBoekingenStore()
 // ROUTE bepaalt view
 const route = useRoute()
 const showAgenda = computed(() => route.path.includes('/planning'))
+
+// REACTIVE DATA VOOR AGENDA
+const toestellen = ref([])
+const boekingen = ref([])
+const typeOptions = ref([])
 
 // MODALS
 const showCreateModal = ref(false)
@@ -114,11 +129,17 @@ async function saveComment(boeking) {
   showBoekingModal.value = false
 }
 
+
 // INIT
-onMounted(() => {
+onMounted(async () => {
   store.setViewMode('actief')
-  store.loadBoekingen()
-  store.loadTypes()
+  await store.loadBoekingen()
+  await store.loadTypes()
+
+  toestellen.value = store.toestellen || []
+  console.log(toestellen)
+  boekingen.value = store.boekingen || []
+  typeOptions.value = store.types || []
 })
 </script>
 

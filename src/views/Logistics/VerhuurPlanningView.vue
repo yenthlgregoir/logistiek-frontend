@@ -3,13 +3,13 @@
     <h2>Planning {{ assetModel.toLowerCase() }}</h2>
 
     <!-- Agenda -->
-    <SchaarliftenAgenda
-      :boekingen="boekingen"
-      :types="machineTypes"
-      @openBoeking="openBoeking"
-      @addBoeking="nieuweBoeking"
-      @filterType="onFilterType"
-    />
+    <VerhuurAgenda
+  :boekingen="boekingen"
+  :types="machineTypes"
+  @openBoeking="openBoeking"
+  @addBoeking="nieuweBoeking"
+  @filterType="onFilterType"
+/>
 
     <!-- Edit drawer -->
     <VerhuurDrawer
@@ -48,9 +48,9 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 
-import SchaarliftenAgenda from '@/components/Logistics/Schaarliften/SchaarliftenAgenda.vue'
-import VerhuurDrawer from '@/components/Logistics/Schaarliften/VerhuurDrawer.vue'
-import AddVerhuurDrawer from '@/components/Logistics/Schaarliften/AddVerhuurDrawer.vue'
+import VerhuurAgenda from '@/components/Logistics/verhuur/VerhuurAgenda.vue'
+import VerhuurDrawer from '@/components/Logistics/verhuur/VerhuurDrawer.vue'
+import AddVerhuurDrawer from '@/components/Logistics/verhuur/AddVerhuurDrawer.vue'
 
 import { verhuurApi } from '@/api/verhuur.js'
 import { werfApi } from '@/api/werf.js'
@@ -112,6 +112,7 @@ async function loadData() {
     if (props.assetModel === "WerfContainer") {
       machineTypes.value = await werfcontainerApi.getTypes()
       entiteiten.value = await entiteitApi.getEntiteiten();
+
     } else {
       machineTypes.value = [
         {  type: "Schaarlift", naam: "Schaarlift" },
@@ -133,9 +134,9 @@ async function loadData() {
 }
 
 // --- filters ---
-function onFilterType(type) {
-  filters.value.type = type
-  loadData()
+async function onFilterType(type) {
+  filters.value.type = type.naam
+  await loadData()
 }
 
 // --- open bestaande ---

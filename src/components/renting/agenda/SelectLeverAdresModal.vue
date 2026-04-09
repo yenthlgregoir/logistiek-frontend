@@ -6,7 +6,13 @@
     </template>
 
     <!-- BODY -->
-    <input type="text" v-model="search" placeholder="Zoek adres..." class="search-input" />
+
+    <SearchBar
+      v-model="search"
+      placeholder="Zoek adres..."
+      width="100%"
+      icon="fa fa-search"
+    />
 
     <ul class="list">
       <li
@@ -32,6 +38,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import BaseModal from '@/components/base/BaseModal.vue'
+import SearchBar from '@/components/base/SearchBar.vue'
 
 const props = defineProps({
   adressen: { type: Array, required: true },

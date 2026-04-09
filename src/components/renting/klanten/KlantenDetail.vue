@@ -7,7 +7,6 @@
           <h3>Detail</h3>
           <button class="close-btn" @click="$emit('close')">✕</button>
         </div>
-
         <!-- Content -->
         <div class="drawer-content">
           <div class="adres-row">
@@ -18,7 +17,6 @@
                 <input v-model="localForm.naam" @blur="touched.naam = true" />
                 <p v-if="touched.naam && !localForm.naam" class="error">Naam is verplicht</p>
               </div>
-
               <div class="form-group">
                 <label>Klantnummer</label>
                 <input v-model="localForm.klantNummer" @blur="touched.klantNummer = true" />
@@ -26,22 +24,18 @@
                   Klantnummer is verplicht
                 </p>
               </div>
-
               <div class="form-group">
                 <label>Telefoonnummer</label>
                 <input v-model="localForm.telefoonnummer" />
               </div>
-
               <div class="form-group">
                 <label>Mailadres</label>
                 <input v-model="localForm.mailadres" />
               </div>
-
               <div class="form-group">
                 <label>BTW-nummer</label>
                 <input v-model="localForm.BTWnummer" />
               </div>
-
               <h4>Factuuradres</h4>
               <div class="form-group-inline">
                 <div class="input-large">
@@ -53,7 +47,6 @@
                   <input v-model="localForm.factuurAdres.huisnummer" />
                 </div>
               </div>
-
               <div class="form-group-inline">
                 <div class="input-small">
                   <label>Postcode</label>
@@ -64,27 +57,18 @@
                   <input v-model="localForm.factuurAdres.gemeente" />
                 </div>
               </div>
-
               <div class="buttons">
                 <button class="save" :disabled="!isValid" @click="emitSave">Opslaan</button>
-                <button class="delete" v-if="localSelected" @click="$emit('delete')">
-                  Verwijderen
-                </button>
+                <button class="delete" v-if="localSelected" @click="$emit('delete')">Verwijderen</button>
               </div>
             </div>
-
             <div class="divider"></div>
 
             <!-- Leveradressen -->
             <div class="leveradressen">
-              <h4>Leveradressen</h4>
+              <h4>Leveradressen</h4>      
               <div class="search-row">
-                <input
-                  class="search-input"
-                  type="search"
-                  v-model="zoekTerm"
-                  placeholder="Zoek op naam…"
-                />
+                <input class="search-input" type="search" v-model="zoekTerm" placeholder="Zoek op naam…" />
                 <button @click="$emit('leveradresToevoegen')" class="add-adres">+ Add</button>
               </div>
 
@@ -135,85 +119,55 @@ const props = defineProps({
   show: { type: Boolean, default: false },
 })
 
-const emit = defineEmits([
-  'save',
-  'cancel',
-  'delete',
-  'close',
-  'leveradresToevoegen',
-  'update-lever-adres',
-  'remove-lever-adres',
-])
+const emit = defineEmits(['save','cancel','delete','close','leveradresToevoegen','update-lever-adres','remove-lever-adres'])
 
-function clone(data) {
-  return JSON.parse(JSON.stringify(data))
-}
+function clone(data) { return JSON.parse(JSON.stringify(data)) }
 
 const localForm = ref(clone(props.form))
-watch(
-  () => props.form,
-  (v) => (localForm.value = clone(v)),
-  { deep: true },
-)
+watch(() => props.form, (v) => (localForm.value = clone(v)), { deep: true })
 
 const localSelected = ref(props.selectedKlant)
-watch(
-  () => props.selectedKlant,
-  (v) => (localSelected.value = v),
-)
+watch(() => props.selectedKlant, (v) => (localSelected.value = v))
 
-const touched = reactive({ naam: false, klantNummer: false })
-const isValid = computed(
-  () => localForm.value?.naam?.trim() && localForm.value?.klantNummer?.trim(),
-)
+const touched = reactive({ naam:false, klantNummer:false })
+const isValid = computed(() => localForm.value?.naam?.trim() && localForm.value?.klantNummer?.trim())
 
 const zoekTerm = ref('')
 const filteredLeverAdressen = computed(() => {
   const q = zoekTerm.value.toLowerCase().trim()
   const list = localForm.value?.leverAdressen || []
-  return !q ? list : list.filter((a) => (a?.naam || '').toLowerCase().includes(q))
+  return !q ? list : list.filter((a) => (a?.naam||'').toLowerCase().includes(q))
 })
 
-function emitSave() {
-  emit('save', clone(localForm.value))
-}
-function onDelete(adres) {
-  emit('remove-lever-adres', adres)
-}
+function emitSave() { emit('save', clone(localForm.value)) }
+function onDelete(adres) { emit('remove-lever-adres', adres) }
 
 const showModal = ref(false)
 const editingAdres = ref(null)
 const adresIndex = ref(null)
 
 function onEdit(adres) {
-  adresIndex.value = localForm.value.leverAdressen.findIndex((a) => a === adres)
+  adresIndex.value = localForm.value.leverAdressen.findIndex((a) => a===adres)
   editingAdres.value = { ...adres }
   showModal.value = true
 }
-function closeModal() {
-  showModal.value = false
-  adresIndex.value = null
-}
+function closeModal() { showModal.value = false; adresIndex.value = null }
 function saveEditedAdres(adres) {
-  if (adresIndex.value !== null) {
-    if (props.selectedKlant?._id) emit('update-lever-adres', { adres })
-    else localForm.value.leverAdressen[adresIndex.value] = { ...adres }
+  if(adresIndex.value!==null){
+    if(props.selectedKlant?._id) emit('update-lever-adres',{adres})
+    else localForm.value.leverAdressen[adresIndex.value] = {...adres}
   }
   closeModal()
 }
 
 // Lock scroll when drawer open
-const lockScroll = () => (document.body.style.overflow = 'hidden')
-const unlockScroll = () => (document.body.style.overflow = '')
-watch(
-  () => props.show,
-  (val) => (val ? lockScroll() : unlockScroll()),
-)
+const lockScroll = () => document.body.style.overflow = 'hidden'
+const unlockScroll = () => document.body.style.overflow = ''
+watch(() => props.show, (val)=> val? lockScroll(): unlockScroll())
 onBeforeUnmount(unlockScroll)
 </script>
 
 <style scoped>
-/* WRAPPER */
 .drawer-wrapper {
   position: fixed;
   top: 0;
@@ -222,7 +176,6 @@ onBeforeUnmount(unlockScroll)
   z-index: 1000;
 }
 
-/* DRAWER */
 .drawer {
   width: 50vw;
   max-width: 100%;
@@ -455,7 +408,6 @@ input:focus {
   font-size: 14px;
 }
 
-/* BUTTONS OP KAART */
 .card-buttons {
   position: absolute;
   top: 10px;
@@ -488,7 +440,7 @@ input:focus {
 
 /* RESPONSIVE */
 @media (max-width: 1024px) {
-  .drawer {
+  .drawer{
     width: 90vw;
   }
   .adres-row {
@@ -499,7 +451,7 @@ input:focus {
     width: 100%;
   }
 }
-button {
+button{
   border: none;
 }
 </style>

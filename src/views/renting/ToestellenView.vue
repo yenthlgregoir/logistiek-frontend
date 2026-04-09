@@ -43,9 +43,9 @@
 
 <script setup>
 import { ref, reactive, onMounted, watch, computed, onBeforeUnmount } from 'vue'
-import ToestellenTable from '@/components/toestellen/ToestellenTable.vue'
-import ToestellenToolbar from '@/components/toestellen/ToestellenToolbar.vue'
-import ToestellenForm from '@/components/toestellen/ToestellenForm.vue'
+import ToestellenTable from '@/components/renting/toestellen/ToestellenTable.vue'
+import ToestellenToolbar from '@/components/renting/toestellen/ToestellenToolbar.vue'
+import ToestellenForm from '@/components/renting/toestellen/ToestellenForm.vue'
 import { toestelApi } from '@/api/toestel'
 import { klantApi } from '@/api/klant'
 

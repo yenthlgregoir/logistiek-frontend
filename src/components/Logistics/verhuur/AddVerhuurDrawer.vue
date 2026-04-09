@@ -29,7 +29,7 @@
         </select>
       </div>
 
-      <!-- Werkhoogte -->
+      <!-- Werkhoogte (specifiek voor Hoogtewerker) -->
       <div
         v-if="verhuurCopy.assetModel === 'Hoogtewerker'"
         class="info-block"
@@ -47,7 +47,7 @@
         />
       </div>
 
-      <!-- Entiteit -->
+      <!-- Entiteit (specifiek voor WerfContainer) -->
       <div
         v-if="verhuurCopy.assetModel === 'WerfContainer'"
         class="info-block"
@@ -56,12 +56,14 @@
         <div v-if="isEditMode && !isEditing">
           {{ verhuurCopy.entiteit?.naam }}
         </div>
-        <select v-else v-model="verhuurCopy.entiteit">
-          <option disabled value="">Selecteer entiteit</option>
-          <option v-for="e in entiteiten" :key="e._id" :value="e">
-            {{ e.naam }}
-          </option>
-        </select>
+        <AutocompleteSelect
+          v-else
+          v-model="verhuurCopy.entiteit"
+          :options="entiteiten"
+          label-key="naam"
+          placeholder="Selecteer entiteit..."
+          @select="(e) => (verhuurCopy.entiteit = e)"
+        />
       </div>
 
       <!-- Werf -->
@@ -70,12 +72,14 @@
         <div v-if="isEditMode && !isEditing">
           {{ verhuurCopy.werf?.naam }}
         </div>
-        <select v-else v-model="verhuurCopy.werf">
-          <option disabled value="">Selecteer werf</option>
-          <option v-for="w in werven" :key="w._id" :value="w">
-            {{ w.naam }}
-          </option>
-        </select>
+        <AutocompleteSelect
+          v-else
+          v-model="verhuurCopy.werf"
+          :options="werven"
+          label-key="naam"
+          placeholder="Zoek werf..."
+          @select="(w) => (verhuurCopy.werf = w)"
+        />
       </div>
 
       <!-- Projectleider -->
@@ -84,12 +88,14 @@
         <div v-if="isEditMode && !isEditing">
           {{ verhuurCopy.projectleider?.naam }}
         </div>
-        <select v-else v-model="verhuurCopy.projectleider">
-          <option disabled value="">Selecteer projectleider</option>
-          <option v-for="p in projectleiders" :key="p._id" :value="p">
-            {{ p.naam }}
-          </option>
-        </select>
+        <AutocompleteSelect
+          v-else
+          v-model="verhuurCopy.projectleider"
+          :options="projectleiders"
+          label-key="naam"
+          placeholder="Zoek projectleider..."
+          @select="(p) => (verhuurCopy.projectleider = p)"
+        />
       </div>
 
       <!-- Datums -->
@@ -123,6 +129,7 @@
 <script setup>
 import { ref, watch } from "vue";
 import BaseDrawer from "@/components/base/BaseDrawer.vue";
+import AutocompleteSelect from "@/components/base/AutocompleteSelect.vue";
 
 const props = defineProps({
   show: Boolean,
@@ -132,7 +139,7 @@ const props = defineProps({
   projectleiders: Array,
   entiteiten: Array,
   error: String,
-  assetModel: String, // 🔥 belangrijk
+  assetModel: String,
 });
 
 const emit = defineEmits(["close", "save", "edit"]);
@@ -142,12 +149,7 @@ const isEditing = ref(true);
 const loading = ref(false);
 const verhuurCopy = ref({});
 
-
-// 🔥 filter assets per model
-
-
-
-// 🔥 init / edit mode
+// Init / edit mode
 watch(
   () => props.verhuur,
   (val) => {
@@ -164,17 +166,13 @@ watch(
   { immediate: true }
 );
 
-
-// 🔥 reset bij model switch
+// Reset bij model switch
 watch(
   () => props.assetModel,
-  () => {
-    resetForm();
-  }
+  () => resetForm()
 );
 
-
-// 🔥 reset form
+// Reset form
 function resetForm() {
   verhuurCopy.value = {
     logistiekeReferentie: "",
@@ -189,8 +187,7 @@ function resetForm() {
   };
 }
 
-
-// 🔥 save
+// Save verhuur
 async function saveVerhuur() {
   if (!verhuurCopy.value.leverDatum) {
     return alert("Startdatum is verplicht");
@@ -207,18 +204,11 @@ async function saveVerhuur() {
     return alert("Selecteer een type");
   }
 
-  // 🔥 type-specifieke validatie
-  if (
-    verhuurCopy.value.assetModel === "Hoogtewerker" &&
-    !verhuurCopy.value.werkhoogte
-  ) {
+  if (verhuurCopy.value.assetModel === "Hoogtewerker" && !verhuurCopy.value.werkhoogte) {
     return alert("Werkhoogte is verplicht");
   }
 
-  if (
-    verhuurCopy.value.assetModel === "WerfContainer" &&
-    !verhuurCopy.value.entiteit
-  ) {
+  if (verhuurCopy.value.assetModel === "WerfContainer" && !verhuurCopy.value.entiteit) {
     return alert("Entiteit is verplicht");
   }
 
