@@ -15,7 +15,7 @@
       </div>
       <div class="info-block">
         <label>Huisnummer</label>
-        <input type="number" v-model="form.adres.huisnummer" placeholder="Huisnummer" />
+        <input type="text" v-model="form.adres.huisnummer" placeholder="Huisnummer" />
       </div>
       <div class="info-block">
         <label>Postcode</label>

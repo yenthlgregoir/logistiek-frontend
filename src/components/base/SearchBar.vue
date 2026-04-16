@@ -13,7 +13,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import debounce from 'lodash/debounce' // of zelf implementeren
+import debounce from 'lodash/debounce' 
 
 const props = defineProps({
   modelValue: String,
