@@ -56,8 +56,15 @@
             @click="$emit('openBoeking', booking._id)"
           >
             <strong class="boeking-title">{{ getBookingTitle(booking) }}</strong>
-            <small class="datum-range">{{ formatDate(getBookingStart(booking)) }} - {{ formatDate(getBookingEnd(booking)) }}</small>
-          </div>
+<small class="datum-range">
+  {{ formatDate(getBookingStart(booking)) }}
+  <span v-if="getBookingEnd(booking) && booking.ophaalDatum">
+    - {{ formatDate(getBookingEnd(booking)) }}
+  </span>
+  <span v-else>
+    - nog geen ophaaldatum
+  </span>
+</small>          </div>
         </div>
       </div>
     </div>
@@ -129,28 +136,48 @@ function onDateChange(val) {
 
 function bookingsForItem(item) {
   if (!props.bookings) return []
+
   const id = props.getItemId(item)
+
   return props.bookings.filter(b => {
     const bs = new Date(props.getBookingStart(b))
-    const be = new Date(props.getBookingEnd(b))
-    return bs <= endDate.value && be >= startDate.value && props.getItemId(b.item || b.asset || b.toestel || item) === id
+
+    const rawEnd = props.getBookingEnd(b)
+
+    // 🔥 FIX: geen einddatum = open einde
+    const be = rawEnd ? new Date(rawEnd) : new Date(8640000000000000)
+
+    return (
+      bs <= endDate.value &&
+      be >= startDate.value &&
+      props.getItemId(b.item || b.asset || b.toestel || item) === id
+    )
   })
 }
-
 function getBlockStyle(booking) {
-  const start = new Date(Math.max(props.getBookingStart(booking), startDate.value))
-  const end = new Date(Math.min(props.getBookingEnd(booking), endDate.value))
-  const startStr = start.toISOString().slice(0,10)
-  const endStr = end.toISOString().slice(0,10)
+  console.log(booking)
+  const start = new Date(Math.max(new Date(props.getBookingStart(booking)), startDate.value))
+
+  const rawEnd = props.getBookingEnd(booking)
+
+  const end = rawEnd
+    ? new Date(Math.min(new Date(rawEnd), endDate.value))
+    : new Date(endDate.value)
+
+  const startStr = start.toISOString().slice(0, 10)
+  const endStr = end.toISOString().slice(0, 10)
 
   let startIdx = days.value.indexOf(startStr)
   let endIdx = days.value.indexOf(endStr)
+
   if (startIdx === -1) startIdx = 0
-  if (endIdx === -1) endIdx = days.value.length -1
-  const width = endIdx - startIdx +1
+  if (endIdx === -1) endIdx = days.value.length - 1
+
+  const width = endIdx - startIdx + 1
+
   return {
-    left: `${(startIdx*100)/days.value.length}%`,
-    width: `${(width*100)/days.value.length}%`
+    left: `${(startIdx * 100) / days.value.length}%`,
+    width: `${(width * 100) / days.value.length}%`,
   }
 }
 

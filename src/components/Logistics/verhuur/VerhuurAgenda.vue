@@ -43,8 +43,14 @@ const assets = computed(() => {
 const getAssetId = (a) => a._id
 
 const getStart = (b) => new Date(b.leverDatum || b.beginDatum)
-const getEnd = (b) =>
-  new Date(b.ophaalDatum || b.eindDatum || b.leverDatum)
+const getEnd = (b) => {
+  const raw = b.ophaalDatum || b.eindDatum
+
+  if (!raw) {
+    return new Date(8640000000000000)
+  }
+  return new Date(raw)
+}
 
 const getTitle = (b) =>
   b.reference ||
