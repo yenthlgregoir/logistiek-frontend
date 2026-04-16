@@ -3,9 +3,9 @@
 
     <!-- TOOLBAR -->
     <div class="agenda-toolbar">
-        <div class="left">
-    <div class="datepicker">
-        <el-date-picker
+      <div class="left">
+        <div class="datepicker">
+          <el-date-picker
             v-model="dateRange"
             type="daterange"
             start-placeholder="Startdatum"
@@ -14,38 +14,46 @@
             value-format="YYYY-MM-DD"
             :picker-options="pickerOptions"
             @change="onDateChange"
-        />
-    </div>
-      
-
-      <select v-if="typeOptions?.length" v-model="selectedType" class="type-select">
-        <option value="">Alle types</option>
-        <option v-for="type in typeOptions" :key="type._id" :value="type">
-          {{ type.naam }}
-        </option>
-      </select>
-
+          />
         </div>
-        
+
+        <select v-if="typeOptions?.length" v-model="selectedType" class="type-select">
+          <option value="">Alle types</option>
+          <option v-for="type in typeOptions" :key="type._id" :value="type">
+            {{ type.naam }}
+          </option>
+        </select>
+      </div>
+
       <button class="add-btn" @click="$emit('addBoeking')">+ Toevoegen</button>
     </div>
 
     <!-- HEADER -->
     <div class="header-row">
       <div class="corner-cell">{{ itemLabel }}</div>
-      <div v-for="dag in days" :key="dag" class="header-cell">{{ formatDateAgenda(dag) }}</div>
+      <div v-for="dag in days" :key="dag" class="header-cell">
+        {{ formatDateAgenda(dag) }}
+      </div>
     </div>
 
-    <!-- GEEN BOEKINGEN -->
-    <div v-if="!hasBookings" class="geen-boekingen">
+    <!-- GEEN DATA -->
+    <div v-if="visibleItems.length === 0" class="geen-boekingen">
       Geen boekingen in deze periode
     </div>
 
     <!-- RIJEN -->
     <div v-else class="rows">
-      <div v-for="item in filteredItems" :key="getItemId(item)" class="row">
-        <div class="label">{{ item.Ref || item.nummer ||'Onbekend' }} <br/> {{ item.type?.naam || '' }} </div>
-        
+      <div
+        v-for="item in visibleItems"
+        :key="getItemId(item)"
+        class="row"
+      >
+        <div class="label">
+          {{ item.Ref || item.nummer || 'Onbekend' }}
+          <br />
+          {{ item.type?.naam || '' }}
+        </div>
+
         <div class="timeline">
           <div
             v-for="booking in bookingsForItem(item)"
@@ -55,16 +63,20 @@
             :style="getBlockStyle(booking)"
             @click="$emit('openBoeking', booking._id)"
           >
-            <strong class="boeking-title">{{ getBookingTitle(booking) }}</strong>
-<small class="datum-range">
-  {{ formatDate(getBookingStart(booking)) }}
-  <span v-if="getBookingEnd(booking) && (booking.ophaalDatum || booking.eindDatum)">
-    - {{ formatDate(getBookingEnd(booking)) }}
-  </span>
-  <span v-else>
-    - nog geen ophaaldatum
-  </span>
-</small>          </div>
+            <strong class="boeking-title">
+              {{ getBookingTitle(booking) }}
+            </strong>
+
+            <small class="datum-range">
+              {{ formatDate(getBookingStart(booking)) }}
+              <span v-if="getBookingEnd(booking)">
+                - {{ formatDate(getBookingEnd(booking)) }}
+              </span>
+              <span v-else>
+                - nog geen ophaaldatum
+              </span>
+            </small>
+          </div>
         </div>
       </div>
     </div>
@@ -91,7 +103,12 @@ const emit = defineEmits(['addBoeking', 'openBoeking', 'filterType'])
 
 const startDate = ref(new Date())
 const endDate = ref(new Date(new Date().setDate(new Date().getDate() + 7)))
-const dateRange = ref([startDate.value.toISOString().slice(0,10), endDate.value.toISOString().slice(0,10)])
+
+const dateRange = ref([
+  startDate.value.toISOString().slice(0,10),
+  endDate.value.toISOString().slice(0,10)
+])
+
 const days = ref([])
 const selectedType = ref('')
 
@@ -101,39 +118,55 @@ const pickerOptions = {
   }
 }
 
-onMounted(() => generateDays())
+onMounted(generateDays)
+
 watch(selectedType, val => emit('filterType', val))
 
 const filteredItems = computed(() => props.items || [])
 
-const hasBookings = computed(() => {
-  return filteredItems.value.some(item => bookingsForItem(item).length > 0)
+/**
+ * 🔥 BELANGRIJK: alleen items tonen die effectief bookings hebben in range
+ */
+const visibleItems = computed(() => {
+  return filteredItems.value.filter(item => {
+    return bookingsForItem(item).length > 0
+  })
 })
 
 function generateDays() {
   days.value = []
   const d = new Date(startDate.value)
-  while(d <= endDate.value) {
+
+  while (d <= endDate.value) {
     days.value.push(d.toISOString().slice(0,10))
-    d.setDate(d.getDate() +1)
+    d.setDate(d.getDate() + 1)
   }
 }
 
 function onDateChange(val) {
-  if (!val || val.length !==2) return
-  let [s,e] = val.map(d => new Date(d))
+  if (!val || val.length !== 2) return
 
-  if ((e-s)/86400000 > props.maxDays) {
+  let [s, e] = val.map(d => new Date(d))
+
+  if ((e - s) / 86400000 > props.maxDays) {
     e = new Date(s)
     e.setDate(s.getDate() + props.maxDays)
   }
 
   startDate.value = s
   endDate.value = e
-  dateRange.value = [s.toISOString().slice(0,10), e.toISOString().slice(0,10)]
+
+  dateRange.value = [
+    s.toISOString().slice(0,10),
+    e.toISOString().slice(0,10)
+  ]
+
   generateDays()
 }
 
+/**
+ * 🔥 centrale filter (range + item match)
+ */
 function bookingsForItem(item) {
   if (!props.bookings) return []
 
@@ -141,22 +174,25 @@ function bookingsForItem(item) {
 
   return props.bookings.filter(b => {
     const bs = new Date(props.getBookingStart(b))
-
     const rawEnd = props.getBookingEnd(b)
-
-    // 🔥 FIX: geen einddatum = open einde
     const be = rawEnd ? new Date(rawEnd) : new Date(8640000000000000)
 
-    return (
+    const inRange =
       bs <= endDate.value &&
-      be >= startDate.value &&
-      props.getItemId(b.item || b.asset || b.toestel || item) === id
-    )
+      be >= startDate.value
+
+    const matchesItem =
+      props.getItemId(b.item || b.asset || b.toestel) === id
+
+    return inRange && matchesItem
   })
 }
+
 function getBlockStyle(booking) {
-  console.log(booking)
-  const start = new Date(Math.max(new Date(props.getBookingStart(booking)), startDate.value))
+  const start = new Date(Math.max(
+    new Date(props.getBookingStart(booking)),
+    startDate.value
+  ))
 
   const rawEnd = props.getBookingEnd(booking)
 
@@ -164,8 +200,8 @@ function getBlockStyle(booking) {
     ? new Date(Math.min(new Date(rawEnd), endDate.value))
     : new Date(endDate.value)
 
-  const startStr = start.toISOString().slice(0, 10)
-  const endStr = end.toISOString().slice(0, 10)
+  const startStr = start.toISOString().slice(0,10)
+  const endStr = end.toISOString().slice(0,10)
 
   let startIdx = days.value.indexOf(startStr)
   let endIdx = days.value.indexOf(endStr)
@@ -183,11 +219,12 @@ function getBlockStyle(booking) {
 
 function formatDateAgenda(d) {
   const dt = new Date(d)
-  return `${dt.getDate()}/${dt.getMonth()+1}`
+  return `${dt.getDate()}/${dt.getMonth() + 1}`
 }
+
 function formatDate(d) {
   const dt = new Date(d)
-  return `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()}`
+  return `${dt.getDate()}/${dt.getMonth() + 1}/${dt.getFullYear()}`
 }
 </script>
 

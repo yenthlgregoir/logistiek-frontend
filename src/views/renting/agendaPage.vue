@@ -3,57 +3,52 @@
     <div class="agenda-parent-container">
       <h1>Planning</h1>
 
-      <!-- Loading -->
-      <div v-if="store.loading.list" class="loading-screen">
-  <div class="loader-card">
-    <div class="spinner"></div>
-    <h2>Planning laden</h2>
-    <p>Even geduld, we halen de data op...</p>
-  </div>
-</div>
       <!-- Agenda -->
       <Agenda
-        v-else-if="showAgenda"
+        v-if="showAgenda"
         :items="toestellen"
-        :bookings="bookingsWithToestel"
+        :bookings="store.filteredBoekingen"
         :typeOptions="store.types"
         item-label="Toestel"
         :get-item-id="t => t._id"
         :get-booking-start="b => new Date(b.beginDatum)"
         :get-booking-end="b => new Date(b.eindDatum)"
         :get-booking-title="b => b.leverAdresDetails?.naam || b.klant?.naam"
-        @addBoeking="showCreateModal = true"
+        @addBoeking="openCreateModal"
         @openBoeking="openBoekingModal"
+        @filterType="onFilterType"
       />
 
       <!-- Lijst -->
       <BoekingList
         v-else
-        :boekingen="store.boekingen"
+        :boekingen="store.filteredBoekingen"
         v-model:search="store.search"
         v-model:dateRange="store.dateRange"
         @openBoeking="openBoekingModal"
-        @addBoeking="showCreateModal = true"
+        @addBoeking="openCreateModal"
       />
 
-      <!-- Modals -->
+      <!-- Create -->
       <CreateBoekingModal
         v-if="showCreateModal"
         :types="store.types"
         @close="showCreateModal = false"
-        @update="store.loadBoekingen"
+        @update="refreshBoekingen"
       />
 
+      <!-- Detail -->
       <BoekingModal
         v-if="showBoekingModal"
         :boekingId="selectedBoekingId"
         @close="showBoekingModal = false"
-        @update="store.loadBoekingen"
+        @update="refreshBoekingen"
         @assignToestel="openVrijeToestellenModal"
         @verwijderen="deleteBoeking"
         @save="saveComment"
       />
 
+      <!-- Vrije toestellen -->
       <VrijToestellenModal
         v-if="showVrijeToestellenModal"
         :toestellen="store.vrijeToestellen"
@@ -77,28 +72,48 @@ import CreateBoekingModal from '@/components/renting/agenda/CreateBoekingModal.v
 import BoekingModal from '@/components/renting/agenda/BoekingModal.vue'
 import VrijToestellenModal from '@/components/renting/agenda/VrijToestellenModal.vue'
 
-// STORE
+// =========================
+// STORE + ROUTE
+// =========================
 const store = useBoekingenStore()
-
-// ROUTE
 const route = useRoute()
+
 const showAgenda = computed(() => route.path.includes('/planning'))
 
-// MODALS
+// =========================
+// STATE
+// =========================
 const showCreateModal = ref(false)
 const showBoekingModal = ref(false)
 const showVrijeToestellenModal = ref(false)
 const selectedBoekingId = ref(null)
 
+// =========================
+// COMPUTED
+// =========================
+const toestellen = computed(() => {
+  const map = new Map()
 
-const bookingsWithToestel = computed(() =>
-  store.boekingen.filter(b => b.toestel)
-)
+  store.filteredBoekingen.forEach(b => {
+    if (b.toestel?._id) {
+      map.set(b.toestel._id, b.toestel)
+    }
+  })
 
-const toestellen = computed(() =>
-  bookingsWithToestel.value.map(b => b.toestel)
-)
+  return [...map.values()]
+})
 
+// =========================
+// FILTER HANDLING
+// =========================
+function onFilterType(type) {
+  store.setType(type)
+  store.loadBoekingen()
+}
+
+// =========================
+// SEARCH / DATE RELOAD
+// =========================
 const reload = useDebounceFn(() => {
   store.loadBoekingen()
 }, 300)
@@ -108,16 +123,21 @@ watch(
   reload
 )
 
-watch(showAgenda, (val) => {
-  if (val) {
-    store.search = ''
-    store.dateRange = [null, null]
-  }
+// =========================
+// RESET WHEN SWITCHING VIEW
+// =========================
+watch(showAgenda, () => {
+  store.resetFilters()
+  store.loadBoekingen()
 })
 
 // =========================
-// UI ACTIONS ONLY
+// UI ACTIONS
 // =========================
+function openCreateModal() {
+  showCreateModal.value = true
+}
+
 function openBoekingModal(id) {
   selectedBoekingId.value = id
   showBoekingModal.value = true
@@ -127,6 +147,19 @@ async function openVrijeToestellenModal(id) {
   selectedBoekingId.value = id
   await store.openVrijeToestellen(id)
   showVrijeToestellenModal.value = true
+}
+
+function closeModals() {
+  showCreateModal.value = false
+  showBoekingModal.value = false
+  showVrijeToestellenModal.value = false
+}
+
+// =========================
+// STORE ACTION WRAPPERS
+// =========================
+async function refreshBoekingen() {
+  await store.loadBoekingen()
 }
 
 async function assignToestel(toestel) {
@@ -141,11 +174,6 @@ async function deleteBoeking() {
 
 async function saveComment(payload) {
   await store.saveComment(selectedBoekingId.value, payload.comment)
-  showBoekingModal.value = false
-}
-
-function closeModals() {
-  showVrijeToestellenModal.value = false
   showBoekingModal.value = false
 }
 
@@ -170,74 +198,6 @@ onMounted(async () => {
 @media (max-width: 768px) {
   .agenda-parent-container {
     padding: 0.5rem;
-  }
-}
-
-
-.loading-screen {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  animation: fadeIn 0.3s ease;
-}
-
-.loader-card {
-  background: white;
-  padding: 2.5rem 3rem;
-  border-radius: 18px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
-  text-align: center;
-  width: 280px;
-  animation: float 1.5s ease-in-out infinite;
-}
-
-.loader-card h2 {
-  margin: 1rem 0 0.5rem;
-  font-size: 1.3rem;
-  color: #1f2a44;
-}
-
-.loader-card p {
-  font-size: 0.9rem;
-  color: #6b7280;
-}
-
-/* SPINNER */
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid #e5e7eb;
-  border-top: 4px solid #3b82f6;
-  border-radius: 50%;
-  margin: 0 auto;
-  animation: spin 0.9s linear infinite;
-}
-
-/* ANIMATIONS */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
   }
 }
 </style>

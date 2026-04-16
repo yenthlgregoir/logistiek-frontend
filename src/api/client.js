@@ -1,4 +1,7 @@
+import { useLoadingStore } from '@/stores/LoadingStore'
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL
+
 function isTokenExpired(token) {
   try {
     const payload = JSON.parse(atob(token.split('.')[1]))
@@ -7,45 +10,52 @@ function isTokenExpired(token) {
     return true
   }
 }
-async function request(path, options = {}) {
+
+export async function request(path, options = {}) {
+  const loading = useLoadingStore()
   const isFormData = options.body instanceof FormData
   const token = localStorage.getItem('token')
+  const key = options.key || null
 
-  // 🔥 Check of token verlopen is
-  if (token && isTokenExpired(token)) {
-    localStorage.removeItem('token')
-    window.location.href = '/login'
-    return
+  loading.start(key)
+
+  try {
+    if (token && isTokenExpired(token)) {
+      localStorage.removeItem('token')
+      window.location.href = '/login'
+      return
+    }
+
+    const headers = {
+      ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
+      ...(options.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    }
+
+    const res = await fetch(`${API_BASE}${path}`, {
+      credentials: 'include',
+      headers,
+      ...options,
+    })
+
+    if (res.status === 401) {
+      localStorage.removeItem('token')
+      window.location.href = '/login'
+      return
+    }
+
+    if (!res.ok) {
+      const text = await res.text()
+      throw new Error(text || 'API error')
+    }
+
+    if (options.responseType === 'blob') return await res.blob()
+    if (options.responseType === 'arraybuffer') return await res.arrayBuffer()
+
+    return res.status === 204 ? null : await res.json()
+  } finally {
+    loading.stop(key)
   }
-
-  const headers = {
-    ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
-    ...(options.headers || {}),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  }
-
-  const res = await fetch(`${API_BASE}${path}`, {
-    credentials: 'include',
-    headers,
-    ...options,
-  })
-
-  // 🔥 Backend zegt token ongeldig/verlopen
-  if (res.status === 401) {
-    localStorage.removeItem('token')
-    window.location.href = '/login'
-    return
-  }
-
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(text || 'API error')
-  }
-
-  if (options.responseType === 'blob') return res.blob()
-  if (options.responseType === 'arraybuffer') return res.arrayBuffer()
-
-  return res.status === 204 ? null : res.json()
 }
 // Helper functies
 export const api = {

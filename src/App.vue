@@ -1,26 +1,27 @@
 <template>
   <div :class="['app-layout', { 'mobile-padding': isMobile && hasSidebar }]">
+
+    <!-- 🔥 GLOBAL LOADER -->
+    <GlobalLoader />
+
     <SidebarComponent
       v-if="hasSidebar"
       :class="['sidebar-wrapper', { 'mobile-open': mobileSidebarOpen && isMobile }]"
       @closeSidebar="mobileSidebarOpen = false"
     />
-    <!-- MOBILE HEADER -->
+
     <MobileHeader v-if="isMobile && hasSidebar" @openSidebar="mobileSidebarOpen = true" />
 
-    <!-- SIDEBAR -->
-
-    <!-- OVERLAY ON MOBILE -->
     <div
       v-if="mobileSidebarOpen && isMobile"
       class="overlay"
       @click="mobileSidebarOpen = false"
     ></div>
 
-    <!-- MAIN CONTENT -->
     <main :class="['main-content', mainClass]">
       <router-view />
     </main>
+
   </div>
 </template>
 
@@ -30,6 +31,7 @@ import { useRoute } from 'vue-router'
 import { useSidebarStore } from '@/stores/sidebar'
 import SidebarComponent from './components/SideBarComponent.vue'
 import MobileHeader from './components/MobileHeader.vue'
+import GlobalLoader from '@/components/base/GlobalLoading.vue'
 
 const route = useRoute()
 const store = useSidebarStore()

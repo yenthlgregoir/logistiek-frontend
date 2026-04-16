@@ -5,13 +5,15 @@ import {
   assignToestel,
   deleteBoeking,
   updateComment,
-} from '@/services/boekingen.service'
+} from '@/services/boekingen.service.ts'
 
 import { boekingApi } from '@/api/boeking'
 import { toestelApi } from '@/api/toestel'
 import { formatDate } from '@/utils/date'
 
-// simpele cache helper
+// =========================
+// CACHE
+// =========================
 function createCache(ttl: number) {
   const map = new Map<string, { data: any; time: number }>()
 
@@ -34,6 +36,9 @@ function createCache(ttl: number) {
   }
 }
 
+// =========================
+// STORE
+// =========================
 export const useBoekingenStore = defineStore('boekingen', {
   state: () => ({
     boekingen: [] as any[],
@@ -45,12 +50,14 @@ export const useBoekingenStore = defineStore('boekingen', {
     search: '',
     dateRange: [null, null] as [string | null, string | null],
 
+    // 🔥 TYPE FILTER
+    selectedType: null as any | null,
+
     vrijeToestellen: [],
 
     types: [],
     typesLoaded: false,
 
-    // ✅ structured loading
     loading: {
       list: false,
       detail: false,
@@ -63,21 +70,47 @@ export const useBoekingenStore = defineStore('boekingen', {
       action: null as any,
     },
 
-    // ✅ generic caches
     listCache: createCache(5 * 60 * 1000),
     detailCache: createCache(5 * 60 * 1000),
   }),
 
+  // =========================
+  // GETTERS (UI ONLY)
+  // =========================
+  getters: {
+    filteredBoekingen: (state) => {
+      // enkel UI cleanup
+      return state.boekingen.filter((b) => b.toestel)
+    },
+  },
+
   actions: {
     // =========================
-    // 🔧 HELPERS
+    // TYPE FILTER
+    // =========================
+    setType(type: any | null) {
+      this.selectedType = type
+      this.invalidateLists()
+    },
+ resetFilters() {
+  this.search = ''
+  this.dateRange = [null, null]
+  this.selectedType = null
+},
+    // =========================
+    // CACHE KEY
     // =========================
     buildListKey() {
       return JSON.stringify({
         search: this.search,
         range: this.dateRange,
+        type: this.selectedType?._id || null,
         archief: this.currentViewMode === 'archief',
       })
+    },
+
+    invalidateLists() {
+      this.listCache.clear()
     },
 
     updateLocal(id: string, patch: any) {
@@ -89,12 +122,8 @@ export const useBoekingenStore = defineStore('boekingen', {
       if (item) Object.assign(item, patch)
     },
 
-    invalidateLists() {
-      this.listCache.clear()
-    },
-
     // =========================
-    // 📦 LIST
+    // LIST
     // =========================
     async loadBoekingen() {
       const key = this.buildListKey()
@@ -113,6 +142,7 @@ export const useBoekingenStore = defineStore('boekingen', {
           search: this.search,
           startDatum: this.dateRange[0],
           eindDatum: this.dateRange[1],
+          type: this.selectedType?._id || null,
           archief: this.currentViewMode === 'archief',
         })
 
@@ -127,7 +157,7 @@ export const useBoekingenStore = defineStore('boekingen', {
     },
 
     // =========================
-    // 📄 DETAIL
+    // DETAIL
     // =========================
     async loadBoeking(id: string) {
       this.loading.detail = true
@@ -170,7 +200,7 @@ export const useBoekingenStore = defineStore('boekingen', {
     },
 
     // =========================
-    // 🔄 ACTIONS
+    // ACTIONS
     // =========================
     async changeStatus(status: string) {
       if (!this.currentBoeking) return
@@ -181,7 +211,6 @@ export const useBoekingenStore = defineStore('boekingen', {
       const oldStatus = this.currentBoeking.status
 
       try {
-        // optimistic update
         this.updateLocal(this.currentBoeking._id, { status })
 
         await boekingApi.changeState(this.currentBoeking._id, { status })
