@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { loginApi } from '@/api/login.js'
+import router from '@/router'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -22,6 +23,9 @@ export const useAuthStore = defineStore('auth', {
   try {
     const res = await loginApi.me()
     this.user = res
+    console.log(this.user)
+    console.log('USER:', this.user)
+console.log('ROLE:', this.user?.role)
   } catch (err) {
     this.user = null
     this.logout()

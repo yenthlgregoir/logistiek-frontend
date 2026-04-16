@@ -2,21 +2,24 @@
   <div class="page-content">
     <div class="agenda-parent-container">
       <h1>Planning</h1>
+
+      <!-- Loading -->
+      <div v-if="store.loading.list">Laden...</div>
+
       <!-- Agenda -->
       <Agenda
-  v-if="showAgenda"
-  :items="store.boekingen.map(b => b.toestel).filter(Boolean)"
-  :bookings="store.boekingen"
-  :typeOptions="store.types"
-  :t
-  item-label="Toestel"
-  :get-item-id="t => t._id"
-  :get-booking-start="b => new Date(b.beginDatum)"
-  :get-booking-end="b => new Date(b.eindDatum)"
-  :get-booking-title="b => b.klant?.naam || b.leverAdresDetails?.naam"
-  @addBoeking="showCreateModal = true"
-  @openBoeking="openBoekingModal"
-/>
+        v-else-if="showAgenda"
+        :items="toestellen"
+        :bookings="bookingsWithToestel"
+        :typeOptions="store.types"
+        item-label="Toestel"
+        :get-item-id="t => t._id"
+        :get-booking-start="b => new Date(b.beginDatum)"
+        :get-booking-end="b => new Date(b.eindDatum)"
+        :get-booking-title="b => b.leverAdresDetails?.naam || b.klant?.naam"
+        @addBoeking="showCreateModal = true"
+        @openBoeking="openBoekingModal"
+      />
 
       <!-- Lijst -->
       <BoekingList
@@ -59,6 +62,8 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useDebounceFn } from '@vueuse/core'
+
 import { useBoekingenStore } from '@/stores/renting/boekingen.store.js'
 
 import Agenda from '@/components/agenda/AgendaComponent.vue'
@@ -70,14 +75,9 @@ import VrijToestellenModal from '@/components/renting/agenda/VrijToestellenModal
 // STORE
 const store = useBoekingenStore()
 
-// ROUTE bepaalt view
+// ROUTE
 const route = useRoute()
 const showAgenda = computed(() => route.path.includes('/planning'))
-
-// REACTIVE DATA VOOR AGENDA
-const toestellen = ref([])
-const boekingen = ref([])
-const typeOptions = ref([])
 
 // MODALS
 const showCreateModal = ref(false)
@@ -85,61 +85,72 @@ const showBoekingModal = ref(false)
 const showVrijeToestellenModal = ref(false)
 const selectedBoekingId = ref(null)
 
-// WATCHERS
-watch([() => store.search, () => store.dateRange], () => {
-  store.loadBoekingen()
-})
 
-watch(
-  () => showAgenda.value,
-  (newVal) => {
-    if (newVal) {
-      store.search = ''
-      store.dateRange = [null, null]
-    }
-    store.loadBoekingen()
-  },
+const bookingsWithToestel = computed(() =>
+  store.boekingen.filter(b => b.toestel)
 )
 
-// MODAL FUNCTIONS
+const toestellen = computed(() =>
+  bookingsWithToestel.value.map(b => b.toestel)
+)
+
+const reload = useDebounceFn(() => {
+  store.loadBoekingen()
+}, 300)
+
+watch(
+  [() => store.search, () => store.dateRange],
+  reload
+)
+
+watch(showAgenda, (val) => {
+  if (val) {
+    store.search = ''
+    store.dateRange = [null, null]
+  }
+})
+
+// =========================
+// UI ACTIONS ONLY
+// =========================
 function openBoekingModal(id) {
   selectedBoekingId.value = id
   showBoekingModal.value = true
 }
 
 async function openVrijeToestellenModal(id) {
+  selectedBoekingId.value = id
   await store.openVrijeToestellen(id)
   showVrijeToestellenModal.value = true
 }
 
 async function assignToestel(toestel) {
   await store.assignToestel(toestel)
+  closeModals()
+}
+
+async function deleteBoeking() {
+  await store.deleteBoeking()
+  showBoekingModal.value = false
+}
+
+async function saveComment(payload) {
+  await store.saveComment(selectedBoekingId.value, payload.comment)
+  showBoekingModal.value = false
+}
+
+function closeModals() {
   showVrijeToestellenModal.value = false
   showBoekingModal.value = false
 }
 
-async function deleteBoeking(id) {
-  await store.deleteBoeking(id)
-  await store.loadBoekingen()
-  showBoekingModal.value = false
-}
-
-async function saveComment(boeking) {
-  await store.saveComment(selectedBoekingId.value, boeking.comment)
-  showBoekingModal.value = false
-}
-
-
+// =========================
 // INIT
+// =========================
 onMounted(async () => {
-  store.setViewMode('actief')
+  store.currentViewMode = 'actief'
   await store.loadBoekingen()
   await store.loadTypes()
-
-  toestellen.value = store.toestellen || []
-  console.log(toestellen)
-  boekingen.value = store.boekingen || []
-  typeOptions.value = store.types || []
 })
 </script>
 

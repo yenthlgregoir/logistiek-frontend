@@ -53,11 +53,16 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useAuthStore } from '@/stores/authentication/auth.store.js'
 import router from '@/router'
-const role = localStorage.getItem('role')
+
+const auth = useAuthStore()
+
+const role = computed(() => auth.user?.role)
 
 function logout() {
-  localStorage.removeItem('token')
+  auth.logout()
   router.push('/login')
 }
 </script>

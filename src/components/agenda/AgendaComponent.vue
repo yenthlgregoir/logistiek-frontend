@@ -33,7 +33,7 @@
     <!-- HEADER -->
     <div class="header-row">
       <div class="corner-cell">{{ itemLabel }}</div>
-      <div v-for="dag in days" :key="dag" class="header-cell">{{ formatDate(dag) }}</div>
+      <div v-for="dag in days" :key="dag" class="header-cell">{{ formatDateAgenda(dag) }}</div>
     </div>
 
     <!-- GEEN BOEKINGEN -->
@@ -154,9 +154,13 @@ function getBlockStyle(booking) {
   }
 }
 
-function formatDate(d) {
+function formatDateAgenda(d) {
   const dt = new Date(d)
   return `${dt.getDate()}/${dt.getMonth()+1}`
+}
+function formatDate(d) {
+  const dt = new Date(d)
+  return `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()}`
 }
 </script>
 
