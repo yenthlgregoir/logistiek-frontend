@@ -110,9 +110,9 @@
       </div>
 
       <!-- Error -->
-      <div v-if="error" class="error-box">
-        {{ error }}
-      </div>
+      <div v-if="errorMessage || error" class="error-box">
+  {{ formattedError }}
+</div>
     </div>
 
     <template #footer>
@@ -127,7 +127,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed} from "vue";
 import BaseDrawer from "@/components/base/BaseDrawer.vue";
 import AutocompleteSelect from "@/components/base/AutocompleteSelect.vue";
 
@@ -149,6 +149,28 @@ const isEditing = ref(true);
 const loading = ref(false);
 const verhuurCopy = ref({});
 
+// 🔥 NIEUW: lokale error state
+const errorMessage = ref("");
+
+const formattedError = computed(() => {
+  const err = errorMessage.value || props.error;
+
+  if (!err) return "";
+
+  // Als het een stringified JSON is
+  try {
+    const parsed = typeof err === "string" ? JSON.parse(err) : err;
+
+    if (parsed.message) {
+      // verwijder eventueel "Error: " prefix
+      return parsed.message.replace(/^Error:\s*/, "");
+    }
+
+    return err;
+  } catch {
+    return err;
+  }
+});
 // Init / edit mode
 watch(
   () => props.verhuur,
@@ -172,7 +194,6 @@ watch(
   () => resetForm()
 );
 
-// Reset form
 function resetForm() {
   verhuurCopy.value = {
     logistiekeReferentie: "",
@@ -185,31 +206,46 @@ function resetForm() {
     werkhoogte: "",
     entiteit: null,
   };
+
+  errorMessage.value = "";
 }
 
 // Save verhuur
 async function saveVerhuur() {
+  errorMessage.value = ""; // reset eerst
+
   if (!verhuurCopy.value.leverDatum) {
-    return alert("Startdatum is verplicht");
+    errorMessage.value = "Startdatum is verplicht";
+    return;
   }
 
   if (
     verhuurCopy.value.ophaalDatum &&
     new Date(verhuurCopy.value.ophaalDatum) <= new Date(verhuurCopy.value.leverDatum)
   ) {
-    return alert("Einddatum moet na startdatum liggen");
+    errorMessage.value = "Einddatum moet na startdatum liggen";
+    return;
   }
 
   if (!verhuurCopy.value.assetType) {
-    return alert("Selecteer een type");
+    errorMessage.value = "Selecteer een type";
+    return;
   }
 
-  if (verhuurCopy.value.assetModel === "Hoogtewerker" && !verhuurCopy.value.werkhoogte) {
-    return alert("Werkhoogte is verplicht");
+  if (
+    verhuurCopy.value.assetModel === "Hoogtewerker" &&
+    !verhuurCopy.value.werkhoogte
+  ) {
+    errorMessage.value = "Werkhoogte is verplicht";
+    return;
   }
 
-  if (verhuurCopy.value.assetModel === "WerfContainer" && !verhuurCopy.value.entiteit) {
-    return alert("Entiteit is verplicht");
+  if (
+    verhuurCopy.value.assetModel === "WerfContainer" &&
+    !verhuurCopy.value.entiteit
+  ) {
+    errorMessage.value = "Entiteit is verplicht";
+    return;
   }
 
   try {

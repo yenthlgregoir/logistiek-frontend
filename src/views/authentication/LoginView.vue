@@ -1,22 +1,36 @@
 <template>
-  <div class="login-wrapper">
-    <div class="login-card">
-      <h2>Login</h2>
-
-      <div class="form-group">
-        <input v-model="email" type="email" placeholder="Email" />
+  <div class="login-page">
+    <!-- LEFT PANEL -->
+    <div class="login-left">
+      <div class="left-content">
+        <img src="@/assets/logo_ops.png" alt="OPS Platform" class="logo" />
       </div>
+    </div>
 
-      <div class="form-group">
-        <input v-model="password" type="password" placeholder="Password" />
+    <!-- RIGHT PANEL -->
+    <div class="login-right">
+      <div class="login-card">
+        <h2>Sign in</h2>
+
+        <div class="form-group">
+          <input v-model="email" type="email" placeholder="Email" />
+        </div>
+
+        <div class="form-group">
+          <input v-model="password" type="password" placeholder="Wachtwoord" />
+        </div>
+
+        <button @click="handleLogin" :disabled="loading">
+          {{ loading ? 'Bezig...' : 'Login' }}
+        </button>
+
+        <p v-if="error" class="error">{{ error }}</p>
       </div>
-
-      <button type="button" @click="handleLogin">Login</button>
-
-      <p v-if="error" class="error">{{ error }}</p>
     </div>
   </div>
 </template>
+
+
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -25,127 +39,173 @@ import { useAuthStore } from '@/stores/authentication/auth.store.js'
 const email = ref('')
 const password = ref('')
 const error = ref(null)
+const loading = ref(false)
+
 const router = useRouter()
-const auth = useAuthStore() // 🔥 hier gebruik je Pinia store
+const auth = useAuthStore()
 
 const handleLogin = async () => {
+  error.value = null
+
+  if (!email.value || !password.value) {
+    error.value = 'Email en wachtwoord zijn verplicht'
+    return
+  }
+
   try {
-    await auth.login(email.value, password.value) // Pinia store login
-    router.push({ name: 'home' }) // redirect na login
+    loading.value = true
+
+    await auth.login(email.value, password.value)
+
+    router.push({ name: 'home' })
   } catch (err) {
     console.error(err)
-    error.value = 'Login mislukt'
+
+    const backendError = err?.response?.data
+
+    if (backendError?.message) {
+      error.value = backendError.message.replace(/^Error:\s*/, '')
+    } else {
+      error.value = 'Login mislukt'
+    }
+  } finally {
+    loading.value = false
   }
 }
 </script>
+
 <style scoped>
-/* Wrapper with soft gradient and subtle animation */
-.login-wrapper {
-  min-height: 92vh;
+.login-page {
+  display: flex;
+  height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+h1{
+  margin:0
+}
+/* LEFT SIDE */
+.login-left {
+  flex: 1;
+  background: linear-gradient(180deg, #5a89ff, #3553f2);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f1f5ff, #e8eeff);
-  font-family: 'Inter', sans-serif;
-  overflow: hidden;
 }
 
-/* Card with glassmorphism effect */
-.login-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  padding: 50px 40px;
+.left-content {
+  max-width: 550px;
+}
+
+.logo {
   width: 100%;
-  max-width: 420px;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  text-align: center;
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
 }
 
-.login-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+.left-content h1 {
+  font-size: 42px;
+  margin-bottom: 14px;
 }
 
-h2 {
-  margin-bottom: 30px;
-  font-weight: 700;
-  font-size: 28px;
-  color: #2c3e50;
+.left-content p {
+  font-size: 18px;
+  opacity: 0.9;
 }
 
-/* Input styling with smooth hover/focus */
+/* RIGHT SIDE */
+.login-right {
+  flex: 0.5;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* CARD */
+.login-card {
+  width: 80%;
+  padding: 40px;
+
+}
+
+.login-card h2 {
+  margin-bottom: 28px;
+  font-size: 26px;
+  color: #0f172a;
+}
+
+/* INPUTS */
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 input {
+  background-color: transparent;
   width: 100%;
-  padding: 14px 16px;
-  border-radius: 12px;
+  padding: 14px;
+  border-radius: 10px;
   border: 1px solid #cbd5e1;
-  font-size: 15px;
-  color: #333;
-  background: rgba(255, 255, 255, 0.9);
-  transition: all 0.3s ease;
+  font-size: 14px;
 }
 
 input:focus {
   outline: none;
-  border-color: #4f73ff;
-  box-shadow: 0 0 0 4px rgba(79, 115, 255, 0.15);
-  background: rgba(255, 255, 255, 1);
+  border-color: #5a89ff;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
-/* Button with gradient and depth */
+/* BUTTON */
 button {
   width: 100%;
   padding: 14px;
+  border-radius: 10px;
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(180deg, #5a89ff, #3553f2);
   color: white;
-  font-size: 16px;
   font-weight: 600;
+  margin-top: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 15px;
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
 button:hover {
-  background: linear-gradient(135deg, #5a67d8, #6b46c1);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+  background: linear-gradient(180deg, #3553f2, #5a89ff  );
 }
 
-button:active {
-  transform: scale(0.97);
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-/* Error text */
 .error {
-  margin-top: 15px;
-  color: #e53e3e;
+  margin-top: 14px;
+  color: #dc2626;
   font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.5px;
 }
-
-/* Subtle floating animation for card */
-@keyframes floatCard {
-  0%,
-  100% {
-    transform: translateY(0px);
+/* =========================
+   MOBILE RESPONSIVE
+   ========================= */
+@media (max-width: 768px) {
+  .login-page {
+    flex-direction: column;
   }
-  50% {
-    transform: translateY(-5px);
-  }
-}
 
-.login-card {
-  animation: floatCard 6s ease-in-out infinite;
+  /* Verberg linker paneel */
+  .login-left {
+    display: none;
+  }
+
+  /* Right wordt full screen */
+  .login-right {
+    flex: 1;
+    width: 100%;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  /* Card beter gecentreerd */
+  .login-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 30px 20px;
+  }
 }
 </style>

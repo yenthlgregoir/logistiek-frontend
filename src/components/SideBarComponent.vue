@@ -4,7 +4,7 @@
   >
     <!-- LOGO -->
     <RouterLink to="/" class="logo-wrapper" @click="handleLinkClick">
-      <img src="../assets/logo_white.png" class="logo" />
+      <img src="../assets/logo_ops.png" class="logo" />
     </RouterLink>
 
     <!-- TOGGLE BUTTON -->
@@ -110,7 +110,7 @@ const linkGroups = {
   logistics: [
     {
       to: '/logistics/schaarlift',
-      label: 'schaarlift',
+      label: 'Hoogtewerkers',
       icon: MoveVertical,
       submenu: [
         { to: '/logistics/schaarlift/planning', label: 'Planning', icon: Calendar },
@@ -151,7 +151,7 @@ function isActive(target) {
 
 function handleLinkClick() {
   if (isMobile.value) {
-    mobileOpen.value = false // sluit de mobiele sidebar
+    mobileOpen.value = false 
     emit('closeSidebar') // emit naar parent
   }
 }
