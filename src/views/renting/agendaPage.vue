@@ -22,7 +22,7 @@
       <!-- Lijst -->
       <BoekingList
         v-else
-        :boekingen="store.filteredBoekingen"
+        :boekingen="store.boekingen"
         v-model:search="store.search"
         v-model:dateRange="store.dateRange"
         @openBoeking="openBoekingModal"
