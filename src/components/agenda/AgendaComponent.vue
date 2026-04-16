@@ -69,7 +69,7 @@
 
             <small class="datum-range">
               {{ formatDate(getBookingStart(booking)) }}
-              <span v-if="getBookingEnd(booking)">
+              <span v-if="getBookingEnd(booking) && (booking.ophaalDatum || booking.eindDatum)">
                 - {{ formatDate(getBookingEnd(booking)) }}
               </span>
               <span v-else>
