@@ -6,7 +6,7 @@
       </svg>
     </button>
     <RouterLink to="/" class="logo-wrapper">
-      <img src="../assets/logo_white.png" class="logo" />
+      <img src="../assets/logo_ops.png" class="logo" />
     </RouterLink>
   </header>
 </template>
