@@ -55,7 +55,6 @@ import { klantApi } from '@/api/klant'
 const toestellen = ref([])
 const search = ref('')
 const filterType = ref('')
-const filterKlant = ref('')
 const currentDateFilter = ref(null)
 const showForm = ref(false)
 const klanten = ref([])
@@ -111,7 +110,6 @@ async function loadToestellen() {
     const params = {
       search: search.value || undefined,
       type: filterType.value || undefined,
-      klant: filterKlant.value || undefined,
       ...(currentDateFilter.value
         ? {
             beginDatum: currentDateFilter.value.beginDatum,
@@ -130,7 +128,7 @@ async function loadToestellen() {
 /* -----------------------------
    WATCHERS VOOR BACKEND FILTERING
 ----------------------------- */
-watch([search, filterType, filterKlant], loadToestellen)
+watch([search, filterType], loadToestellen)
 
 /* -----------------------------
    VRIJE TOESTELLEN

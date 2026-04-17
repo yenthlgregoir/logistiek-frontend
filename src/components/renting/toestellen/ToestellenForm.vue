@@ -43,18 +43,6 @@
           <label>Identificatie</label>
           <input v-model="localForm.chasisnummer" />
         </div>
-        <!-- Klant -->
-        <div class="form-group">
-          <label>Klant</label>
-          <select v-model="localForm.klant">
-            <option disabled value="">Selecteer klant</option>
-            <option value="null">Geen klant geselecteerd</option>
-            <option v-for="klant in klanten" :key="klant._id" :value="klant._id">
-              {{ klant.naam }}
-            </option>
-          </select>
-        </div>
-
         <div v-if="isEdit" class="form-group">
           <label>Status</label>
           <select
@@ -85,7 +73,6 @@ import { reactive, ref, watch } from 'vue'
 
 const props = defineProps({
   form: Object,
-  klanten: Array,
   types: Array,
   isEdit: Boolean,
 })
@@ -98,7 +85,6 @@ const localForm = reactive({
   nrplaat: '',
   Ref: '',
   chasisnummer: '',
-  klant: null,
   status: '',
 })
 

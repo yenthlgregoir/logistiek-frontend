@@ -125,11 +125,10 @@ export const useBoekingenStore = defineStore('boekingen', {
     // =========================
     // LIST
     // =========================
-    async loadBoekingen() {
+    async loadBoekingen(ophalen:boolean = true) {
       const key = this.buildListKey()
-
       const cached = this.listCache.get(key)
-      if (cached) {
+      if (cached && ophalen) {
         this.boekingen = cached
         return
       }

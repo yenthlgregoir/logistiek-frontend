@@ -38,8 +38,10 @@
       :projectleiders="projectleiders"
       :entiteiten="entiteiten"
       :error="error"
+      :succes ="saveSuccess"
       @close="closeAddDrawer"
       @save="createVerhuur"
+
     />
     
   </div>
@@ -81,6 +83,8 @@ const entiteiten = ref([])
 
 const error = ref('')
 const loading = ref(false)
+const saveSuccess = ref(false);
+
 
 const filters = ref({
   type: '',
@@ -201,9 +205,11 @@ async function createVerhuur(data) {
     error.value = ''
     await verhuurApi.create(cleanPayload(data))
     await loadData()
+    saveSuccess.value = true;
     closeAddDrawer()
   } catch (err) {
     error.value = parseApiError(err)
+    saveSuccess.value = false;
     throw err
   }
 }

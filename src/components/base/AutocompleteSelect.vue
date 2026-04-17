@@ -14,6 +14,12 @@
 
     <ul v-if="showDropdown" class="autocomplete-list">
       <li
+  :class="{ highlighted: highlightedIndex === -1 }"
+  @mousedown.prevent="selectEmpty"
+>
+  Geen optie geselecteerd
+</li>
+      <li
         v-for="(option, index) in filteredOptions"
         :key="option._id"
         :class="{ highlighted: index === highlightedIndex }"
@@ -61,7 +67,12 @@ function filterOptions() {
   )
   highlightedIndex.value = 0
 }
-
+function selectEmpty() {
+  search.value = ''
+  emit('update:modelValue', null)
+  emit('select', null)
+  showDropdown.value = false
+}
 function selectOption(option) {
   search.value = option[props.labelKey]
   emit('update:modelValue', option._id)

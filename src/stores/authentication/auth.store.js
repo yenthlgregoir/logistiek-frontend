@@ -5,7 +5,8 @@ import router from '@/router'
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
-    token: localStorage.getItem('token') || null
+    token: localStorage.getItem('token') || null,
+    initialized: false,
   }),
   getters: {
     isLoggedIn: (state) => !!state.token
@@ -23,14 +24,15 @@ export const useAuthStore = defineStore('auth', {
   try {
     const res = await loginApi.me()
     this.user = res
-console.log('ROLE:', this.user?.role)
   } catch (err) {
-  if (err?.response?.status === 401) {
-    this.logout()
-  } else {
-    this.user = null
+    if (err?.response?.status === 401) {
+      this.logout()
+    } else {
+      this.user = null
+    }
+  } finally {
+    this.initialized = true
   }
-}
 },
 
     logout() {

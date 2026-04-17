@@ -140,6 +140,7 @@ const props = defineProps({
   entiteiten: Array,
   error: String,
   assetModel: String,
+  success: Boolean
 });
 
 const emit = defineEmits(["close", "save", "edit"]);
@@ -193,6 +194,12 @@ watch(
   () => props.assetModel,
   () => resetForm()
 );
+
+watch(() => props.success, (val) => {
+  if (val && !isEditMode.value) {
+    resetForm();
+  }
+});
 
 function resetForm() {
   verhuurCopy.value = {
@@ -255,7 +262,6 @@ async function saveVerhuur() {
       emit("edit", verhuurCopy.value);
     } else {
       emit("save", verhuurCopy.value);
-      resetForm();
     }
   } finally {
     loading.value = false;

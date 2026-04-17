@@ -75,11 +75,13 @@
 import { reactive, ref, onMounted, onUnmounted } from 'vue'
 import { boekingApi } from '@/api/boeking'
 import { klantApi } from '@/api/klant'
+import { useBoekingenStore } from '@/stores/renting/boekingen.store.js'
 import SelectLeverAdresModal from './SelectLeverAdresModal.vue'
 import AutocompleteSelect from '@/components/base/AutocompleteSelect.vue'
 
 defineProps({ types: Object })
 const emit = defineEmits(['close', 'update'])
+const boekingenstore = useBoekingenStore();
 
 /* --------------------------
    STATE
@@ -163,17 +165,18 @@ async function submitBoeking() {
 
   try {
     await boekingApi.add(JSON.stringify(form))
+
+    // 🔥 BELANGRIJK: refresh lijst/cache
+    await boekingenstore.loadBoekingen(false)
+
     message.value = 'Boeking succesvol aangemaakt!'
     error.value = false
+
     emit('update')
     setTimeout(() => close(), 800)
+
   } catch (err) {
-    try {
-      const jsonErr = JSON.parse(err.message)
-      message.value = jsonErr.message || 'Er is een fout opgetreden.'
-    } catch {
-      message.value = err.message || 'Er is een fout opgetreden.'
-    }
+    message.value = err.message || 'Er is een fout opgetreden.'
     error.value = true
   }
 }
