@@ -23,13 +23,14 @@ export const useAuthStore = defineStore('auth', {
   try {
     const res = await loginApi.me()
     this.user = res
-    console.log(this.user)
-    console.log('USER:', this.user)
 console.log('ROLE:', this.user?.role)
   } catch (err) {
-    this.user = null
+  if (err?.response?.status === 401) {
     this.logout()
+  } else {
+    this.user = null
   }
+}
 },
 
     logout() {

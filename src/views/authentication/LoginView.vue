@@ -20,7 +20,7 @@
           <input v-model="password" type="password" placeholder="Wachtwoord" />
         </div>
 
-        <button @click="handleLogin" :disabled="loading">
+        <button type="button" @click="handleLogin" :disabled="loading">
           {{ loading ? 'Bezig...' : 'Login' }}
         </button>
 
@@ -57,7 +57,12 @@ const handleLogin = async () => {
 
     await auth.login(email.value, password.value)
 
+    console.log("voor");
+
     router.push({ name: 'home' })
+
+        console.log("na");
+
   } catch (err) {
     console.error(err)
 

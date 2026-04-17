@@ -186,22 +186,38 @@ const router = createRouter({
 })
 
 // --- Auth Guard ---
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore()
 
+  // ✅ Als token bestaat maar user niet → eerst ophalen
+  if (auth.token && !auth.user) {
+    try {
+      await auth.fetchMe()
+    } catch (e) {
+      console.warn('fetchMe in router failed')
+    }
+  }
+
+  // 🔐 Auth check
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
     return next({ name: 'login' })
   }
 
+  // 🎭 Role check (alleen als user er is!)
   if (to.meta.roles && auth.isLoggedIn) {
     const userRole = auth.user?.role
-    if (!userRole) return next({ name: 'login' })
+
+    if (!userRole) {
+      // ❗ NIET meteen naar login → gewoon laten doorgaan of wachten
+      return next()
+    }
 
     if (userRole !== 'admin' && !to.meta.roles.includes(userRole)) {
       return next({ name: 'home' })
     }
   }
 
+  // 🔁 Login redirect
   if (to.name === 'login' && auth.isLoggedIn) {
     return next({ name: 'home' })
   }
