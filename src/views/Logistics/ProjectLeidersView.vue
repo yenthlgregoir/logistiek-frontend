@@ -1,8 +1,9 @@
 <template>
   <div class="page">
     <h2>Projectleiders</h2>
+
     <ProjetLeiderTable
-      :leaders="leaders"
+      :leaders="paginatedLeaders"
       :entiteiten="entiteiten"
       @add="addLeader"
       @delete="deleteLeader"
@@ -10,27 +11,63 @@
       @edit="editLeader"
       @add-entiteit="addEntiteit"
     />
+
+    <!-- PAGINATION -->
+    <BasePagination
+      :current-page="currentPage"
+      :total-pages="totalPages"
+      @next="next"
+      @prev="prev"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+
 import ProjetLeiderTable from '@/components/Logistics/ProjectLeider/ProjetLeiderTable.vue'
+import BasePagination from '@/components/base/BasePagination.vue'
+
 import { leiderApi } from '@/api/projectLeider.js'
 import { entiteitApi } from '@/api/entiteit'
 
+import { usePagination } from '@/composable/usePagination'
+
+/* -----------------------------
+   STATE
+----------------------------- */
 const leaders = ref([])
 const entiteiten = ref([])
+const search = ref('')
 
-// Bij component mount data ophalen
-onMounted(getEntiteiten)
+/* -----------------------------
+   PAGINATION
+----------------------------- */
+const {
+  currentPage,
+  totalPages,
+  paginatedItems: paginatedLeaders,
+  next,
+  prev,
+  reset,
+} = usePagination(leaders, {
+  pageSize: 10,
+})
 
-onMounted(getLeaders)
+/* -----------------------------
+   LOAD LEADERS
+----------------------------- */
+onMounted(() => {
+  getLeaders()
+  getEntiteiten()
+})
 
-// Haal lijst op van backend
 async function getLeaders() {
   try {
-    const params = { search: undefined }
+    const params = {
+      search: search.value || undefined,
+    }
+
     const response = await leiderApi.list(params)
     leaders.value = response
   } catch (error) {
@@ -38,18 +75,22 @@ async function getLeaders() {
   }
 }
 
-// Search functionaliteit
+/* -----------------------------
+   SEARCH
+----------------------------- */
 async function searchLeaders(query) {
   try {
-    const params = { search: query || undefined }
-    const response = await leiderApi.list(params)
-    leaders.value = response
+    search.value = query || ''
+    reset()
+    await getLeaders()
   } catch (err) {
     console.error(err)
   }
 }
 
-// Nieuwe projectleider toevoegen
+/* -----------------------------
+   CRUD LEADERS
+----------------------------- */
 async function addLeader(data) {
   try {
     await leiderApi.create(data)
@@ -59,7 +100,6 @@ async function addLeader(data) {
   }
 }
 
-// Projectleider verwijderen
 async function deleteLeader(leaderId) {
   try {
     await leiderApi.remove(leaderId)
@@ -69,7 +109,6 @@ async function deleteLeader(leaderId) {
   }
 }
 
-// Projectleider bewerken
 async function editLeader(data) {
   try {
     await leiderApi.update(data._id, data)
@@ -79,6 +118,9 @@ async function editLeader(data) {
   }
 }
 
+/* -----------------------------
+   ENTITEITEN
+----------------------------- */
 async function getEntiteiten() {
   try {
     const res = await entiteitApi.getEntiteiten()
@@ -96,12 +138,20 @@ async function addEntiteit(data) {
     console.log(err)
   }
 }
+
+/* -----------------------------
+   RESET PAGINATION
+----------------------------- */
+watch(leaders, () => {
+  reset()
+})
 </script>
 
 <style scoped>
 .page {
   padding: 1rem;
 }
+
 .page h2 {
   padding-left: 2rem;
 }

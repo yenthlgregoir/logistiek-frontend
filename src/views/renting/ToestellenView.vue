@@ -1,6 +1,7 @@
 <template>
   <div class="page">
     <h2>Toestellen</h2>
+
     <!-- TOOLBAR -->
     <ToestellenToolbar
       v-model:search="search"
@@ -18,13 +19,15 @@
       @update-status="handleStatusUpdate"
       @edit-toestel="editForm"
     />
-    <div v-if="toestellen.length > pageSize" class="pagination">
-      <button :disabled="currentPage === 1" @click="currentPage--">Vorige</button>
 
-      <span>Pagina {{ currentPage }} van {{ totalPages }}</span>
+    <!-- PAGINATION -->
+    <BasePagination
+      :current-page="currentPage"
+      :total-pages="totalPages"
+      @next="next"
+      @prev="prev"
+    />
 
-      <button :disabled="currentPage === totalPages" @click="currentPage++">Volgende</button>
-    </div>
     <!-- OVERLAY FORM -->
     <div v-if="showForm" class="overlay">
       <div class="modal">
@@ -42,12 +45,17 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch, computed, onBeforeUnmount } from 'vue'
+import { ref, reactive, onMounted, watch, onBeforeUnmount } from 'vue'
+
 import ToestellenTable from '@/components/renting/toestellen/ToestellenTable.vue'
 import ToestellenToolbar from '@/components/renting/toestellen/ToestellenToolbar.vue'
 import ToestellenForm from '@/components/renting/toestellen/ToestellenForm.vue'
+import BasePagination from '@/components/base/BasePagination.vue'
+
 import { toestelApi } from '@/api/toestel'
 import { klantApi } from '@/api/klant'
+
+import { usePagination } from '@/composable/usePagination'
 
 /* -----------------------------
    STATE
@@ -55,7 +63,9 @@ import { klantApi } from '@/api/klant'
 const toestellen = ref([])
 const search = ref('')
 const filterType = ref('')
+const filterKlant = ref(null)
 const currentDateFilter = ref(null)
+
 const showForm = ref(false)
 const klanten = ref([])
 const types = ref([])
@@ -73,7 +83,21 @@ const form = reactive({
   },
   klant: '',
 })
+
 const isEdit = ref(false)
+
+/* -----------------------------
+   PAGINATION (NEW)
+----------------------------- */
+const {
+  currentPage,
+  pageSize,
+  totalPages,
+  paginatedItems: paginatedToestellen,
+  next,
+  prev,
+  reset,
+} = usePagination(toestellen)
 
 /* -----------------------------
    LOAD DATA
@@ -82,6 +106,13 @@ onMounted(() => {
   getKlanten()
   getTypes()
   loadToestellen()
+  updatePageSize()
+
+  window.addEventListener('resize', updatePageSize)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updatePageSize)
 })
 
 async function getTypes() {
@@ -103,13 +134,17 @@ async function getKlanten() {
 }
 
 /* -----------------------------
-   LOAD TOESTELLEN MET FILTERS
+   LOAD TOESTELLEN
 ----------------------------- */
 async function loadToestellen() {
   try {
     const params = {
       search: search.value || undefined,
       type: filterType.value || undefined,
+
+      // 🔥 FIX: klant toevoegen
+      klant: filterKlant.value?._id || filterKlant.value || undefined,
+
       ...(currentDateFilter.value
         ? {
             beginDatum: currentDateFilter.value.beginDatum,
@@ -117,8 +152,8 @@ async function loadToestellen() {
           }
         : {}),
     }
+
     const res = await toestelApi.list(params)
-    console.log(res)
     toestellen.value = res.items || res
   } catch (e) {
     console.error('Fout bij laden toestellen', e)
@@ -126,16 +161,26 @@ async function loadToestellen() {
 }
 
 /* -----------------------------
-   WATCHERS VOOR BACKEND FILTERING
+   FILTERS
 ----------------------------- */
-watch([search, filterType], loadToestellen)
+watch([search, filterType, filterKlant], () => {
+  reset()
+  loadToestellen()
+})
 
-/* -----------------------------
-   VRIJE TOESTELLEN
------------------------------ */
 function onFilterChange(dateRange) {
   currentDateFilter.value = dateRange
+  reset()
   loadToestellen()
+}
+
+/* -----------------------------
+   PAGE SIZE (UI ONLY)
+----------------------------- */
+function updatePageSize() {
+  const availableHeight = window.innerHeight - 350
+  const rowHeight = 60
+  pageSize.value = Math.floor(availableHeight / rowHeight)
 }
 
 /* -----------------------------
@@ -161,6 +206,7 @@ function editForm(toestel) {
     },
     klant: toestel.klant?._id || toestel.klant || '',
   })
+
   isEdit.value = true
   showForm.value = true
 }
@@ -186,12 +232,13 @@ function resetForm() {
 }
 
 /* -----------------------------
-   SAVE TOESTEL
+   SAVE
 ----------------------------- */
 async function saveToestel(data) {
   try {
     if (data._id) await toestelApi.update(data._id, data)
     else await toestelApi.create(data)
+
     closeForm()
     loadToestellen()
     getTypes()
@@ -201,7 +248,7 @@ async function saveToestel(data) {
 }
 
 /* -----------------------------
-   UPDATE STATUS
+   STATUS UPDATE
 ----------------------------- */
 async function handleStatusUpdate(payload) {
   try {
@@ -211,40 +258,13 @@ async function handleStatusUpdate(payload) {
     console.error(e)
   }
 }
-
-const currentPage = ref(1)
-const pageSize = ref(9) // default, wordt overschreven
-const totalPages = computed(() => Math.ceil(toestellen.value.length / pageSize.value))
-
-function updatePageSize() {
-  // hoogte van viewport min header + toolbar (bijv 200px)
-  const availableHeight = window.innerHeight - 350
-
-  const rowHeight = 60
-
-  pageSize.value = Math.floor(availableHeight / rowHeight)
-}
-
-// recompute bij resize
-onMounted(() => {
-  updatePageSize()
-  window.addEventListener('resize', updatePageSize)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', updatePageSize)
-})
-const paginatedToestellen = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return toestellen.value.slice(start, end)
-})
 </script>
+
 <style scoped>
-/* OVERLAY */
 .page {
   padding: 1rem;
 }
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -255,41 +275,11 @@ const paginatedToestellen = computed(() => {
   z-index: 2000;
 }
 
-/* MODAL */
-
 .modal {
   width: 360px;
   background: #bee9e8;
   border-radius: 8px;
   padding: 28px 24px;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
-}
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-  gap: 12px;
-}
-
-.pagination button {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: none;
-  background-color: #5786f7;
-  color: white;
-  font-weight: 500;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.pagination button:disabled {
-  background-color: #a1b9f5;
-  cursor: not-allowed;
-}
-
-.pagination span {
-  font-weight: 500;
-  color: #1b4965;
 }
 </style>

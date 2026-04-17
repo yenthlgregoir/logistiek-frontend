@@ -13,13 +13,12 @@
     />
 
     <!-- PAGINATION -->
-    <div v-if="klanten.length > pageSize" class="pagination">
-      <button :disabled="currentPage === 1" @click="currentPage--">Vorige</button>
-
-      <span>Pagina {{ currentPage }} van {{ totalPages }}</span>
-
-      <button :disabled="currentPage === totalPages" @click="currentPage++">Volgende</button>
-    </div>
+    <BasePagination
+      :current-page="currentPage"
+      :total-pages="totalPages"
+      @next="next"
+      @prev="prev"
+    />
 
     <!-- DETAIL SLIDE-OVER -->
     <KlantenDetail
@@ -46,45 +45,52 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 
 import KlantenList from '@/components/renting/klanten/KlantenList.vue'
 import KlantenDetail from '@/components/renting/klanten/KlantenDetail.vue'
 import NieuwLeveradresModal from '@/components/renting/klanten/NieuwLeveradresModal.vue'
+import BasePagination from '@/components/base/BasePagination.vue'
 
 import { klantApi } from '@/api/klant'
+import { usePagination } from '@/composable/usePagination'
 
+/* -----------------------------
+   STATE
+----------------------------- */
 const klanten = ref([])
 const search = ref('')
 const selectedKlant = ref(null)
 const showDetail = ref(false)
 
+/* -----------------------------
+   FILTERED KLANTEN
+----------------------------- */
 const filteredKlanten = computed(() => {
   const term = search.value.toLowerCase()
   return klanten.value.filter(
-    (k) => k.naam?.toLowerCase().includes(term) || k.klantNummer?.toLowerCase().includes(term),
+    (k) =>
+      k.naam?.toLowerCase().includes(term) ||
+      k.klantNummer?.toLowerCase().includes(term),
   )
 })
 
 /* -----------------------------
-   PAGINATION (same as toestellen)
+   PAGINATION (NEW)
 ----------------------------- */
-const currentPage = ref(1)
-const pageSize = ref(9)
+const {
+  currentPage,
+  pageSize,
+  totalPages,
+  paginatedItems: paginatedKlanten,
+  next,
+  prev,
+  reset,
+} = usePagination(filteredKlanten)
 
-const totalPages = computed(() => Math.ceil(filteredKlanten.value.length / pageSize.value))
-
-const paginatedKlanten = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  return filteredKlanten.value.slice(start, start + pageSize.value)
-})
-
-function updatePageSize() {
-  const availableHeight = window.innerHeight - 330
-  const rowHeight = 60
-  pageSize.value = Math.floor(availableHeight / rowHeight)
-}
-
+/* -----------------------------
+   LOAD DATA
+----------------------------- */
 onMounted(() => {
   updatePageSize()
   window.addEventListener('resize', updatePageSize)
@@ -95,9 +101,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updatePageSize)
 })
 
-/* -----------------------------
-   LOAD KLANTEN
------------------------------ */
 async function loadKlanten() {
   try {
     const data = await klantApi.list()
@@ -106,6 +109,22 @@ async function loadKlanten() {
     console.error('Laden van klanten mislukt', e)
   }
 }
+
+/* -----------------------------
+   PAGE SIZE (UI ONLY)
+----------------------------- */
+function updatePageSize() {
+  const availableHeight = window.innerHeight - 330
+  const rowHeight = 60
+  pageSize.value = Math.floor(availableHeight / rowHeight)
+}
+
+/* -----------------------------
+   RESET PAGINATION ON SEARCH
+----------------------------- */
+watch(search, () => {
+  reset()
+})
 
 /* -----------------------------
    FORM + DETAIL
@@ -128,6 +147,7 @@ const nieuwAdres = reactive({
   postcode: '',
   gemeente: '',
 })
+
 const showModal = ref(false)
 
 function selectKlant(k) {
@@ -167,6 +187,9 @@ function selectNew() {
   })
 }
 
+/* -----------------------------
+   SAVE
+----------------------------- */
 async function saveKlant(data) {
   try {
     if (selectedKlant.value) {
@@ -186,6 +209,9 @@ function cancel() {
   showDetail.value = false
 }
 
+/* -----------------------------
+   ADRES LOGICA
+----------------------------- */
 function leveradresToevoegen() {
   Object.assign(nieuwAdres, {
     naam: '',
@@ -234,27 +260,5 @@ async function refreshKlant(id) {
 .page {
   padding: 1rem;
   overflow: hidden;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-  gap: 12px;
-}
-
-.pagination button {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: none;
-  background-color: #5786f7;
-  color: white;
-  cursor: pointer;
-}
-
-.pagination button:disabled {
-  background-color: #a1b9f5;
-  cursor: not-allowed;
 }
 </style>

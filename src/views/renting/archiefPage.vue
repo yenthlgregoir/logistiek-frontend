@@ -1,26 +1,24 @@
 <template>
   <div class="agenda-parent-container">
-    
-    <!-- Loading -->
-    <div v-if="store.loading.list">Laden...</div>
+    <h1>Archief</h1>
 
     <!-- Lijst -->
     <BoekingList
-      v-else
       :boekingen="store.boekingen"
-      :archief="true"
       v-model:search="store.search"
       v-model:dateRange="store.dateRange"
       @openBoeking="openBoekingModal"
-      @addBoeking="showCreateModal = true"
+      @addBoeking="openCreateModal"
     />
 
-    <!-- Boeking modal -->
+  
+
+    <!-- Detail -->
     <BoekingModal
       v-if="showBoekingModal"
       :boekingId="selectedBoekingId"
       @close="showBoekingModal = false"
-      @update="store.loadBoekingen"
+      @update="refreshBoekingen"
       @assignToestel="openVrijeToestellenModal"
       @verwijderen="deleteBoeking"
       @save="saveComment"
@@ -33,21 +31,19 @@
       @select="assignToestel"
       @close="showVrijeToestellenModal = false"
     />
-
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 
 import { useBoekingenStore } from '@/stores/renting/boekingen.store.js'
 
-import BoekingModal from '@/components/renting/agenda/BoekingModal.vue'
 import BoekingList from '@/components/renting/agenda/BoekingList.vue'
+import BoekingModal from '@/components/renting/agenda/BoekingModal.vue'
 import VrijToestellenModal from '@/components/renting/agenda/VrijToestellenModal.vue'
 
-// STORE
 const store = useBoekingenStore()
 
 // MODALS
@@ -56,24 +52,35 @@ const showBoekingModal = ref(false)
 const showVrijeToestellenModal = ref(false)
 const selectedBoekingId = ref(null)
 
-// =========================
-// ✅ WATCHERS (debounced)
-// =========================
+/**
+ * ✅ ONLY ONE RELOAD SOURCE (BELANGRIJK)
+ * Geen dubbele loadBoekingen calls meer
+ */
 const reload = useDebounceFn(() => {
   store.loadBoekingen()
 }, 300)
 
+/**
+ * FIX: wacht op UI state changes
+ */
 watch(
-  [() => store.search, () => store.dateRange],
-  reload
+  () => [store.search, store.dateRange],
+  () => {
+    reload()
+  },
+  { deep: true }
 )
 
-// =========================
-// UI ACTIONS
-// =========================
+/**
+ * TYPE FILTER (archief gebruikt dit niet, maar safe)
+ */
 function openBoekingModal(id) {
   selectedBoekingId.value = id
   showBoekingModal.value = true
+}
+
+function openCreateModal() {
+  showCreateModal.value = true
 }
 
 async function openVrijeToestellenModal(id) {
@@ -97,11 +104,17 @@ async function saveComment(payload) {
   showBoekingModal.value = false
 }
 
-// =========================
-// INIT
-// =========================
+async function refreshBoekingen() {
+  await store.loadBoekingen()
+}
+
+/**
+ * INIT ARCHIEF
+ */
 onMounted(async () => {
   store.currentViewMode = 'archief'
+
+  // ❗ BELANGRIJK: geen resetFilters hier!
   await store.loadBoekingen()
   await store.loadTypes()
 })
@@ -111,5 +124,6 @@ onMounted(async () => {
 .agenda-parent-container {
   font-family: Arial, sans-serif;
   padding: 1rem;
+  width: 100%;
 }
 </style>

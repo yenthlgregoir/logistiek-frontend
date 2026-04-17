@@ -55,15 +55,9 @@ function close() {
 async function save() {
   errorMessage.value = ''
 
-  if (!form.eindDatum) {
-    const begin = new Date(form.beginDatum)
-    begin.setFullYear(begin.getFullYear() + 5)
-    form.eindDatum = begin.toISOString().split('T')[0]
-  }
-
   emit('update', {
     beginDatum: form.beginDatum,
-    eindDatum: form.eindDatum,
+    eindDatum: form.eindDatum || null,
   })
 
   emit('close')

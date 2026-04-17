@@ -121,6 +121,13 @@ const pickerOptions = {
 onMounted(generateDays)
 
 watch(selectedType, val => emit('filterType', val))
+watch(dateRange, (val) => {
+  // als user reset (null of lege array)
+  if (!val || val.length === 0 || !val[0] || !val[1]) {
+    resetToDefaultRange()
+  }
+})
+
 
 const filteredItems = computed(() => props.items || [])
 
@@ -159,6 +166,20 @@ function onDateChange(val) {
   dateRange.value = [
     s.toISOString().slice(0,10),
     e.toISOString().slice(0,10)
+  ]
+
+  generateDays()
+}function resetToDefaultRange() {
+  const start = new Date()
+  const end = new Date()
+  end.setDate(start.getDate() + 7)
+
+  startDate.value = start
+  endDate.value = end
+
+  dateRange.value = [
+    start.toISOString().slice(0, 10),
+    end.toISOString().slice(0, 10)
   ]
 
   generateDays()

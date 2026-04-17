@@ -4,13 +4,17 @@
       <div class="drawer">
         <!-- HEADER -->
         <div class="drawer-header">
-          <h3>{{ title }}</h3>
-          <div class="header-actions">
-            <slot name="header-actions">
-              <button class="close-btn" @click="$emit('close')">✕</button>
-            </slot>
-          </div>
-        </div>
+  <div class="title-block">
+    <h3>{{ title }}</h3>
+    <h4>{{ subtitle }}</h4>
+  </div>
+
+  <div class="header-actions">
+    <slot name="header-actions">
+      <button class="close-btn" @click="$emit('close')">✕</button>
+    </slot>
+  </div>
+</div>
 
         <!-- CONTENT -->
         <div class="drawer-content">
@@ -33,6 +37,7 @@
 defineProps({
   show: { type: Boolean, default: false },
   title: { type: String, default: '' },
+  subtitle: {type: String , default: ''}
 })
 </script>
 
@@ -65,9 +70,26 @@ defineProps({
 .drawer-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: 20px;
   border-bottom: 1px solid #e5e7eb;
+}
+
+.title-block {
+  display: flex;
+  flex-direction: column;
+}
+.drawer-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.drawer-header h4 {
+  margin: 4px 0 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: #6b7280;
 }
 .header-actions {
   display: flex;

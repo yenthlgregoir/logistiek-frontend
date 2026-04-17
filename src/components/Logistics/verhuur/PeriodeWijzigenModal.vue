@@ -63,21 +63,15 @@ function close() {
 // Save stuurt de lokale kopie terug naar de parent (drawer)
 function save() {
   if (!form.leverDatum) {
-    errorMessage.value = 'Begin datum is verplicht'
+    errorMessage.value = 'Leverdatum is verplicht'
     return
   }
 
-  // Als einddatum leeg is → 5 jaar later
-  const lever = form.leverDatum
-  const ophaal =
-    form.ophaalDatum ||
-    (() => {
-      const d = new Date(lever)
-      d.setFullYear(d.getFullYear() + 5)
-      return d.toISOString().split('T')[0]
-    })()
+  emit('save', {
+    leverDatum: form.leverDatum,
+    ophaalDatum: form.ophaalDatum || null,
+  })
 
-  emit('save', { leverDatum: lever, ophaalDatum: ophaal })
   emit('close')
 }
 </script>
