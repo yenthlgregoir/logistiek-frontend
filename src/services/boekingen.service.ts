@@ -1,5 +1,5 @@
-import { boekingApi } from '@/api/boeking'
 import { formatDate } from '@/utils/date'
+import { boekingApi } from '@/api/boeking'
 
 export async function fetchBoekingen(params: {
   search: string

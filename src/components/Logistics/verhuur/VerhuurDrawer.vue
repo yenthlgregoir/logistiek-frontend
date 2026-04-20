@@ -178,11 +178,13 @@ async function openModal(field) {
       alleWerven.value = await werfApi.list()
       showWerfModal.value = true
       break
+
     case 'projectleider':
       alleProjectleiders.value = await leiderApi.list()
       showProjectleiderModal.value = true
       break
-    case 'machine':
+
+    case 'machine': {
       const data = {
         assetModel: verhuurCopy.assetModel,
         leverDatum: verhuurCopy.leverDatum || null,
@@ -192,6 +194,8 @@ async function openModal(field) {
       vrijeToestellen.value = await verhuurApi.vrijeToestellen(data)
       showToestelModal.value = true
       break
+    }
+
     case 'periode':
       showPeriodeModal.value = true
       break

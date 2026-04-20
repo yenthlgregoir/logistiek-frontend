@@ -36,12 +36,12 @@
       </div>
     </div>
 
-    <!-- GEEN DATA -->
+    <!-- NO DATA -->
     <div v-if="visibleItems.length === 0" class="geen-boekingen">
       Geen boekingen in deze periode
     </div>
 
-    <!-- RIJEN -->
+    <!-- ROWS -->
     <div v-else class="rows">
       <div
         v-for="item in visibleItems"
@@ -69,9 +69,11 @@
 
             <small class="datum-range">
               {{ formatDate(getBookingStart(booking)) }}
+
               <span v-if="getBookingEnd(booking) && (booking.ophaalDatum || booking.eindDatum)">
                 - {{ formatDate(getBookingEnd(booking)) }}
               </span>
+              
               <span v-else>
                 - nog geen ophaaldatum
               </span>
@@ -122,18 +124,16 @@ onMounted(generateDays)
 
 watch(selectedType, val => emit('filterType', val))
 watch(dateRange, (val) => {
-  // als user reset (null of lege array)
   if (!val || val.length === 0 || !val[0] || !val[1]) {
     resetToDefaultRange()
   }
 })
 
-
 const filteredItems = computed(() => props.items || [])
 
-/**
- * 🔥 BELANGRIJK: alleen items tonen die effectief bookings hebben in range
- */
+/* -----------------------------
+   FIX: altijd items tonen die bookings hebben
+------------------------------ */
 const visibleItems = computed(() => {
   return filteredItems.value.filter(item => {
     return bookingsForItem(item).length > 0
@@ -169,7 +169,9 @@ function onDateChange(val) {
   ]
 
   generateDays()
-}function resetToDefaultRange() {
+}
+
+function resetToDefaultRange() {
   const start = new Date()
   const end = new Date()
   end.setDate(start.getDate() + 7)
@@ -185,40 +187,68 @@ function onDateChange(val) {
   generateDays()
 }
 
-/**
- * 🔥 centrale filter (range + item match)
- */
+/* -----------------------------
+   SAFE DATE HELPERS (FIX)
+------------------------------ */
+function safeDate(d, fallback = null) {
+  if (!d) return fallback
+  const dt = new Date(d)
+  return isNaN(dt.getTime()) ? fallback : dt
+}
+
+
+
+
+
+/* -----------------------------
+   CORE FILTER (FIXED)
+------------------------------ */
 function bookingsForItem(item) {
   if (!props.bookings) return []
 
   const id = props.getItemId(item)
 
-  return props.bookings.filter(b => {
-    const bs = new Date(props.getBookingStart(b))
-    const rawEnd = props.getBookingEnd(b)
-    const be = rawEnd ? new Date(rawEnd) : new Date(8640000000000000)
+  const rangeStart = new Date(startDate.value)
+  rangeStart.setHours(0,0,0,0)
 
-    const inRange =
-      bs <= endDate.value &&
-      be >= startDate.value
+  const rangeEnd = new Date(endDate.value)
+  rangeEnd.setHours(23,59,59,999)
+
+  return props.bookings.filter(b => {
+
+    const bookingStart = new Date(props.getBookingStart(b))
+    if (isNaN(bookingStart)) return true // 🔥 fallback: niet breken
+
+    const rawEnd = props.getBookingEnd(b)
+
+    // 🔥 open booking blijft in toekomst
+    const bookingEnd = rawEnd
+      ? new Date(rawEnd)
+      : new Date(8640000000000000)
 
     const matchesItem =
       props.getItemId(b.item || b.asset || b.toestel) === id
 
-    return inRange && matchesItem
+    if (!matchesItem) return false
+
+    const inRange =
+      bookingStart <= rangeEnd &&
+      bookingEnd >= rangeStart
+
+    return inRange
   })
 }
 
+/* -----------------------------
+   BLOCK POSITION (SAFE)
+------------------------------ */
 function getBlockStyle(booking) {
-  const start = new Date(Math.max(
-    new Date(props.getBookingStart(booking)),
-    startDate.value
-  ))
+  const startRaw = safeDate(props.getBookingStart(booking), startDate.value)
+  const endRaw = safeDate(props.getBookingEnd(booking), endDate.value)
 
-  const rawEnd = props.getBookingEnd(booking)
-
-  const end = rawEnd
-    ? new Date(Math.min(new Date(rawEnd), endDate.value))
+  const start = new Date(Math.max(startRaw, startDate.value))
+  const end = endRaw
+    ? new Date(Math.min(endRaw, endDate.value))
     : new Date(endDate.value)
 
   const startStr = start.toISOString().slice(0,10)
@@ -230,11 +260,9 @@ function getBlockStyle(booking) {
   if (startIdx === -1) startIdx = 0
   if (endIdx === -1) endIdx = days.value.length - 1
 
-  const width = endIdx - startIdx + 1
-
   return {
     left: `${(startIdx * 100) / days.value.length}%`,
-    width: `${(width * 100) / days.value.length}%`,
+    width: `${((endIdx - startIdx + 1) * 100) / days.value.length}%`,
   }
 }
 
