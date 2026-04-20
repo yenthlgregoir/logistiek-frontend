@@ -8,6 +8,7 @@
       @search="searchAssets"
       @open-add="openCreate"
       @edit-asset="openEdit"
+      @toPDF= "toPDF"
     />
 
     <!-- DRAWER -->
@@ -80,6 +81,16 @@ async function saveAsset(data) {
   } catch (err) {
     console.error('Fout bij opslaan asset:', err)
   }
+}
+
+async function toPDF(){
+   const blob =  await schaarliftenApi.toPdf();
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `Lijst.pdf`
+    a.click()
+    window.URL.revokeObjectURL(url)
 }
 
 // --- CLOSE ---

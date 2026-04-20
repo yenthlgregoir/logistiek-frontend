@@ -5,6 +5,7 @@ export async function fetchBoekingen(params: {
   search: string
   startDatum: string | null
   eindDatum: string | null
+  type: string | null
   archief: boolean
 }) {
   const res = await boekingApi.list(params)

@@ -2,7 +2,6 @@
   <div class="agenda-parent-container">
     <h1>Archief</h1>
 
-    <!-- Lijst -->
     <BoekingList
       :boekingen="store.boekingen"
       v-model:search="store.search"
@@ -11,9 +10,6 @@
       @addBoeking="openCreateModal"
     />
 
-  
-
-    <!-- Detail -->
     <BoekingModal
       v-if="showBoekingModal"
       :boekingId="selectedBoekingId"
@@ -24,7 +20,6 @@
       @save="saveComment"
     />
 
-    <!-- Vrije toestellen -->
     <VrijToestellenModal
       v-if="showVrijeToestellenModal"
       :toestellen="store.vrijeToestellen"
@@ -35,7 +30,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 
 import { useBoekingenStore } from '@/stores/renting/boekingen.store.js'
@@ -46,22 +41,20 @@ import VrijToestellenModal from '@/components/renting/agenda/VrijToestellenModal
 
 const store = useBoekingenStore()
 
-// MODALS
-const showCreateModal = ref(false)
 const showBoekingModal = ref(false)
 const showVrijeToestellenModal = ref(false)
 const selectedBoekingId = ref(null)
 
 /**
- * ✅ ONLY ONE RELOAD SOURCE (BELANGRIJK)
- * Geen dubbele loadBoekingen calls meer
+ * 🔥 SINGLE SOURCE OF TRUTH FOR LOAD
  */
 const reload = useDebounceFn(() => {
+  store.resetFilters();
   store.loadBoekingen()
-}, 300)
+}, 250)
 
 /**
- * FIX: wacht op UI state changes
+ * ⚠️ ONLY WATCH FILTERS, NOT MANUAL LOADS ANYWHERE ELSE
  */
 watch(
   () => [store.search, store.dateRange],
@@ -72,15 +65,11 @@ watch(
 )
 
 /**
- * TYPE FILTER (archief gebruikt dit niet, maar safe)
+ * MODALS
  */
 function openBoekingModal(id) {
   selectedBoekingId.value = id
   showBoekingModal.value = true
-}
-
-function openCreateModal() {
-  showCreateModal.value = true
 }
 
 async function openVrijeToestellenModal(id) {
@@ -104,19 +93,17 @@ async function saveComment(payload) {
   showBoekingModal.value = false
 }
 
-async function refreshBoekingen() {
-  await store.loadBoekingen()
-}
-
 /**
- * INIT ARCHIEF
+ * INIT
  */
 onMounted(async () => {
+
+  // ❌ NIET meer loadBoekingen dubbel callen
+    store.resetFilters();
   store.currentViewMode = 'archief'
 
-  // ❗ BELANGRIJK: geen resetFilters hier!
-  await store.loadBoekingen()
   await store.loadTypes()
+  await store.loadBoekingen()
 })
 </script>
 

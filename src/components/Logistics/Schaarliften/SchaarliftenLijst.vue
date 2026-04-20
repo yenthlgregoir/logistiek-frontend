@@ -9,7 +9,10 @@
         icon="fa fa-search"
         @update:modelValue="$emit('search', $event)"
       />
-      <button class="btn btn-primary" @click="$emit('openAdd')">+ Asset</button>
+      <div class="buttons">
+        <button class="btn btn-primary btn1" @click="$emit('toPDF')">PDF exporteren</button>
+        <button class="btn btn-primary" @click="$emit('openAdd')">+ Asset</button>
+      </div>
     </div>
 
     <!-- Table -->
@@ -132,7 +135,7 @@ import ExpandedBaseTable from '@/components/base/ExpandedBaseTable.vue'
 import SearchBar from '@/components/base/SearchBar.vue'
 
 defineProps({ assets: { type: Array, default: () => [] } })
-const emit = defineEmits(['search', 'openAdd', 'edit-asset'])
+const emit = defineEmits(['search', 'openAdd', 'edit-asset', 'toPDF'])
 
 const searchQuery = ref('')
 const openRowId = ref(null)
@@ -231,4 +234,9 @@ progress::-webkit-progress-value {
 
 .boeking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 40px; padding: 10px 0; border-bottom: 1px solid #ddd; margin-bottom: 10px }
 .boeking-grid:last-child { border-bottom: none; margin-bottom: 0 }
+
+.btn1{
+  margin-right: 1rem;
+  background-color: #969191;
+}
 </style>
