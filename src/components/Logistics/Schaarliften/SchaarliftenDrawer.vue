@@ -54,7 +54,10 @@
         <label>keuring Datum</label>
         <input type="date" v-model="form.keuringDatum" />
       </div>
-
+<div class="info-block">
+        <label>Opmerkingen</label>
+        <input type="text" v-model="form.comment" placeholder="Opmerkingen" />
+      </div>
       <div class="info-block">
         <label>status</label>
         <select v-model="form.status">
@@ -165,6 +168,7 @@ function resetForm() {
   form.werkhoogte = ''
   form.keuringDatum = ''
   form.status = 'Vrij'
+  form.comment = ''
 }
 
 /* -------------------------

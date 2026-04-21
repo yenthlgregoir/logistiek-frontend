@@ -2,10 +2,10 @@
   <div class="page">
     <main class="center-wrapper">
       <div class="content">
-        <img src="../assets/logo-bumacogroup.svg" alt="Bumaco" class="logo-large" />
+        <img src="../assets/logo_ops_home.png" alt="Bumaco" class="logo-large" />
 
-        <h1>Ops Platform</h1>
-        <p class="subtitle">Welkom bij het centrale dashboard</p>
+               <p class="subtitle">Welkom bij het centrale dashboard</p>
+
 
         <div class="cards">
           <RouterLink v-if="role === 'admin' || role === 'purchase'" to="/purchase" class="card">
@@ -92,31 +92,20 @@ function logout() {
 
 /* ================= LOGO ================= */
 .logo-large {
-  width: 250px;
+  width: 500px;
   max-width: 40vw;
   height: auto;
-  margin-bottom: 1.75rem;
   filter: drop-shadow(0 0 6px rgba(47, 128, 237, 0.3));
   transition: width 0.3s ease;
 }
 
 /* ================= HEADINGS ================= */
-h1 {
-  font-size: 3.5rem;
-  color: #0f2e4d;
-  margin-bottom: 0.5rem;
-  font-weight: 900;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  user-select: none;
-  line-height: 1.1;
-  transition: font-size 0.3s ease;
-}
+
 
 .subtitle {
   font-size: 1.25rem;
   color: #7fa6c5;
-  margin-bottom: 2.5rem;
+  margin: 0 0 2.5rem 0;
   font-weight: 400;
   letter-spacing: 0.04em;
   user-select: none;

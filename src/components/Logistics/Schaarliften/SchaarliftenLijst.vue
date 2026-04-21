@@ -76,6 +76,13 @@
                 <div>{{ item.bouwjaar || '-' }}</div>
               </div>
 
+              <div class="comments">
+  <div class="comments-title"><strong>Opmerking</strong></div>
+  <div class="comments-text">
+    {{ item.comment || 'Geen opmerking' }}
+  </div>
+</div>
+
               <!-- Keuring -->
               <div v-if="isSchaarlift(item)" class="keuring">
                 <div class="keuring-title"><strong>Keuring</strong></div>
@@ -185,6 +192,25 @@ function editAsset(asset) {
 </script>
 
 <style scoped>
+.comments {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: #333;
+}
+
+.comments-title {
+  font-weight: 600;
+}
+
+.comments-text {
+  background: #f9fafb;
+  border-radius: 6px;
+
+  white-space: pre-wrap; /* belangrijk voor vrije tekst */
+}
 .page { width: 100% }
 .toolbar { display: flex; justify-content: space-between; margin-bottom: 15px }
 .clickable { cursor: pointer; font-weight: 500 }

@@ -83,6 +83,13 @@
                 <div>{{ item.entiteit.naam || '-' }}</div>
                 
               </div>
+
+              <div class="comments">
+  <div class="comments-title"><strong>Opmerking</strong></div>
+  <div class="comments-text">
+    {{ item.comment || 'Geen opmerking' }}
+  </div>
+</div>
             </div>
           </div>
 
@@ -114,6 +121,7 @@
                   <div><strong>Werf</strong></div>
                   <div>{{ boeking.werf?.naam || '-' }}</div>
                 </div>
+                
               </div>
             </div>
 
@@ -177,7 +185,24 @@ function editAsset(asset) {
 .page {
   width: 100%;
 }
+.comments {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: #333;
+}
 
+.comments-title {
+  font-weight: 600;
+}
+
+.comments-text {
+  background: #f9fafb;
+  border-radius: 6px;
+  white-space: pre-wrap; /* belangrijk voor vrije tekst */
+}
 /* Toolbar */
 .toolbar {
   display: flex;
