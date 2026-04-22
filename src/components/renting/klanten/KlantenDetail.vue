@@ -2,169 +2,305 @@
   <Transition name="drawer">
     <div v-if="show" class="drawer-wrapper">
       <div class="drawer">
-        <!-- Header -->
+
+        <!-- HEADER -->
         <div class="drawer-header">
           <h3>Detail</h3>
           <button class="close-btn" @click="$emit('close')">✕</button>
         </div>
-        <!-- Content -->
+
         <div class="drawer-content">
           <div class="adres-row">
-            <!-- Factuuradres -->
+
+            <!-- FACTUUR -->
             <div class="factuuradres">
+
               <div class="form-group">
                 <label>Naam</label>
-                <input v-model="localForm.naam" @blur="touched.naam = true" />
-                <p v-if="touched.naam && !localForm.naam" class="error">Naam is verplicht</p>
+                <input v-model="localForm.naam" />
               </div>
+
               <div class="form-group">
                 <label>Klantnummer</label>
-                <input v-model="localForm.klantNummer" @blur="touched.klantNummer = true" />
-                <p v-if="touched.klantNummer && !localForm.klantNummer" class="error">
-                  Klantnummer is verplicht
-                </p>
+                <input v-model="localForm.klantNummer" />
               </div>
+
               <div class="form-group">
                 <label>Telefoonnummer</label>
                 <input v-model="localForm.telefoonnummer" />
               </div>
+
               <div class="form-group">
                 <label>Mailadres</label>
                 <input v-model="localForm.mailadres" />
               </div>
+
               <div class="form-group">
-                <label>BTW-nummer</label>
-                <input v-model="localForm.BTWnummer" />
-              </div>
+  <label>BTW-nummer</label>
+
+  <div style="display:flex; gap:10px;">
+    <input v-model="localForm.BTWnummer" />
+
+    <button
+      class="validate-btn"
+      @click="checkBTW"
+      :disabled="loadingBTW"
+    >
+      {{ loadingBTW ? 'Bezig...' : 'Valideer' }}
+    </button>
+  </div>
+
+  <span v-if="btwError" class="error">{{ btwError }}</span>
+</div>
+
               <h4>Factuuradres</h4>
+
               <div class="form-group-inline">
-                <div class="input-large">
-                  <label>Straat</label>
-                  <input v-model="localForm.factuurAdres.straat" />
-                </div>
-                <div class="input-small">
-                  <label>Huisnummer</label>
-                  <input v-model="localForm.factuurAdres.huisnummer" />
-                </div>
+                <input v-model="localForm.factuurAdres.straat" placeholder="Straat" />
+                <input v-model="localForm.factuurAdres.huisnummer" placeholder="Nr" />
               </div>
+
               <div class="form-group-inline">
-                <div class="input-small">
-                  <label>Postcode</label>
-                  <input v-model="localForm.factuurAdres.postcode" />
-                </div>
-                <div class="input-large">
-                  <label>Gemeente</label>
-                  <input v-model="localForm.factuurAdres.gemeente" />
-                </div>
+                <input v-model="localForm.factuurAdres.postcode" placeholder="Postcode" />
+                <input v-model="localForm.factuurAdres.gemeente" placeholder="Gemeente" />
               </div>
+
               <div class="buttons">
-                <button class="save" :disabled="!isValid" @click="emitSave">Opslaan</button>
-                <button class="delete" v-if="localSelected" @click="$emit('delete')">Verwijderen</button>
+                <button class="save" @click="emitSave">Opslaan</button>
+                <button v-if="selectedKlant" class="delete" @click="$emit('delete')">
+                  Verwijderen
+                </button>
               </div>
+
             </div>
+
             <div class="divider"></div>
 
-            <!-- Leveradressen -->
+            <!-- LEVERADRESSEN -->
             <div class="leveradressen">
-              <h4>Leveradressen</h4>      
+
+              <h4>Leveradressen</h4>
+
               <div class="search-row">
-                <input class="search-input" type="search" v-model="zoekTerm" placeholder="Zoek op naam…" />
-                <button @click="$emit('leveradresToevoegen')" class="add-adres">+ Add</button>
+                <input v-model="zoekTerm" placeholder="Zoek..." />
+                <button @click="$emit('leveradresToevoegen' , localForm)" class="add-adres">+ Add</button>
               </div>
 
               <div class="leveradressen-container">
-                <template v-if="filteredLeverAdressen.length">
-                  <div
-                    v-for="adres in filteredLeverAdressen"
-                    :key="adres._id"
-                    class="leveradres-card"
-                  >
-                    <div class="adres-info" @click="onEdit(adres)">
-                      <strong>{{ adres.naam }}</strong>
-                      <div>{{ adres.straat }} {{ adres.huisnummer }}</div>
-                      <div>{{ adres.postcode }} {{ adres.gemeente }}</div>
-                    </div>
-                    <div class="card-buttons">
-                      <button class="edit-small" @click.stop="onEdit(adres)">✎</button>
-                      <button class="delete-small" @click.stop="onDelete(adres)">✕</button>
-                    </div>
-                  </div>
-                </template>
 
-                <p v-else class="no-results">Geen resultaten voor “{{ zoekTerm }}”.</p>
+                <div
+                  v-for="adres in filtered"
+                  :key="adres._id ?? adres.naam"
+                  class="leveradres-card"
+                >
+
+                  <div class="adres-info" @click="$emit('edit-lever-adres', adres)">
+                    <strong>{{ adres.naam }}</strong>
+                    <div>{{ adres.straat }} {{ adres.huisnummer }}</div>
+                    <div>{{ adres.postcode }} {{ adres.gemeente }}</div>
+                  </div>
+
+                  <div class="card-buttons">
+                    <button
+                      class="edit-small"
+                      @click.stop="$emit('edit-lever-adres', adres)"
+                    >
+                      ✎
+                    </button>
+
+                    <button
+                      class="delete-small"
+                      @click.stop="$emit('remove-lever-adres', adres)"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                </div>
+
+                <p v-if="!filtered.length">Geen resultaten</p>
+
               </div>
             </div>
+
           </div>
         </div>
 
-        <!-- Nieuw leveradres modal -->
-        <NieuwLeveradresModal
-          :show="showModal"
-          :model-value="editingAdres"
-          @close="closeModal"
-          @save="saveEditedAdres"
-        />
       </div>
     </div>
   </Transition>
 </template>
 
 <script setup>
-import { reactive, ref, watch, computed, onBeforeUnmount } from 'vue'
-import NieuwLeveradresModal from './NieuwLeveradresModal.vue'
+import { reactive, ref, watch, computed } from 'vue'
+import {VAT_REGEX} from '@/utils/vatRegex'
 
 const props = defineProps({
   form: { type: Object, required: true },
-  selectedKlant: { type: Object, default: null },
-  show: { type: Boolean, default: false },
+  selectedKlant: Object,
+  show: Boolean,
 })
 
-const emit = defineEmits(['save','cancel','delete','close','leveradresToevoegen','update-lever-adres','remove-lever-adres'])
+const emit = defineEmits([
+  'save',
+  'delete',
+  'close',
+  'leveradresToevoegen',
+  'update-lever-adres',
+  'remove-lever-adres',
+ 'edit-lever-adres'
+])
 
-function clone(data) { return JSON.parse(JSON.stringify(data)) }
+/**
+ * 🔥 FIX: reactive i.p.v ref + replace
+ * → voorkomt broken v-model binding
+ */
+const localForm = reactive({
+  naam: '',
+  klantNummer: '',
+  telefoonnummer: '',
+  mailadres: '',
+  BTWnummer: '',
+  factuurAdres: {
+    straat: '',
+    huisnummer: '',
+    postcode: '',
+    gemeente: ''
+  },
+  leverAdressen: []
+})
 
-const localForm = ref(clone(props.form))
-watch(() => props.form, (v) => (localForm.value = clone(v)), { deep: true })
+/**
+ * 🔥 FIX: merge i.p.v replace
+ */
+watch(
+  () => props.form,
+  (v) => {
+    if (!v) return
+    Object.assign(localForm, JSON.parse(JSON.stringify(v)))
+  },
+  { immediate: true, deep: true }
+)
 
-const localSelected = ref(props.selectedKlant)
-watch(() => props.selectedKlant, (v) => (localSelected.value = v))
-
-const touched = reactive({ naam:false, klantNummer:false })
-const isValid = computed(() => localForm.value?.naam?.trim() && localForm.value?.klantNummer?.trim())
+const selectedKlant = computed(() => props.selectedKlant)
 
 const zoekTerm = ref('')
-const filteredLeverAdressen = computed(() => {
+
+const filtered = computed(() => {
   const q = zoekTerm.value.toLowerCase().trim()
-  const list = localForm.value?.leverAdressen || []
-  return !q ? list : list.filter((a) => (a?.naam||'').toLowerCase().includes(q))
+  const list = localForm.leverAdressen || []
+
+  if (!q) return list
+
+  return list.filter(a =>
+    (a.naam || '').toLowerCase().includes(q)
+  )
 })
 
-function emitSave() { emit('save', clone(localForm.value)) }
-function onDelete(adres) { emit('remove-lever-adres', adres) }
-
-const showModal = ref(false)
-const editingAdres = ref(null)
-const adresIndex = ref(null)
-
-function onEdit(adres) {
-  adresIndex.value = localForm.value.leverAdressen.findIndex((a) => a===adres)
-  editingAdres.value = { ...adres }
-  showModal.value = true
+/**
+ * 🔥 FIX: clone bij emit (geen proxy leakage)
+ */
+function emitSave() {
+  emit('save', JSON.parse(JSON.stringify(localForm)))
 }
-function closeModal() { showModal.value = false; adresIndex.value = null }
-function saveEditedAdres(adres) {
-  if(adresIndex.value!==null){
-    if(props.selectedKlant?._id) emit('update-lever-adres',{adres})
-    else localForm.value.leverAdressen[adresIndex.value] = {...adres}
+
+const btwError = ref('')
+const loadingBTW = ref(false)
+function validateBTW(value) {
+  if (!value) {
+    btwError.value = ''
+    return true
   }
-  closeModal()
+
+  const clean = normalizeBTW(value)
+  const country = clean.slice(0, 2)
+  const regex = VAT_REGEX[country]
+
+  if (!regex) {
+    btwError.value = 'Onbekend land'
+    return false
+  }
+
+  if (!regex.test(clean)) {
+    btwError.value = 'Ongeldig BTW-nummer'
+    return false
+  }
+
+  btwError.value = ''
+  return true
+}
+async function checkBTW() {
+  const value = localForm.BTWnummer
+
+  if (!validateBTW(value)) return
+
+  const clean = normalizeBTW(value)
+
+  loadingBTW.value = true
+  btwError.value = ''
+
+  try {
+    const res = await fetch(
+      `https://api.vatcomply.com/vat?vat_number=${clean}`
+    )
+
+    const data = await res.json()
+
+    if (!data.valid) {
+      btwError.value = 'BTW-nummer bestaat niet'
+      return
+    }
+
+    // 🔥 Zorg dat input clean is
+    localForm.BTWnummer = clean
+
+    if (data.name) {
+      localForm.naam = data.name
+    }
+
+    // ✅ Adres parsing (VATComply geeft string)
+    if (data.address) {
+      parseAddress(data.address)
+    }
+
+  } catch  {
+    btwError.value = 'Fout bij controleren'
+  } finally {
+    loadingBTW.value = false
+  }
+}
+function parseAddress(address) {
+  if (!address) return
+  console.log(address)
+  const lines = address.split('\n').map(l => l.trim())
+
+  if (lines.length >= 2) {
+    const streetLine = lines[0]
+    const cityLine = lines[1]
+
+    // straat + nr
+    const matchStreet = streetLine.match(/(.+?)\s(\d+.*)$/)
+    if (matchStreet) {
+      localForm.factuurAdres.straat = matchStreet[1]
+      localForm.factuurAdres.huisnummer = matchStreet[2]
+    } else {
+      localForm.factuurAdres.straat = streetLine
+    }
+
+    // postcode + stad
+    const matchCity = cityLine.match(/(\d{4})\s(.+)/)
+    if (matchCity) {
+      localForm.factuurAdres.postcode = matchCity[1]
+      localForm.factuurAdres.gemeente = matchCity[2]
+    }
+  }
+}
+function normalizeBTW(value) {
+  return value
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '') // 🔥 alles behalve letters/cijfers weg
 }
 
-// Lock scroll when drawer open
-const lockScroll = () => document.body.style.overflow = 'hidden'
-const unlockScroll = () => document.body.style.overflow = ''
-watch(() => props.show, (val)=> val? lockScroll(): unlockScroll())
-onBeforeUnmount(unlockScroll)
 </script>
 
 <style scoped>
@@ -196,7 +332,22 @@ onBeforeUnmount(unlockScroll)
 .drawer-leave-active {
   transition: transform 0.32s ease;
 }
+.validate-btn {
+  background: #10b981;
+  color: white;
+  padding: 0 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
 
+.validate-btn:hover {
+  background: #059669;
+}
+
+.validate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 /* HEADER */
 .drawer-header {
   display: flex;
@@ -377,6 +528,7 @@ input:focus {
 }
 .add-adres:hover {
   background: #2563eb;
+  cursor: pointer;
 }
 
 /* LEVERADRES CARDS */

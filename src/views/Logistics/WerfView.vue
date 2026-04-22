@@ -21,7 +21,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
 
 import WerfTable from '@/components/Logistics/Werf/WerfTable.vue'
 import BasePagination from '@/components/base/BasePagination.vue'
@@ -36,32 +36,59 @@ const werven = ref([])
 const search = ref('')
 
 /* -----------------------------
-   PAGINATION (NEW)
+   FILTERING (zoals klanten)
+----------------------------- */
+const filteredWerven = computed(() => {
+  const term = search.value.toLowerCase()
+
+  return werven.value.filter(
+    (w) =>
+      w.naam?.toLowerCase().includes(term) ||
+      w.werfNummer?.toLowerCase().includes(term)
+  )
+})
+
+/* -----------------------------
+   PAGINATION
 ----------------------------- */
 const {
   currentPage,
+  pageSize,
   totalPages,
   paginatedItems: paginatedWerven,
   next,
   prev,
   reset,
-} = usePagination(werven, {
-  pageSize: 10,
-})
+} = usePagination(filteredWerven)
+
+/* -----------------------------
+   DYNAMIC PAGE SIZE
+----------------------------- */
+function updatePageSize() {
+  const availableHeight = window.innerHeight - 350
+  const rowHeight = 60
+  pageSize.value = Math.floor(availableHeight / rowHeight)
+}
 
 /* -----------------------------
    LOAD DATA
 ----------------------------- */
-onMounted(getWerven)
+onMounted(() => {
+  updatePageSize()
+  window.addEventListener('resize', updatePageSize)
+  getWerven()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updatePageSize)
+})
 
 async function getWerven() {
   try {
-    const params = {
-      search: search.value || undefined,
-    }
-
-    const response = await werfApi.list(params)
-    werven.value = response
+    const response = await werfApi.list()
+    werven.value = Array.isArray(response)
+      ? response
+      : (response.items ?? [])
   } catch (error) {
     console.error(error)
   }
@@ -70,15 +97,15 @@ async function getWerven() {
 /* -----------------------------
    SEARCH
 ----------------------------- */
-async function searchWerven(query) {
-  try {
-    search.value = query || ''
-    reset()
-    await getWerven()
-  } catch (err) {
-    console.error(err)
-  }
+function searchWerven(query) {
+  search.value = query || ''
 }
+
+/* reset pagination bij search */
+watch(search, () => reset())
+
+/* reset bij data change */
+watch(werven, () => reset())
 
 /* -----------------------------
    CRUD
@@ -106,16 +133,9 @@ async function editWerf(data) {
     await werfApi.update(data._id, data)
     await getWerven()
   } catch (err) {
-    console.log(err)
+    console.error(err)
   }
 }
-
-/* -----------------------------
-   RESET PAGINATION ON DATA CHANGE
------------------------------ */
-watch(werven, () => {
-  reset()
-})
 </script>
 
 <style scoped>

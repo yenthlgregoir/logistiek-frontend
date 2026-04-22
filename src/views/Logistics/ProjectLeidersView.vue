@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
 
 import ProjetLeiderTable from '@/components/Logistics/ProjectLeider/ProjetLeiderTable.vue'
 import BasePagination from '@/components/base/BasePagination.vue'
@@ -41,52 +41,75 @@ const entiteiten = ref([])
 const search = ref('')
 
 /* -----------------------------
-   PAGINATION
+   FILTERING (client-side)
+----------------------------- */
+const filteredLeaders = computed(() => {
+  const term = search.value.toLowerCase()
+
+  return leaders.value.filter(
+    (l) =>
+      l.naam?.toLowerCase().includes(term) ||
+      l.email?.toLowerCase().includes(term)
+  )
+})
+
+/* -----------------------------
+   PAGINATION (responsive)
 ----------------------------- */
 const {
   currentPage,
+  pageSize,
   totalPages,
   paginatedItems: paginatedLeaders,
   next,
   prev,
   reset,
-} = usePagination(leaders, {
-  pageSize: 10,
-})
+} = usePagination(filteredLeaders)
 
 /* -----------------------------
-   LOAD LEADERS
+   DYNAMIC PAGE SIZE
+----------------------------- */
+function updatePageSize() {
+  const availableHeight = window.innerHeight - 350
+  const rowHeight = 65
+  pageSize.value = Math.floor(availableHeight / rowHeight)
+}
+
+/* -----------------------------
+   LOAD DATA
 ----------------------------- */
 onMounted(() => {
+  updatePageSize()
+  window.addEventListener('resize', updatePageSize)
+
   getLeaders()
   getEntiteiten()
 })
 
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updatePageSize)
+})
+
 async function getLeaders() {
   try {
-    const params = {
-      search: search.value || undefined,
-    }
-
-    const response = await leiderApi.list(params)
-    leaders.value = response
+    const response = await leiderApi.list()
+    leaders.value = Array.isArray(response)
+      ? response
+      : (response.items ?? [])
   } catch (error) {
     console.error(error)
   }
 }
 
 /* -----------------------------
-   SEARCH
+   SEARCH (client-side)
 ----------------------------- */
-async function searchLeaders(query) {
-  try {
-    search.value = query || ''
-    reset()
-    await getLeaders()
-  } catch (err) {
-    console.error(err)
-  }
+function searchLeaders(query) {
+  search.value = query || ''
 }
+
+watch(search, () => reset())
+watch(leaders, () => reset())
 
 /* -----------------------------
    CRUD LEADERS
@@ -126,7 +149,7 @@ async function getEntiteiten() {
     const res = await entiteitApi.getEntiteiten()
     entiteiten.value = res
   } catch (err) {
-    console.log(err)
+    console.error(err)
   }
 }
 
@@ -135,16 +158,9 @@ async function addEntiteit(data) {
     await entiteitApi.createEniteit(data)
     await getEntiteiten()
   } catch (err) {
-    console.log(err)
+    console.error(err)
   }
 }
-
-/* -----------------------------
-   RESET PAGINATION
------------------------------ */
-watch(leaders, () => {
-  reset()
-})
 </script>
 
 <style scoped>

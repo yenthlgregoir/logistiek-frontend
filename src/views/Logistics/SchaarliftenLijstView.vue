@@ -88,7 +88,9 @@ async function toPDF(){
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `Lijst.pdf`
+    const d = new Date();
+    const date = `${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`;
+    a.download = `Hoogtewerkers_${date}.pdf`;
     a.click()
     window.URL.revokeObjectURL(url)
 }
