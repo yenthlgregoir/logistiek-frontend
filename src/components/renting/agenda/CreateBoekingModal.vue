@@ -8,16 +8,16 @@
 
       <form @submit.prevent="submitBoeking">
         <!-- Type toestel -->
-        <div class="form-group">
-          <label>Type toestel</label>
-          <select v-model="form.toestelType" required>
-            <option disabled value="">Selecteer type</option>
-            <option v-for="type in types" :key="type._id" :value="type._id">
-              {{ type.naam }}
-            </option>
-          </select>
-        </div>
-
+        
+<div class="form-group">
+  <label>Type toestel</label>
+  <AutocompleteSelect
+    v-model="form.toestelType"
+    :options="types"
+    label-key="naam"
+    placeholder="Zoek Type"
+  />
+</div>
         <!-- ✅ Klant autocomplete select -->
         <!-- NieuweBoekingModal.vue -->
 <div class="form-group">

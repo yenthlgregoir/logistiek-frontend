@@ -98,8 +98,22 @@ function handleClickOutside(e) {
   if (box.value && !box.value.contains(e.target)) showDropdown.value = false
 }
 
-onMounted(() => document.addEventListener('click', handleClickOutside))
-onUnmounted(() => document.removeEventListener('click', handleClickOutside))
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+  document.addEventListener('keydown', handleKeyDown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('keydown', handleKeyDown)
+})
+
+function handleKeyDown(event) {
+  if (event.key === 'Tab') {
+    showDropdown.value = false
+  }
+}
+
 </script>
 <style scoped>
 .autocomplete {

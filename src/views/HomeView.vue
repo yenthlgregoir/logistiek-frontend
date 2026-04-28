@@ -2,7 +2,7 @@
   <div class="page">
     <main class="center-wrapper">
       <div class="content">
-        <img src="../assets/logo_ops_home.png" alt="Bumaco" class="logo-large" />
+        <img src="../assets/logo_ops_home.svg" alt="Bumaco" class="logo-large" />
 
                <p class="subtitle">Welkom bij het centrale dashboard</p>
 

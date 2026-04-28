@@ -235,7 +235,27 @@ const routes = [
       title: 'Logistics',
     },
   },
-
+  {
+    path: '/logistics/hoogtewerkers/lijst',
+    name: 'hoogtewerkersLijst',
+    component: () => import('@/views/Logistics/hoogtewerkerCardsView.vue'),
+    props: { assetModel: 'Hoogtewerker' },
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'logistics'],
+      title: 'Logistics',
+    },
+  },
+{
+    path: '/logistics/werfcontainers',
+    name: 'schaarliften',
+    redirect: '/logistics/werfcontainers/planning',
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'logistics'],
+      title: 'Logistics',
+    },
+  },
   {
     path: '/logistics/werfcontainers/lijst',
     name: 'werfContainerLijst',
