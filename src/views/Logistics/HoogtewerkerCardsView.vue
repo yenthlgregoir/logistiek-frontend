@@ -123,11 +123,12 @@ onMounted(async () => {
   const grouped = {}
 
   data.forEach(item => {
-    const type = item.Type?.naam ?? 'Onbekend'
+    const naam = item.Type?.naam ?? 'Onbekend'
     const werkhoogte = item.werkhoogte ?? 0
+    const type = item.Type?.type ?? 'onbekend'
 
     // 🔑 groep-sleutel = type + werkhoogte
-    const key = `${type}_${werkhoogte}`
+    const key = `${naam}_${werkhoogte}`
 
     if (!grouped[key]) {
       grouped[key] = {
