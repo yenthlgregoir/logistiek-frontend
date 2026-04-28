@@ -238,7 +238,7 @@ const routes = [
   {
     path: '/logistics/hoogtewerkers/lijst',
     name: 'hoogtewerkersLijst',
-    component: () => import('@/views/Logistics/hoogtewerkerCardsView.vue'),
+    component: () => import('@/views/Logistics/HoogtewerkerCardsView.vue'),
     props: { assetModel: 'Hoogtewerker' },
     meta: {
       requiresAuth: true,
