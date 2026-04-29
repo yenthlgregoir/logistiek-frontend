@@ -10,8 +10,10 @@
       <!-- MAIN ROW -->
       <div
         class="table-row"
-        :class="{ 'no-hover': !hover }"
-        :style="gridStyle"
+:class="[
+    { 'no-hover': !hover },
+    rowClass?.(item) // 👈 nieuw
+  ]"        :style="gridStyle"
         @click="toggleRow(item)"
       >
         <slot name="row" :item="item" :open="isOpen(item)" />
