@@ -143,7 +143,6 @@ function handleDelete(leaderId) {
 function handleAddEntiteit(data) {
   emit('addEntiteit', data)
 }
-
 </script>
 
 <style scoped>

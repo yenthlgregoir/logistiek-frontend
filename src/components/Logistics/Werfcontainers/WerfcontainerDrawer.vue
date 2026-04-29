@@ -39,13 +39,13 @@
       </div>
       <div class="info-block">
         <label>Verandwoordelijke</label>
-        <input type="text" v-model="form.verantwoordelijke" placeholder="Ploeg van Tom"  />
+        <input type="text" v-model="form.verantwoordelijke" placeholder="Ploeg van Tom" />
       </div>
-<div class="info-block">
+      <div class="info-block">
         <label>Opmerkingen</label>
         <input type="text" v-model="form.comment" placeholder="Opmerkingen" />
       </div>
-       <div class="info-block">
+      <div class="info-block">
         <label>status</label>
         <select v-model="form.status">
           <option value="Vrij">vrij</option>
@@ -144,8 +144,7 @@ function resetForm() {
   form.nummer = ''
   form.Type = ''
   form.entiteit = ''
-  form.status = 'Vrij',
-  form.verantwoordelijke = ''
+  ;((form.status = 'Vrij'), (form.verantwoordelijke = ''))
 }
 
 /* -------------------------

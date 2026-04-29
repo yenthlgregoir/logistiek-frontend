@@ -1,6 +1,5 @@
 <template>
   <div class="agenda-container">
-
     <!-- TOOLBAR -->
     <div class="agenda-toolbar">
       <div class="left">
@@ -43,11 +42,7 @@
 
     <!-- ROWS -->
     <div v-else class="rows">
-      <div
-        v-for="item in visibleItems"
-        :key="getItemId(item)"
-        class="row"
-      >
+      <div v-for="item in visibleItems" :key="getItemId(item)" class="row">
         <div class="label">
           {{ item.Ref || item.nummer || 'Onbekend' }}
           <br />
@@ -73,16 +68,13 @@
               <span v-if="getBookingEnd(booking) && (booking.ophaalDatum || booking.eindDatum)">
                 - {{ formatDate(getBookingEnd(booking)) }}
               </span>
-              
-              <span v-else>
-                - nog geen ophaaldatum
-              </span>
+
+              <span v-else> - nog geen ophaaldatum </span>
             </small>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -98,7 +90,7 @@ const props = defineProps({
   getBookingStart: Function,
   getBookingEnd: Function,
   getBookingTitle: Function,
-  maxDays: { type: Number, default: 20 }
+  maxDays: { type: Number, default: 20 },
 })
 
 const emit = defineEmits(['addBoeking', 'openBoeking', 'filterType'])
@@ -107,8 +99,8 @@ const startDate = ref(new Date())
 const endDate = ref(new Date(new Date().setDate(new Date().getDate() + 7)))
 
 const dateRange = ref([
-  startDate.value.toISOString().slice(0,10),
-  endDate.value.toISOString().slice(0,10)
+  startDate.value.toISOString().slice(0, 10),
+  endDate.value.toISOString().slice(0, 10),
 ])
 
 const days = ref([])
@@ -117,12 +109,12 @@ const selectedType = ref('')
 const pickerOptions = {
   disabledDate(time) {
     return time.getTime() < new Date().getTime() - 86400000
-  }
+  },
 }
 
 onMounted(generateDays)
 
-watch(selectedType, val => emit('filterType', val))
+watch(selectedType, (val) => emit('filterType', val))
 watch(dateRange, (val) => {
   if (!val || val.length === 0 || !val[0] || !val[1]) {
     resetToDefaultRange()
@@ -135,7 +127,7 @@ const filteredItems = computed(() => props.items || [])
    FIX: altijd items tonen die bookings hebben
 ------------------------------ */
 const visibleItems = computed(() => {
-  return filteredItems.value.filter(item => {
+  return filteredItems.value.filter((item) => {
     return bookingsForItem(item).length > 0
   })
 })
@@ -145,7 +137,7 @@ function generateDays() {
   const d = new Date(startDate.value)
 
   while (d <= endDate.value) {
-    days.value.push(d.toISOString().slice(0,10))
+    days.value.push(d.toISOString().slice(0, 10))
     d.setDate(d.getDate() + 1)
   }
 }
@@ -153,7 +145,7 @@ function generateDays() {
 function onDateChange(val) {
   if (!val || val.length !== 2) return
 
-  let [s, e] = val.map(d => new Date(d))
+  let [s, e] = val.map((d) => new Date(d))
 
   if ((e - s) / 86400000 > props.maxDays) {
     e = new Date(s)
@@ -163,10 +155,7 @@ function onDateChange(val) {
   startDate.value = s
   endDate.value = e
 
-  dateRange.value = [
-    s.toISOString().slice(0,10),
-    e.toISOString().slice(0,10)
-  ]
+  dateRange.value = [s.toISOString().slice(0, 10), e.toISOString().slice(0, 10)]
 
   generateDays()
 }
@@ -179,10 +168,7 @@ function resetToDefaultRange() {
   startDate.value = start
   endDate.value = end
 
-  dateRange.value = [
-    start.toISOString().slice(0, 10),
-    end.toISOString().slice(0, 10)
-  ]
+  dateRange.value = [start.toISOString().slice(0, 10), end.toISOString().slice(0, 10)]
 
   generateDays()
 }
@@ -196,10 +182,6 @@ function safeDate(d, fallback = null) {
   return isNaN(dt.getTime()) ? fallback : dt
 }
 
-
-
-
-
 /* -----------------------------
    CORE FILTER (FIXED)
 ------------------------------ */
@@ -209,31 +191,25 @@ function bookingsForItem(item) {
   const id = props.getItemId(item)
 
   const rangeStart = new Date(startDate.value)
-  rangeStart.setHours(0,0,0,0)
+  rangeStart.setHours(0, 0, 0, 0)
 
   const rangeEnd = new Date(endDate.value)
-  rangeEnd.setHours(23,59,59,999)
+  rangeEnd.setHours(23, 59, 59, 999)
 
-  return props.bookings.filter(b => {
-
+  return props.bookings.filter((b) => {
     const bookingStart = new Date(props.getBookingStart(b))
     if (isNaN(bookingStart)) return true // 🔥 fallback: niet breken
 
     const rawEnd = props.getBookingEnd(b)
 
     // 🔥 open booking blijft in toekomst
-    const bookingEnd = rawEnd
-      ? new Date(rawEnd)
-      : new Date(8640000000000000)
+    const bookingEnd = rawEnd ? new Date(rawEnd) : new Date(8640000000000000)
 
-    const matchesItem =
-      props.getItemId(b.item || b.asset || b.toestel) === id
+    const matchesItem = props.getItemId(b.item || b.asset || b.toestel) === id
 
     if (!matchesItem) return false
 
-    const inRange =
-      bookingStart <= rangeEnd &&
-      bookingEnd >= rangeStart
+    const inRange = bookingStart <= rangeEnd && bookingEnd >= rangeStart
 
     return inRange
   })
@@ -247,12 +223,10 @@ function getBlockStyle(booking) {
   const endRaw = safeDate(props.getBookingEnd(booking), endDate.value)
 
   const start = new Date(Math.max(startRaw, startDate.value))
-  const end = endRaw
-    ? new Date(Math.min(endRaw, endDate.value))
-    : new Date(endDate.value)
+  const end = endRaw ? new Date(Math.min(endRaw, endDate.value)) : new Date(endDate.value)
 
-  const startStr = start.toISOString().slice(0,10)
-  const endStr = end.toISOString().slice(0,10)
+  const startStr = start.toISOString().slice(0, 10)
+  const endStr = end.toISOString().slice(0, 10)
 
   let startIdx = days.value.indexOf(startStr)
   let endIdx = days.value.indexOf(endStr)
@@ -278,25 +252,118 @@ function formatDate(d) {
 </script>
 
 <style scoped>
-.agenda-container { width: 100%; font-family: 'Inter', sans-serif; }
-.agenda-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.datepicker{margin-right: 1rem;}
-.left{display: flex;}
-.type-select { padding: 6px 10px; border-radius: 8px; border: 1px solid #d1d5db; background: white; cursor: pointer; }
-.add-btn { background: #4f73ff; color: white; padding: 10px 18px; border: none; border-radius: 12px; cursor: pointer; }
-.header-row { display: flex; background: #e4edff; border-radius: 12px; overflow: hidden; }
-.corner-cell { width: 200px; font-weight: 700; padding: 12px; background: #f3f4f6; border-right: 1px solid #e5e7eb; text-align:center; }
-.header-cell { flex:1; text-align:center; padding:12px; font-weight:600; border-right:1px solid #cbd5e1; }
-.geen-boekingen { padding: 2rem; text-align:center; background: #f8fafc; border-radius:12px; border:2px dashed #cbd5e1; color:#6b7280; font-size:16px; margin-top:1rem; }
-.rows { margin-top: 1rem; width:100%; }
-.row { display:flex; margin-bottom:12px; border-radius:12px; background:white; overflow:hidden; position:relative; min-height:55px; box-shadow:0 2px 10px rgba(0,0,50,0.05); }
-.label { width:200px; padding:12px; background:#f8fafc; border-right:1px solid #e5e7eb; }
-.timeline { flex:1; position:relative; }
-.boek-block { position:absolute; top:6px; height:40px; padding:8px 10px; border-radius:10px; background:#4f73ff; color:white; cursor:pointer; display:flex; flex-direction:column; justify-content:center; transition:0.2s ease; }
-.boek-block:hover { transform:translateY(-3px); box-shadow:0 6px 18px rgba(0,0,0,0.12); }
-.boeking-title { font-weight:700; font-size:13px; }
-.datum-range { font-size:11px; opacity:0.9; }
-
+.agenda-container {
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+}
+.agenda-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.datepicker {
+  margin-right: 1rem;
+}
+.left {
+  display: flex;
+}
+.type-select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: white;
+  cursor: pointer;
+}
+.add-btn {
+  background: #4f73ff;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.header-row {
+  display: flex;
+  background: #e4edff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.corner-cell {
+  width: 200px;
+  font-weight: 700;
+  padding: 12px;
+  background: #f3f4f6;
+  border-right: 1px solid #e5e7eb;
+  text-align: center;
+}
+.header-cell {
+  flex: 1;
+  text-align: center;
+  padding: 12px;
+  font-weight: 600;
+  border-right: 1px solid #cbd5e1;
+}
+.geen-boekingen {
+  padding: 2rem;
+  text-align: center;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 2px dashed #cbd5e1;
+  color: #6b7280;
+  font-size: 16px;
+  margin-top: 1rem;
+}
+.rows {
+  margin-top: 1rem;
+  width: 100%;
+}
+.row {
+  display: flex;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background: white;
+  overflow: hidden;
+  position: relative;
+  min-height: 55px;
+  box-shadow: 0 2px 10px rgba(0, 0, 50, 0.05);
+}
+.label {
+  width: 200px;
+  padding: 12px;
+  background: #f8fafc;
+  border-right: 1px solid #e5e7eb;
+}
+.timeline {
+  flex: 1;
+  position: relative;
+}
+.boek-block {
+  position: absolute;
+  top: 6px;
+  height: 40px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #4f73ff;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: 0.2s ease;
+}
+.boek-block:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+.boeking-title {
+  font-weight: 700;
+  font-size: 13px;
+}
+.datum-range {
+  font-size: 11px;
+  opacity: 0.9;
+}
 
 .boek-block.Aangevraagd {
   background: #fef7c3;

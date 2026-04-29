@@ -8,7 +8,7 @@
         icon="fa fa-search"
         @update:modelValue="$emit('update:search', $event)"
       />
-    
+
       <button class="btn btn-primary" @click="$emit('new')">+ Add</button>
     </div>
 
@@ -28,7 +28,7 @@
 
 <script setup>
 import BaseTable from '@/components/base/BaseTable.vue'
-import SearchBar from '@/components/base/SearchBar.vue';
+import SearchBar from '@/components/base/SearchBar.vue'
 
 defineProps({
   klanten: { type: Array, default: () => [] },

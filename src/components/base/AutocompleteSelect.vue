@@ -13,12 +13,9 @@
     />
 
     <ul v-if="showDropdown" class="autocomplete-list">
-      <li
-  :class="{ highlighted: highlightedIndex === -1 }"
-  @mousedown.prevent="selectEmpty"
->
-  Geen optie geselecteerd
-</li>
+      <li :class="{ highlighted: highlightedIndex === -1 }" @mousedown.prevent="selectEmpty">
+        Geen optie geselecteerd
+      </li>
       <li
         v-for="(option, index) in filteredOptions"
         :key="option._id"
@@ -39,7 +36,7 @@ const props = defineProps({
   modelValue: [String, Number],
   options: { type: Array, required: true },
   labelKey: { type: String, required: true },
-  placeholder: { type: String, default: '' }
+  placeholder: { type: String, default: '' },
 })
 
 const emit = defineEmits(['update:modelValue', 'select'])
@@ -51,9 +48,12 @@ const filteredOptions = ref([])
 const highlightedIndex = ref(0)
 
 // watch voor props.options correct gebruiken
-watch(() => props.options, () => {
-  filteredOptions.value = [...props.options]
-})
+watch(
+  () => props.options,
+  () => {
+    filteredOptions.value = [...props.options]
+  },
+)
 
 function openDropdown() {
   showDropdown.value = true
@@ -62,8 +62,8 @@ function openDropdown() {
 
 function filterOptions() {
   const q = search.value.toLowerCase().trim()
-  filteredOptions.value = props.options.filter(o =>
-    String(o[props.labelKey]).toLowerCase().includes(q)
+  filteredOptions.value = props.options.filter((o) =>
+    String(o[props.labelKey]).toLowerCase().includes(q),
   )
   highlightedIndex.value = 0
 }
@@ -113,7 +113,6 @@ function handleKeyDown(event) {
     showDropdown.value = false
   }
 }
-
 </script>
 <style scoped>
 .autocomplete {

@@ -6,12 +6,7 @@
     </template>
 
     <!-- BODY -->
-    <SearchBar
-      v-model="search"
-      placeholder="Zoek"
-      width="100%"
-      icon="fa fa-search"
-    />
+    <SearchBar v-model="search" placeholder="Zoek" width="100%" icon="fa fa-search" />
 
     <ul class="toestel-list">
       <li

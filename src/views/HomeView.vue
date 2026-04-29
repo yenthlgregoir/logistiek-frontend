@@ -4,8 +4,7 @@
       <div class="content">
         <img src="../assets/logo_ops_home.svg" alt="Bumaco" class="logo-large" />
 
-               <p class="subtitle">Welkom bij het centrale dashboard</p>
-
+        <p class="subtitle">Welkom bij het centrale dashboard</p>
 
         <div class="cards">
           <RouterLink v-if="role === 'admin' || role === 'purchase'" to="/purchase" class="card">
@@ -100,7 +99,6 @@ function logout() {
 }
 
 /* ================= HEADINGS ================= */
-
 
 .subtitle {
   font-size: 1.25rem;

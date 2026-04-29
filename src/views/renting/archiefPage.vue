@@ -49,7 +49,7 @@ const selectedBoekingId = ref(null)
  * 🔥 SINGLE SOURCE OF TRUTH FOR LOAD
  */
 const reload = useDebounceFn(() => {
-  store.resetFilters();
+  store.resetFilters()
   store.loadBoekingen()
 }, 250)
 
@@ -61,7 +61,7 @@ watch(
   () => {
     reload()
   },
-  { deep: true }
+  { deep: true },
 )
 
 /**
@@ -97,9 +97,8 @@ async function saveComment(payload) {
  * INIT
  */
 onMounted(async () => {
-
   // ❌ NIET meer loadBoekingen dubbel callen
-    store.resetFilters();
+  store.resetFilters()
   store.currentViewMode = 'archief'
 
   await store.loadTypes()

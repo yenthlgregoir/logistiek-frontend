@@ -1,5 +1,10 @@
 <template>
-  <BaseDrawer :show="show" :title="`REF: ${verhuurCopy.reference  || '—'}`" @close="$emit('close')" :subtitle="`${verhuurCopy.logistiekeReferentie}`">
+  <BaseDrawer
+    :show="show"
+    :title="`REF: ${verhuurCopy.reference || '—'}`"
+    @close="$emit('close')"
+    :subtitle="`${verhuurCopy.logistiekeReferentie}`"
+  >
     <!-- INFO BLOCKS -->
     <div class="info-card" v-for="block in blocks" :key="block.label">
       <div class="card-label">{{ block.label }}</div>
@@ -110,7 +115,7 @@ const verhuurCopy = reactive({
   ophaalDatum: '',
   status: 'Leveren',
   werkhoogte: null,
-  logistiekeReferentie : '',
+  logistiekeReferentie: '',
 })
 
 // --- SYNC PROPS ---
@@ -133,7 +138,7 @@ watch(
       logistiekeReferentie: v.logistiekeReferentie || '',
     })
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // --- BLOCKS ---
@@ -228,8 +233,6 @@ async function downloadPDF() {
     console.error('PDF download mislukt', err)
   }
 }
-
-
 </script>
 <style scoped>
 .info-card {

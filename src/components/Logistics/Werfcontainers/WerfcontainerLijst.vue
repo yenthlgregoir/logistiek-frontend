@@ -2,14 +2,13 @@
   <div class="page">
     <!-- Toolbar -->
     <div class="toolbar">
-
       <SearchBar
         placeholder="Zoek"
         width="300px"
         icon="fa fa-search"
         @update:modelValue="emit('search', $event)"
       />
-    
+
       <button class="btn btn-primary" @click="emit('openAdd')">+ Werfcontainer</button>
     </div>
 
@@ -33,18 +32,18 @@
         </div>
 
         <div>{{ item.Type?.naam || 'Onbekend' }}</div>
-<div
-  class="col-entiteit"
-  :style="{
-    backgroundColor: item.entiteit?.color || '#1b4965',
-    color: getContrastColor(item.entiteit?.color || '#1b4965'),
-  }"
->
-  <span v-if="item.entiteit?.icon" class="material-icons entiteit-icon">
-    {{ item.entiteit.icon }}
-  </span>
-  <span>{{ item.entiteit?.naam || 'Onbekend' }}</span>
-</div>
+        <div
+          class="col-entiteit"
+          :style="{
+            backgroundColor: item.entiteit?.color || '#1b4965',
+            color: getContrastColor(item.entiteit?.color || '#1b4965'),
+          }"
+        >
+          <span v-if="item.entiteit?.icon" class="material-icons entiteit-icon">
+            {{ item.entiteit.icon }}
+          </span>
+          <span>{{ item.entiteit?.naam || 'Onbekend' }}</span>
+        </div>
         <div class="right">
           <span :class="['status', getStatus(item)]">
             {{ getStatusLabel(item) }}
@@ -81,15 +80,14 @@
 
                 <div><strong>entiteit</strong></div>
                 <div>{{ item.entiteit.naam || '-' }}</div>
-                
               </div>
 
               <div class="comments">
-  <div class="comments-title"><strong>Opmerking</strong></div>
-  <div class="comments-text">
-    {{ item.comment || 'Geen opmerking' }}
-  </div>
-</div>
+                <div class="comments-title"><strong>Opmerking</strong></div>
+                <div class="comments-text">
+                  {{ item.comment || 'Geen opmerking' }}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -121,7 +119,6 @@
                   <div><strong>Werf</strong></div>
                   <div>{{ boeking.werf?.naam || '-' }}</div>
                 </div>
-                
               </div>
             </div>
 
@@ -142,7 +139,6 @@ defineProps({
 })
 
 const emit = defineEmits(['search', 'openAdd', 'edit-asset'])
-
 
 // STATUS
 function getStatus(item) {

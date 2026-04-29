@@ -9,7 +9,7 @@ export const useAuthStore = defineStore('auth', {
     initialized: false,
   }),
   getters: {
-    isLoggedIn: (state) => !!state.token
+    isLoggedIn: (state) => !!state.token,
   },
   actions: {
     async login(email, password) {
@@ -17,28 +17,28 @@ export const useAuthStore = defineStore('auth', {
       this.token = response.token
       localStorage.setItem('token', this.token)
 
-      await this.fetchMe() 
+      await this.fetchMe()
     },
 
     async fetchMe() {
-  try {
-    const res = await loginApi.me()
-    this.user = res
-  } catch (err) {
-    if (err?.response?.status === 401) {
-      this.logout()
-    } else {
-      this.user = null
-    }
-  } finally {
-    this.initialized = true
-  }
-},
+      try {
+        const res = await loginApi.me()
+        this.user = res
+      } catch (err) {
+        if (err?.response?.status === 401) {
+          this.logout()
+        } else {
+          this.user = null
+        }
+      } finally {
+        this.initialized = true
+      }
+    },
 
     logout() {
       this.user = null
       this.token = null
       localStorage.removeItem('token')
-    }
-  }
+    },
+  },
 })

@@ -1,37 +1,20 @@
 <template>
-  <div
-    v-if="isReady"
-    :class="[
-      'app-layout',
-      { 'mobile-padding': isMobile && hasSidebar }
-    ]"
-  >
-
+  <div v-if="isReady" :class="['app-layout', { 'mobile-padding': isMobile && hasSidebar }]">
     <!-- 🔥 GLOBAL LOADER -->
     <GlobalLoader />
 
     <!-- SIDEBAR -->
     <SidebarComponent
       v-if="hasSidebar"
-      :class="[
-        'sidebar-wrapper',
-        { 'mobile-open': mobileSidebarOpen && isMobile }
-      ]"
+      :class="['sidebar-wrapper', { 'mobile-open': mobileSidebarOpen && isMobile }]"
       @closeSidebar="mobileSidebarOpen = false"
     />
 
     <!-- MOBILE HEADER -->
-    <MobileHeader
-      v-if="isMobile && hasSidebar"
-      @openSidebar="mobileSidebarOpen = true"
-    />
+    <MobileHeader v-if="isMobile && hasSidebar" @openSidebar="mobileSidebarOpen = true" />
 
     <!-- OVERLAY -->
-    <div
-      v-if="mobileSidebarOpen && isMobile"
-      class="overlay"
-      @click="mobileSidebarOpen = false"
-    />
+    <div v-if="mobileSidebarOpen && isMobile" class="overlay" @click="mobileSidebarOpen = false" />
 
     <!-- 🚀 MAIN -->
     <main
@@ -40,13 +23,12 @@
         mainClass,
         {
           'no-layout-transition': disableLayoutTransition,
-          'no-route-transition': isFirstLoad
-        }
+          'no-route-transition': isFirstLoad,
+        },
       ]"
     >
       <router-view />
     </main>
-
   </div>
 </template>
 
@@ -111,7 +93,7 @@ watch(
     requestAnimationFrame(() => {
       disableLayoutTransition.value = false
     })
-  }
+  },
 )
 
 /* -----------------------

@@ -58,7 +58,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 
-
 const props = defineProps({
   search: String,
   type: String,

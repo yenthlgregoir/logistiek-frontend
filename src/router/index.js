@@ -246,7 +246,7 @@ const routes = [
       title: 'Logistics',
     },
   },
-{
+  {
     path: '/logistics/werfcontainers',
     name: 'schaarliften',
     redirect: '/logistics/werfcontainers/planning',
@@ -326,8 +326,6 @@ router.beforeEach(async (to, from, next) => {
 })
 router.afterEach((to) => {
   const defaultTitle = 'Operations'
-  document.title = to.meta.title
-    ? `${to.meta.title} | Operations`
-    : defaultTitle
+  document.title = to.meta.title ? `${to.meta.title} | Operations` : defaultTitle
 })
 export default router

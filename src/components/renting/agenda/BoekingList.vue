@@ -5,13 +5,13 @@
     <!-- ======================= -->
 
     <div class="toolbar">
-        <SearchBar
+      <SearchBar
         placeholder="Zoek"
         width="260px"
         icon="fa fa-search"
         @update:modelValue="emit('update:search', $event)"
       />
-      
+
       <div class="item">
         <el-date-picker
           v-model="localDateRange"
@@ -26,7 +26,6 @@
           style="width: 260px"
         />
       </div>
-        
     </div>
 
     <BaseTable
@@ -157,7 +156,6 @@ function formatPeriode(b) {
   color: #065f46;
 }
 
-
 .col-status {
   justify-self: end;
   padding: 6px 12px;
@@ -186,7 +184,5 @@ function formatPeriode(b) {
   .toolbar .search input {
     width: 100%;
   }
-
-
 }
 </style>

@@ -30,7 +30,6 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -57,12 +56,11 @@ const handleLogin = async () => {
 
     await auth.login(email.value, password.value)
 
-    console.log("voor");
+    console.log('voor')
 
     router.push({ name: 'home' })
 
-        console.log("na");
-
+    console.log('na')
   } catch (err) {
     console.error(err)
 
@@ -85,8 +83,8 @@ const handleLogin = async () => {
   height: 100vh;
   font-family: 'Inter', sans-serif;
 }
-h1{
-  margin:0
+h1 {
+  margin: 0;
 }
 /* LEFT SIDE */
 .login-left {
@@ -129,7 +127,6 @@ h1{
 .login-card {
   width: 80%;
   padding: 40px;
-
 }
 
 .login-card h2 {
@@ -172,7 +169,7 @@ button {
 }
 
 button:hover {
-  background: linear-gradient(180deg, #3553f2, #5a89ff  );
+  background: linear-gradient(180deg, #3553f2, #5a89ff);
 }
 
 button:disabled {

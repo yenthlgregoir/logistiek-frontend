@@ -8,28 +8,28 @@
 
       <form @submit.prevent="submitBoeking">
         <!-- Type toestel -->
-        
-<div class="form-group">
-  <label>Type toestel</label>
-  <AutocompleteSelect
-    v-model="form.toestelType"
-    :options="types"
-    label-key="naam"
-    placeholder="Zoek Type"
-  />
-</div>
+
+        <div class="form-group">
+          <label>Type toestel</label>
+          <AutocompleteSelect
+            v-model="form.toestelType"
+            :options="types"
+            label-key="naam"
+            placeholder="Zoek Type"
+          />
+        </div>
         <!-- ✅ Klant autocomplete select -->
         <!-- NieuweBoekingModal.vue -->
-<div class="form-group">
-  <label>Klant</label>
-  <AutocompleteSelect
-    v-model="form.klant"
-    :options="klanten"
-    label-key="naam"
-    placeholder="Zoek klant..."
-    @select="handleKlantAdres"
-  />
-</div>
+        <div class="form-group">
+          <label>Klant</label>
+          <AutocompleteSelect
+            v-model="form.klant"
+            :options="klanten"
+            label-key="naam"
+            placeholder="Zoek klant..."
+            @select="handleKlantAdres"
+          />
+        </div>
 
         <!-- Periode -->
         <div class="form-group">
@@ -81,7 +81,7 @@ import AutocompleteSelect from '@/components/base/AutocompleteSelect.vue'
 
 defineProps({ types: Object })
 const emit = defineEmits(['close', 'update'])
-const boekingenstore = useBoekingenStore();
+const boekingenstore = useBoekingenStore()
 
 /* --------------------------
    STATE
@@ -114,7 +114,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleEsc))
 async function getKlanten() {
   try {
     const data = await klantApi.list()
-    klanten.value = Array.isArray(data) ? data : data.items ?? []
+    klanten.value = Array.isArray(data) ? data : (data.items ?? [])
   } catch (e) {
     console.error(e)
   }
@@ -134,7 +134,6 @@ function handleKlantAdres(klant) {
 /* --------------------------
    KLANT ADRES LOGICA
 -------------------------- */
-
 
 /* --------------------------
    ESC EN CLOSE
@@ -174,7 +173,6 @@ async function submitBoeking() {
 
     emit('update')
     setTimeout(() => close(), 800)
-
   } catch (err) {
     message.value = err.message || 'Er is een fout opgetreden.'
     error.value = true

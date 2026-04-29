@@ -92,11 +92,11 @@ export const useBoekingenStore = defineStore('boekingen', {
       this.selectedType = type
       this.invalidateLists()
     },
- resetFilters() {
-  this.search = ''
-  this.dateRange = [null, null]
-  this.selectedType = null
-},
+    resetFilters() {
+      this.search = ''
+      this.dateRange = [null, null]
+      this.selectedType = null
+    },
     // =========================
     // CACHE KEY
     // =========================
@@ -125,7 +125,7 @@ export const useBoekingenStore = defineStore('boekingen', {
     // =========================
     // LIST
     // =========================
-    async loadBoekingen(ophalen:boolean = true) {
+    async loadBoekingen(ophalen: boolean = true) {
       const key = this.buildListKey()
       const cached = this.listCache.get(key)
       if (cached && ophalen) {

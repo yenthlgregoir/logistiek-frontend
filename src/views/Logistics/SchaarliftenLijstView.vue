@@ -8,7 +8,7 @@
       @search="searchAssets"
       @open-add="openCreate"
       @edit-asset="openEdit"
-      @toPDF= "toPDF"
+      @toPDF="toPDF"
     />
 
     <!-- DRAWER -->
@@ -83,16 +83,16 @@ async function saveAsset(data) {
   }
 }
 
-async function toPDF(){
-   const blob =  await schaarliftenApi.toPdf();
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    const d = new Date();
-    const date = `${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`;
-    a.download = `Hoogtewerkers_${date}.pdf`;
-    a.click()
-    window.URL.revokeObjectURL(url)
+async function toPDF() {
+  const blob = await schaarliftenApi.toPdf()
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  const d = new Date()
+  const date = `${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}`
+  a.download = `Hoogtewerkers_${date}.pdf`
+  a.click()
+  window.URL.revokeObjectURL(url)
 }
 
 // --- CLOSE ---

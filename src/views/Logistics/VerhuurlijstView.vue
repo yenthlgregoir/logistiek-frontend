@@ -1,6 +1,6 @@
 <template>
   <div class="planning-page">
-     <h2>Verhuringen {{assetType.toLowerCase()}}</h2>
+    <h2>Verhuringen {{ assetType.toLowerCase() }}</h2>
     <!-- ====================== -->
     <!--  SCHAARELIFTEN LIST -->
     <!-- ====================== -->
@@ -37,8 +37,8 @@ import { leiderApi } from '@/api/projectLeider.js'
 const props = defineProps({
   assetType: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 })
 
 /* ---------------- STATE ---------------- */
@@ -61,7 +61,7 @@ async function loadData() {
     const [werfRes, plRes, verhuringenRes] = await Promise.all([
       werfApi.list(),
       leiderApi.list(),
-      verhuurApi.list({assetModel:props.assetType}),
+      verhuurApi.list({ assetModel: props.assetType }),
     ])
 
     werven.value = werfRes || []

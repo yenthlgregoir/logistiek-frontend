@@ -47,9 +47,7 @@ const filteredLeaders = computed(() => {
   const term = search.value.toLowerCase()
 
   return leaders.value.filter(
-    (l) =>
-      l.naam?.toLowerCase().includes(term) ||
-      l.email?.toLowerCase().includes(term)
+    (l) => l.naam?.toLowerCase().includes(term) || l.email?.toLowerCase().includes(term),
   )
 })
 
@@ -93,9 +91,7 @@ onBeforeUnmount(() => {
 async function getLeaders() {
   try {
     const response = await leiderApi.list()
-    leaders.value = Array.isArray(response)
-      ? response
-      : (response.items ?? [])
+    leaders.value = Array.isArray(response) ? response : (response.items ?? [])
   } catch (error) {
     console.error(error)
   }

@@ -13,7 +13,7 @@
     <WerfcontainerDrawer
       :show="showDrawer"
       :model="selectedAsset"
-      :entiteiten= "entiteiten"
+      :entiteiten="entiteiten"
       @close="closeDrawer"
       @save="saveAsset"
     />
@@ -22,7 +22,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { werfcontainerApi } from "@/api/werfcontainer.js"
+import { werfcontainerApi } from '@/api/werfcontainer.js'
 
 import WerfcontainerLijst from '@/components/Logistics/Werfcontainers/WerfcontainerLijst.vue'
 import WerfcontainerDrawer from '@/components/Logistics/Werfcontainers/WerfcontainerDrawer.vue'
@@ -66,14 +66,13 @@ function openEdit(asset) {
   selectedAsset.value = { ...asset }
   showDrawer.value = true
 }
-async function getEntiteiten(){
-    try{
-        const res = await entiteitApi.getEntiteiten();
-        entiteiten.value = res;
-    }
-    catch  (err) {
-        console.log(err);
-    }
+async function getEntiteiten() {
+  try {
+    const res = await entiteitApi.getEntiteiten()
+    entiteiten.value = res
+  } catch (err) {
+    console.log(err)
+  }
 }
 // --- SAVE (CREATE + UPDATE) ---
 async function saveAsset(data) {

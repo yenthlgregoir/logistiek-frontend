@@ -2,7 +2,6 @@
   <div class="lijstweergave">
     <!-- TOOLBAR -->
     <div class="toolbar">
-
       <!-- DATE RANGE PICKER -->
       <div class="date-picker">
         <el-date-picker
@@ -26,7 +25,6 @@
         icon="fa fa-search"
         @update:modelValue="emit('update:search', $event)"
       />
-      
     </div>
 
     <!-- TABLE -->
@@ -46,7 +44,9 @@
 
       <!-- ROW -->
       <template #row="{ item: v }">
-        <div><strong>{{ v.reference }}</strong></div>
+        <div>
+          <strong>{{ v.reference }}</strong>
+        </div>
         <div>{{ v.asset?.nummer || 'Geen toestel toegewezen' }}</div>
         <div class="col-adres">{{ formatAdres(v) }}</div>
         <div class="col-periode">{{ formatPeriode(v) }}</div>
@@ -121,8 +121,20 @@ function formatPeriode(v) {
   color: #4f73ff;
   white-space: nowrap;
 }
-.col-status.Afgewerkt { background: #fef7c3; color: #854d0e; }
-.col-status.Opgehaald { background: #dbeafe; color: #1e3a8a; }
-.col-status.Leveren { background: #fdecc8; color: #78350f; }
-.col-status.Geleverd { background: #d1fae5; color: #065f46; }
+.col-status.Afgewerkt {
+  background: #fef7c3;
+  color: #854d0e;
+}
+.col-status.Opgehaald {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+.col-status.Leveren {
+  background: #fdecc8;
+  color: #78350f;
+}
+.col-status.Geleverd {
+  background: #d1fae5;
+  color: #065f46;
+}
 </style>

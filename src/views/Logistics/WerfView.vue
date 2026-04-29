@@ -42,9 +42,7 @@ const filteredWerven = computed(() => {
   const term = search.value.toLowerCase()
 
   return werven.value.filter(
-    (w) =>
-      w.naam?.toLowerCase().includes(term) ||
-      w.werfNummer?.toLowerCase().includes(term)
+    (w) => w.naam?.toLowerCase().includes(term) || w.werfNummer?.toLowerCase().includes(term),
   )
 })
 
@@ -86,9 +84,7 @@ onBeforeUnmount(() => {
 async function getWerven() {
   try {
     const response = await werfApi.list()
-    werven.value = Array.isArray(response)
-      ? response
-      : (response.items ?? [])
+    werven.value = Array.isArray(response) ? response : (response.items ?? [])
   } catch (error) {
     console.error(error)
   }

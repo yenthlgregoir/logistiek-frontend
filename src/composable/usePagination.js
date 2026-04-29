@@ -5,9 +5,7 @@ export function usePagination(items, options = {}) {
 
   const pageSize = ref(options.pageSize ?? 10)
 
-  const totalPages = computed(() =>
-    Math.max(1, Math.ceil(items.value.length / pageSize.value))
-  )
+  const totalPages = computed(() => Math.max(1, Math.ceil(items.value.length / pageSize.value)))
 
   const paginatedItems = computed(() => {
     const start = (currentPage.value - 1) * pageSize.value

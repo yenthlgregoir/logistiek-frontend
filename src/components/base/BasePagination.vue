@@ -1,16 +1,10 @@
 <template>
   <div v-if="totalPages > 1" class="pagination">
-    <button :disabled="currentPage === 1" @click="$emit('prev')">
-      Vorige
-    </button>
+    <button :disabled="currentPage === 1" @click="$emit('prev')">Vorige</button>
 
-    <span>
-      Pagina {{ currentPage }} van {{ totalPages }}
-    </span>
+    <span> Pagina {{ currentPage }} van {{ totalPages }} </span>
 
-    <button :disabled="currentPage === totalPages" @click="$emit('next')">
-      Volgende
-    </button>
+    <button :disabled="currentPage === totalPages" @click="$emit('next')">Volgende</button>
   </div>
 </template>
 

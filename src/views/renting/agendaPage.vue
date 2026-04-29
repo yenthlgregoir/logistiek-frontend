@@ -10,10 +10,10 @@
         :bookings="store.filteredBoekingen"
         :typeOptions="store.types"
         item-label="Toestel"
-        :get-item-id="t => t._id"
-        :get-booking-start="b => new Date(b.beginDatum)"
-        :get-booking-end="b => new Date(b.eindDatum)"
-        :get-booking-title="b => b.leverAdresDetails?.naam || b.klant?.naam"
+        :get-item-id="(t) => t._id"
+        :get-booking-start="(b) => new Date(b.beginDatum)"
+        :get-booking-end="(b) => new Date(b.eindDatum)"
+        :get-booking-title="(b) => b.leverAdresDetails?.naam || b.klant?.naam"
         @addBoeking="openCreateModal"
         @openBoeking="openBoekingModal"
         @filterType="onFilterType"
@@ -94,7 +94,7 @@ const selectedBoekingId = ref(null)
 const toestellen = computed(() => {
   const map = new Map()
 
-  store.filteredBoekingen.forEach(b => {
+  store.filteredBoekingen.forEach((b) => {
     if (b.toestel?._id) {
       map.set(b.toestel._id, b.toestel)
     }
@@ -118,10 +118,7 @@ const reload = useDebounceFn(() => {
   store.loadBoekingen()
 }, 300)
 
-watch(
-  [() => store.search, () => store.dateRange],
-  reload
-)
+watch([() => store.search, () => store.dateRange], reload)
 
 // =========================
 // RESET WHEN SWITCHING VIEW

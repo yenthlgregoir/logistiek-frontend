@@ -4,17 +4,17 @@
       <div class="drawer">
         <!-- HEADER -->
         <div class="drawer-header">
-  <div class="title-block">
-    <h3>{{ title }}</h3>
-    <h4>{{ subtitle }}</h4>
-  </div>
+          <div class="title-block">
+            <h3>{{ title }}</h3>
+            <h4>{{ subtitle }}</h4>
+          </div>
 
-  <div class="header-actions">
-    <slot name="header-actions">
-      <button class="close-btn" @click="$emit('close')">✕</button>
-    </slot>
-  </div>
-</div>
+          <div class="header-actions">
+            <slot name="header-actions">
+              <button class="close-btn" @click="$emit('close')">✕</button>
+            </slot>
+          </div>
+        </div>
 
         <!-- CONTENT -->
         <div class="drawer-content">
@@ -37,7 +37,7 @@
 defineProps({
   show: { type: Boolean, default: false },
   title: { type: String, default: '' },
-  subtitle: {type: String , default: ''}
+  subtitle: { type: String, default: '' },
 })
 </script>
 

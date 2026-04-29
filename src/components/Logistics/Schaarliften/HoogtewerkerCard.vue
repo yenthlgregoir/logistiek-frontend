@@ -8,17 +8,11 @@
 
     <!-- Image -->
     <div class="image-wrapper">
-      <img
-  class="machine-image"
-  :src="imageSrc"
-  :alt="type || 'Hoogtewerker'"
-/>
+      <img class="machine-image" :src="imageSrc" :alt="type || 'Hoogtewerker'" />
 
       <!-- TYPE BADGE (terug ✅) -->
-       
-<span v-if="aantal" class="badge badge-count">
-  {{ aantal }}x
-</span>
+
+      <span v-if="aantal" class="badge badge-count"> {{ aantal }}x </span>
 
       <span v-if="type" class="badge">{{ type }}</span>
 
@@ -26,14 +20,12 @@
       <div class="height-indicator">
         <div class="height-line"></div>
 
-        <div class="height-label">
-          {{ werkhoogte }} m
-        </div>
+        <div class="height-label">{{ werkhoogte }} m</div>
       </div>
     </div>
 
     <!-- Specs -->
-  <div class="specs">
+    <div class="specs">
       <div class="spec">
         <span class="label">Werkhoogte</span>
         <span class="value highlight">{{ werkhoogte }} m</span>
@@ -75,9 +67,8 @@ const props = defineProps({
   breedte: { type: Number, required: true },
 
   description: { type: String, required: true },
-  
-  aantal: { type: Number, default: 0 }
 
+  aantal: { type: Number, default: 0 },
 })
 
 const imageSrc = computed(() => {
@@ -94,7 +85,6 @@ const imageSrc = computed(() => {
 })
 </script>
 
-
 <style scoped>
 /* Card */
 .machine-card {
@@ -103,8 +93,13 @@ const imageSrc = computed(() => {
   border-radius: 18px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
   overflow: hidden;
-  font-family: system-ui, -apple-system, sans-serif;
-  transition: transform 0.15s ease, box-shadow 0.25s ease;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.25s ease;
 }
 
 .machine-card:hover {
@@ -139,12 +134,11 @@ const imageSrc = computed(() => {
   display: flex;
   justify-content: center;
   align-items: end;
-  
 }
 .image-wrapper::after {
   content: '';
   position: absolute;
-  bottom: 15px;         
+  bottom: 15px;
   left: 16px;
   right: 16px;
 
@@ -163,7 +157,6 @@ const imageSrc = computed(() => {
   max-width: 70%;
   object-fit: contain;
   margin-bottom: 1rem;
-
 }
 
 /* Type badge */
@@ -195,11 +188,10 @@ const imageSrc = computed(() => {
 /* Hoogte-indicator */
 .height-indicator {
   position: relative;
-  margin-left: 1rem ;
+  margin-left: 1rem;
   margin-bottom: 1rem;
   display: flex;
   align-items: end;
-
 }
 
 /* Lijn = even hoog als image */

@@ -13,14 +13,14 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import debounce from 'lodash/debounce' 
+import debounce from 'lodash/debounce'
 
 const props = defineProps({
   modelValue: String,
   placeholder: { type: String, default: 'Zoek...' },
   width: { type: String, default: '260px' },
   icon: { type: String, default: 'fa fa-search' },
-  debounceTime: { type: Number, default: 300 }
+  debounceTime: { type: Number, default: 300 },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -28,12 +28,13 @@ const emit = defineEmits(['update:modelValue'])
 const internalValue = ref(props.modelValue)
 
 // Sync prop changes
-watch(() => props.modelValue, val => internalValue.value = val)
+watch(
+  () => props.modelValue,
+  (val) => (internalValue.value = val),
+)
 
 // Debounced input emit
 const onInput = debounce(() => emit('update:modelValue', internalValue.value), props.debounceTime)
-
-
 </script>
 
 <style scoped>
@@ -50,7 +51,7 @@ const onInput = debounce(() => emit('update:modelValue', internalValue.value), p
   font-size: 14px;
   background-color: transparent;
   border: 2px solid transparent;
-    transition: border-color 0.2s ease; 
+  transition: border-color 0.2s ease;
 }
 .search-input:focus {
   outline: none;
@@ -63,8 +64,4 @@ const onInput = debounce(() => emit('update:modelValue', internalValue.value), p
   transform: translateY(-50%);
   color: #6b7280;
 }
-
-
-
-
 </style>

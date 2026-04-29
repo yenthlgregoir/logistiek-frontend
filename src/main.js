@@ -13,7 +13,7 @@ const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
 app.use(router)
-app.use(ElementPlus) 
+app.use(ElementPlus)
 app.mount('#app')
 
 // Haal user info op bij refresh

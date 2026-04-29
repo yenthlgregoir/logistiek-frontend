@@ -7,12 +7,7 @@
 
     <!-- BODY -->
 
-    <SearchBar
-      v-model="search"
-      placeholder="Zoek adres..."
-      width="100%"
-      icon="fa fa-search"
-    />
+    <SearchBar v-model="search" placeholder="Zoek adres..." width="100%" icon="fa fa-search" />
 
     <ul class="list">
       <li

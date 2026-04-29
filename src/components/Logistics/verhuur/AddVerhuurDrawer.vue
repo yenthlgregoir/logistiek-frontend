@@ -5,7 +5,6 @@
     @close="$emit('close')"
   >
     <div class="form-container">
-
       <!-- Logistieke referentie -->
       <div class="info-block">
         <label>Logistieke referentie</label>
@@ -30,28 +29,16 @@
       </div>
 
       <!-- Werkhoogte (specifiek voor Hoogtewerker) -->
-      <div
-        v-if="verhuurCopy.assetModel === 'Hoogtewerker'"
-        class="info-block"
-      >
+      <div v-if="verhuurCopy.assetModel === 'Hoogtewerker'" class="info-block">
         <label>Werkhoogte (m)</label>
         <div v-if="isEditMode && !isEditing">
           {{ verhuurCopy.werkhoogte }}
         </div>
-        <input
-          v-else
-          v-model="verhuurCopy.werkhoogte"
-          type="number"
-          min="0"
-          step="0.1"
-        />
+        <input v-else v-model="verhuurCopy.werkhoogte" type="number" min="0" step="0.1" />
       </div>
 
       <!-- Entiteit (specifiek voor WerfContainer) -->
-      <div
-        v-if="verhuurCopy.assetModel === 'WerfContainer'"
-        class="info-block"
-      >
+      <div v-if="verhuurCopy.assetModel === 'WerfContainer'" class="info-block">
         <label>Entiteit</label>
         <div v-if="isEditMode && !isEditing">
           {{ verhuurCopy.entiteit?.naam }}
@@ -111,25 +98,23 @@
 
       <!-- Error -->
       <div v-if="errorMessage || error" class="error-box">
-  {{ formattedError }}
-</div>
+        {{ formattedError }}
+      </div>
     </div>
 
     <template #footer>
-      <button class="btn btn-secondary" @click="$emit('close')">
-        Cancel
-      </button>
+      <button class="btn btn-secondary" @click="$emit('close')">Cancel</button>
       <button class="btn btn-primary" @click="saveVerhuur" :disabled="loading">
-        {{ loading ? "Bezig..." : "Opslaan" }}
+        {{ loading ? 'Bezig...' : 'Opslaan' }}
       </button>
     </template>
   </BaseDrawer>
 </template>
 
 <script setup>
-import { ref, watch, computed} from "vue";
-import BaseDrawer from "@/components/base/BaseDrawer.vue";
-import AutocompleteSelect from "@/components/base/AutocompleteSelect.vue";
+import { ref, watch, computed } from 'vue'
+import BaseDrawer from '@/components/base/BaseDrawer.vue'
+import AutocompleteSelect from '@/components/base/AutocompleteSelect.vue'
 
 const props = defineProps({
   show: Boolean,
@@ -140,131 +125,128 @@ const props = defineProps({
   entiteiten: Array,
   error: String,
   assetModel: String,
-  success: Boolean
-});
+  success: Boolean,
+})
 
-const emit = defineEmits(["close", "save", "edit"]);
+const emit = defineEmits(['close', 'save', 'edit'])
 
-const isEditMode = ref(false);
-const isEditing = ref(true);
-const loading = ref(false);
-const verhuurCopy = ref({});
+const isEditMode = ref(false)
+const isEditing = ref(true)
+const loading = ref(false)
+const verhuurCopy = ref({})
 
 // 🔥 NIEUW: lokale error state
-const errorMessage = ref("");
+const errorMessage = ref('')
 
 const formattedError = computed(() => {
-  const err = errorMessage.value || props.error;
+  const err = errorMessage.value || props.error
 
-  if (!err) return "";
+  if (!err) return ''
 
   // Als het een stringified JSON is
   try {
-    const parsed = typeof err === "string" ? JSON.parse(err) : err;
+    const parsed = typeof err === 'string' ? JSON.parse(err) : err
 
     if (parsed.message) {
       // verwijder eventueel "Error: " prefix
-      return parsed.message.replace(/^Error:\s*/, "");
+      return parsed.message.replace(/^Error:\s*/, '')
     }
 
-    return err;
+    return err
   } catch {
-    return err;
+    return err
   }
-});
+})
 // Init / edit mode
 watch(
   () => props.verhuur,
   (val) => {
     if (val) {
-      isEditMode.value = true;
-      verhuurCopy.value = JSON.parse(JSON.stringify(val));
-      isEditing.value = false;
+      isEditMode.value = true
+      verhuurCopy.value = JSON.parse(JSON.stringify(val))
+      isEditing.value = false
     } else {
-      isEditMode.value = false;
-      resetForm();
-      isEditing.value = true;
+      isEditMode.value = false
+      resetForm()
+      isEditing.value = true
     }
   },
-  { immediate: true }
-);
+  { immediate: true },
+)
 
 // Reset bij model switch
 watch(
   () => props.assetModel,
-  () => resetForm()
-);
+  () => resetForm(),
+)
 
-watch(() => props.success, (val) => {
-  if (val && !isEditMode.value) {
-    resetForm();
-  }
-});
+watch(
+  () => props.success,
+  (val) => {
+    if (val && !isEditMode.value) {
+      resetForm()
+    }
+  },
+)
 
 function resetForm() {
   verhuurCopy.value = {
-    logistiekeReferentie: "",
+    logistiekeReferentie: '',
     assetModel: props.assetModel,
     assetType: null,
     werf: null,
     projectleider: null,
-    leverDatum: "",
-    ophaalDatum: "",
-    werkhoogte: "",
+    leverDatum: '',
+    ophaalDatum: '',
+    werkhoogte: '',
     entiteit: null,
-  };
+  }
 
-  errorMessage.value = "";
+  errorMessage.value = ''
 }
 
 // Save verhuur
 async function saveVerhuur() {
-  errorMessage.value = ""; // reset eerst
+  errorMessage.value = '' // reset eerst
 
   if (!verhuurCopy.value.leverDatum) {
-    errorMessage.value = "Startdatum is verplicht";
-    return;
+    errorMessage.value = 'Startdatum is verplicht'
+    return
   }
 
   if (
     verhuurCopy.value.ophaalDatum &&
     new Date(verhuurCopy.value.ophaalDatum) <= new Date(verhuurCopy.value.leverDatum)
   ) {
-    errorMessage.value = "Einddatum moet na startdatum liggen";
-    return;
+    errorMessage.value = 'Einddatum moet na startdatum liggen'
+    return
   }
 
   if (!verhuurCopy.value.assetType) {
-    errorMessage.value = "Selecteer een type";
-    return;
+    errorMessage.value = 'Selecteer een type'
+    return
   }
 
-  if (
-    verhuurCopy.value.assetModel === "Hoogtewerker" &&
-    !verhuurCopy.value.werkhoogte
-  ) {
-    errorMessage.value = "Werkhoogte is verplicht";
-    return;
+  if (verhuurCopy.value.assetModel === 'Hoogtewerker' && !verhuurCopy.value.werkhoogte) {
+    errorMessage.value = 'Werkhoogte is verplicht'
+    return
   }
 
-  if (
-    verhuurCopy.value.assetModel === "WerfContainer" &&
-    !verhuurCopy.value.entiteit
-  ) {
-    errorMessage.value = "Entiteit is verplicht";
-    return;
+  if (verhuurCopy.value.assetModel === 'WerfContainer' && !verhuurCopy.value.entiteit) {
+    errorMessage.value = 'Entiteit is verplicht'
+    return
   }
 
   try {
-    loading.value = true;
+    loading.value = true
 
     if (isEditMode.value) {
-      emit("edit", verhuurCopy.value);
+      emit('edit', verhuurCopy.value)
     } else {
-      emit("save", verhuurCopy.value);
+      emit('save', verhuurCopy.value)
     }
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 </script>

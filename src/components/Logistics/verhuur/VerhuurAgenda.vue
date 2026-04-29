@@ -1,17 +1,17 @@
 <template>
   <AgendaComponent
-  :items="assets"
-  :bookings="filteredBoekingen"
-  :typeOptions="types"
-  item-label="Asset"
-  :get-item-id="getAssetId"
-  :get-booking-start="getStart"
-  :get-booking-end="getEnd"
-  :get-booking-title="getTitle"
-  @addBoeking="$emit('addBoeking')"
-  @openBoeking="$emit('openBoeking', $event)"
-  @filterType="$emit('filterType', $event)"
-/>
+    :items="assets"
+    :bookings="filteredBoekingen"
+    :typeOptions="types"
+    item-label="Asset"
+    :get-item-id="getAssetId"
+    :get-booking-start="getStart"
+    :get-booking-end="getEnd"
+    :get-booking-title="getTitle"
+    @addBoeking="$emit('addBoeking')"
+    @openBoeking="$emit('openBoeking', $event)"
+    @filterType="$emit('filterType', $event)"
+  />
 </template>
 
 <script setup>
@@ -27,7 +27,7 @@ defineEmits(['openBoeking', 'addBoeking', 'filterType'])
 
 /* ---------------- FILTER BOEKINGEN ---------------- */
 const filteredBoekingen = computed(() => {
-  return (props.boekingen || []).filter(b => {
+  return (props.boekingen || []).filter((b) => {
     const asset = b.asset || b.toestel
     return asset && asset._id // 🔥 alleen geldige boekingen
   })
@@ -37,7 +37,7 @@ const filteredBoekingen = computed(() => {
 const assets = computed(() => {
   const map = new Map()
 
-  filteredBoekingen.value.forEach(b => {
+  filteredBoekingen.value.forEach((b) => {
     const asset = b.asset || b.toestel
     map.set(asset._id, asset)
   })
@@ -63,11 +63,7 @@ const getEnd = (b) => {
   return new Date(raw)
 }
 
-const getTitle = (b) =>
-  b.reference ||
-  b.klant?.naam ||
-  b.leverAdresDetails?.naam ||
-  'Onbekend'
+const getTitle = (b) => b.reference || b.klant?.naam || b.leverAdresDetails?.naam || 'Onbekend'
 </script>
 
 <style scoped>

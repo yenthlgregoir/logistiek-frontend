@@ -8,5 +8,5 @@ export const klantApi = {
   remove: (id) => api.del(`/renting/klant/${id}`),
   addLeverAdres: (id, formData) => api.postFormData(`/renting/klant/${id}/leveradressen`, formData),
   removeLeverAdres: (id, adresId) => api.del(`/renting/klant/${id}/leveradressen/${adresId}`),
-  updateLeverAdres: (id, adres) => api.patch(`/renting/klant/${id}/leveradres`, {adres}),
+  updateLeverAdres: (id, adres) => api.patch(`/renting/klant/${id}/leveradres`, { adres }),
 }

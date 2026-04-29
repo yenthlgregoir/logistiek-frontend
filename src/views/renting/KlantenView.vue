@@ -57,9 +57,7 @@ const showDetail = ref(false)
 const filteredKlanten = computed(() => {
   const term = search.value.toLowerCase()
   return klanten.value.filter(
-    (k) =>
-      k.naam?.toLowerCase().includes(term) ||
-      k.klantNummer?.toLowerCase().includes(term)
+    (k) => k.naam?.toLowerCase().includes(term) || k.klantNummer?.toLowerCase().includes(term),
   )
 })
 
@@ -136,16 +134,21 @@ function selectKlant(k) {
   selectedKlant.value = k
   showDetail.value = true
 
-  Object.assign(form, JSON.parse(JSON.stringify({
-    id: k._id,
-    naam: k.naam,
-    klantNummer: k.klantNummer,
-    telefoonnummer: k.telefoonnummer,
-    mailadres: k.mailadres,
-    factuurAdres: k.factuurAdres ?? {},
-    leverAdressen: k.leverAdressen ?? [],
-    BTWnummer: k.BTWnummer,
-  })))
+  Object.assign(
+    form,
+    JSON.parse(
+      JSON.stringify({
+        id: k._id,
+        naam: k.naam,
+        klantNummer: k.klantNummer,
+        telefoonnummer: k.telefoonnummer,
+        mailadres: k.mailadres,
+        factuurAdres: k.factuurAdres ?? {},
+        leverAdressen: k.leverAdressen ?? [],
+        BTWnummer: k.BTWnummer,
+      }),
+    ),
+  )
 }
 
 function selectNew() {
@@ -178,7 +181,7 @@ async function saveKlant(data) {
 
 /* LEVERADRES FLOW (LOCAL ONLY) */
 function leveradresToevoegen(localForm) {
-  Object.assign(form , localForm)
+  Object.assign(form, localForm)
   Object.assign(nieuwAdres, {
     _id: undefined,
     naam: '',
@@ -191,12 +194,10 @@ function leveradresToevoegen(localForm) {
 }
 
 function addLeverAdresModal(adres) {
-  if(adres._id){
+  if (adres._id) {
     upsertLeverAdres(adres)
-  }
-  else{
-      form.leverAdressen.push({ ...adres })
-
+  } else {
+    form.leverAdressen.push({ ...adres })
   }
   showModal.value = false
   Object.assign(nieuwAdres, {
@@ -213,13 +214,14 @@ function upsertLeverAdres(adres) {
   const list = form.leverAdressen
 
   const index = adres._id
-    ? list.findIndex(a => a._id === adres._id)
-    : list.findIndex(a =>
-        a.naam === adres.naam &&
-        a.straat === adres.straat &&
-        a.huisnummer === adres.huisnummer &&
-        a.postcode === adres.postcode &&
-        a.gemeente === adres.gemeente
+    ? list.findIndex((a) => a._id === adres._id)
+    : list.findIndex(
+        (a) =>
+          a.naam === adres.naam &&
+          a.straat === adres.straat &&
+          a.huisnummer === adres.huisnummer &&
+          a.postcode === adres.postcode &&
+          a.gemeente === adres.gemeente,
       )
 
   if (index !== -1) {
@@ -230,7 +232,7 @@ function upsertLeverAdres(adres) {
 }
 
 function removeLeverAdresLocal(adres) {
-  form.leverAdressen = form.leverAdressen.filter(a =>
+  form.leverAdressen = form.leverAdressen.filter((a) =>
     a._id
       ? a._id !== adres._id
       : !(
@@ -239,7 +241,7 @@ function removeLeverAdresLocal(adres) {
           a.huisnummer === adres.huisnummer &&
           a.postcode === adres.postcode &&
           a.gemeente === adres.gemeente
-        )
+        ),
   )
 }
 

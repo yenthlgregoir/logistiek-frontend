@@ -4,12 +4,12 @@
 
     <!-- Agenda -->
     <VerhuurAgenda
-  :boekingen="boekingen"
-  :types="machineTypes"
-  @openBoeking="openBoeking"
-  @addBoeking="nieuweBoeking"
-  @filterType="onFilterType"
-/>
+      :boekingen="boekingen"
+      :types="machineTypes"
+      @openBoeking="openBoeking"
+      @addBoeking="nieuweBoeking"
+      @filterType="onFilterType"
+    />
 
     <!-- Edit drawer -->
     <VerhuurDrawer
@@ -38,12 +38,10 @@
       :projectleiders="projectleiders"
       :entiteiten="entiteiten"
       :error="error"
-      :succes ="saveSuccess"
+      :succes="saveSuccess"
       @close="closeAddDrawer"
       @save="createVerhuur"
-
     />
-    
   </div>
 </template>
 
@@ -64,8 +62,8 @@ import { entiteitApi } from '@/api/entiteit'
 const props = defineProps({
   assetModel: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 })
 
 // --- state ---
@@ -83,12 +81,11 @@ const entiteiten = ref([])
 
 const error = ref('')
 const loading = ref(false)
-const saveSuccess = ref(false);
-
+const saveSuccess = ref(false)
 
 const filters = ref({
   type: '',
-  assetModel: props.assetModel
+  assetModel: props.assetModel,
 })
 
 // --- reload bij route switch ---
@@ -98,7 +95,7 @@ watch(
     filters.value.assetModel = props.assetModel
     await loadData()
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // --- load data ---
@@ -106,21 +103,20 @@ async function loadData() {
   try {
     loading.value = true
 
-    const [werfRes, plRes, boekingenRes ] = await Promise.all([
+    const [werfRes, plRes, boekingenRes] = await Promise.all([
       werfApi.list(),
       leiderApi.list(),
       verhuurApi.list(filters.value),
     ])
 
     // 🔥 types + extra data
-    if (props.assetModel === "WerfContainer") {
+    if (props.assetModel === 'WerfContainer') {
       machineTypes.value = await werfcontainerApi.getTypes()
-      entiteiten.value = await entiteitApi.getEntiteiten();
-
+      entiteiten.value = await entiteitApi.getEntiteiten()
     } else {
       machineTypes.value = [
-        {  type: "Schaarlift", naam: "Schaarlift" },
-        { type: "Knikarm", naam: "Knikarm" }
+        { type: 'Schaarlift', naam: 'Schaarlift' },
+        { type: 'Knikarm', naam: 'Knikarm' },
       ]
       entiteiten.value = []
     }
@@ -128,7 +124,6 @@ async function loadData() {
     werven.value = werfRes || []
     projectleiders.value = plRes || []
     boekingen.value = boekingenRes || []
-
   } catch (err) {
     console.error('Fout bij laden data', err)
     error.value = 'Fout bij laden data'
@@ -205,11 +200,11 @@ async function createVerhuur(data) {
     error.value = ''
     await verhuurApi.create(cleanPayload(data))
     await loadData()
-    saveSuccess.value = true;
+    saveSuccess.value = true
     closeAddDrawer()
   } catch (err) {
     error.value = parseApiError(err)
-    saveSuccess.value = false;
+    saveSuccess.value = false
     throw err
   }
 }

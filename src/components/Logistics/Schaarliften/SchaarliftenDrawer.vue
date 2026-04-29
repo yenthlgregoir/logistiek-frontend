@@ -54,7 +54,7 @@
         <label>keuring Datum</label>
         <input type="date" v-model="form.keuringDatum" />
       </div>
-<div class="info-block">
+      <div class="info-block">
         <label>Opmerkingen</label>
         <input type="text" v-model="form.comment" placeholder="Opmerkingen" />
       </div>

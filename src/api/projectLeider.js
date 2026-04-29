@@ -9,5 +9,4 @@ export const leiderApi = {
   getById: (id) => api.get(`/logistics/projectleider/${id}`),
   remove: (id) => api.del(`/logistics/projectleider/${id}`),
   update: (id, data) => api.patch(`/logistics/projectleider/${id}`, data),
-  
 }

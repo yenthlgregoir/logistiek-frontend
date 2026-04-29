@@ -77,11 +77,11 @@
               </div>
 
               <div class="comments">
-  <div class="comments-title"><strong>Opmerking</strong></div>
-  <div class="comments-text">
-    {{ item.comment || 'Geen opmerking' }}
-  </div>
-</div>
+                <div class="comments-title"><strong>Opmerking</strong></div>
+                <div class="comments-text">
+                  {{ item.comment || 'Geen opmerking' }}
+                </div>
+              </div>
 
               <!-- Keuring -->
               <div v-if="isSchaarlift(item)" class="keuring">
@@ -173,7 +173,7 @@ function statusLabel(item) {
 // Keuring
 function daysUntilKeuring(d) {
   if (!d) return 0
-  return Math.ceil((new Date(d) - new Date()) / (1000*60*60*24))
+  return Math.ceil((new Date(d) - new Date()) / (1000 * 60 * 60 * 24))
 }
 function isKeuringVerlopen(d) {
   return d && new Date(d) < new Date()
@@ -211,31 +211,111 @@ function editAsset(asset) {
 
   white-space: pre-wrap; /* belangrijk voor vrije tekst */
 }
-.page { width: 100% }
-.toolbar { display: flex; justify-content: space-between; margin-bottom: 15px }
-.clickable { cursor: pointer; font-weight: 500 }
+.page {
+  width: 100%;
+}
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+.clickable {
+  cursor: pointer;
+  font-weight: 500;
+}
 
-.expanded-row-container { display: flex; gap: 20px; padding: 20px; border-radius: 8px }
-.expanded-left, .expanded-right { flex: 1; display: flex; flex-direction: column }
+.expanded-row-container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  border-radius: 8px;
+}
+.expanded-left,
+.expanded-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
 
-.section-header { position: relative; display: flex; align-items: center; justify-content: flex-end; font-weight: 700; font-size: 16px; margin-bottom: 12px; height: 32px }
-.section-title { position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none }
-.edit-btn { background: none; border: none; cursor: pointer; font-size: 16px; color: #555 }
+.section-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 12px;
+  height: 32px;
+}
+.section-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #555;
+}
 
-.divider { width: 100%; border: 1px solid #c2bebe; margin-bottom: 1rem }
-.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 40px; font-size: 14px; color: #333 }
-.column { display: flex; flex-direction: column; gap: 8px }
-.column > div { display: flex; justify-content: space-between }
-.column strong { font-weight: 600 }
+.divider {
+  width: 100%;
+  border: 1px solid #c2bebe;
+  margin-bottom: 1rem;
+}
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 40px;
+  font-size: 14px;
+  color: #333;
+}
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.column > div {
+  display: flex;
+  justify-content: space-between;
+}
+.column strong {
+  font-weight: 600;
+}
 
-.keuring { grid-column: 1 / -1; margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 10px; color: #444; font-weight: 600 }
-.keuring-title { grid-column: 1 / -1 }
-.keuring-data { grid-column: 1 / -1; width: 80%; display: flex; justify-content: space-between }
-.expired-text { color: #b91c1c; font-weight: 700; grid-column: 1 / -1; padding: 6px 0; font-size: 14px }
+.keuring {
+  grid-column: 1 / -1;
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 10px;
+  color: #444;
+  font-weight: 600;
+}
+.keuring-title {
+  grid-column: 1 / -1;
+}
+.keuring-data {
+  grid-column: 1 / -1;
+  width: 80%;
+  display: flex;
+  justify-content: space-between;
+}
+.expired-text {
+  color: #b91c1c;
+  font-weight: 700;
+  grid-column: 1 / -1;
+  padding: 6px 0;
+  font-size: 14px;
+}
 progress {
   grid-column: 1 / -1;
-  width: 80%;       
-  height: 10px;       
+  width: 80%;
+  height: 10px;
   border-radius: 8px;
   overflow: hidden;
   appearance: none;
@@ -250,18 +330,56 @@ progress::-webkit-progress-value {
   background-color: #3b82f6;
   border-radius: 8px;
 }
-.coming-soon-placeholder { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 18px; font-style: italic; color: #888; border: 2px dashed #ccc; border-radius: 8px; min-height: 150px }
+.coming-soon-placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-style: italic;
+  color: #888;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  min-height: 150px;
+}
 
-.status { padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600 }
-.status.vrij { background: #d1fae5; color: #065f46 }
-.status.bezet { background: #fef3c7; color: #92400e }
-.status.kapot { background: #fee2e2; color: #991b1b }
-.status.ongekeurd { background: #f0f0f0; color: #6b7280 }
+.status {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.status.vrij {
+  background: #d1fae5;
+  color: #065f46;
+}
+.status.bezet {
+  background: #fef3c7;
+  color: #92400e;
+}
+.status.kapot {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.status.ongekeurd {
+  background: #f0f0f0;
+  color: #6b7280;
+}
 
-.boeking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 40px; padding: 10px 0; border-bottom: 1px solid #ddd; margin-bottom: 10px }
-.boeking-grid:last-child { border-bottom: none; margin-bottom: 0 }
+.boeking-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 40px;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 10px;
+}
+.boeking-grid:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
 
-.btn1{
+.btn1 {
   margin-right: 1rem;
   background-color: #969191;
 }

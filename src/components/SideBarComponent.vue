@@ -151,7 +151,7 @@ function isActive(target) {
 
 function handleLinkClick() {
   if (isMobile.value) {
-    mobileOpen.value = false 
+    mobileOpen.value = false
     emit('closeSidebar') // emit naar parent
   }
 }
