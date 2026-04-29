@@ -24,7 +24,7 @@
     <ExpandedBaseTable
       :items="assets"
       :expand-on-row-click="true"
-      columns="1fr 1fr 2fr 1fr 1fr"
+      columns="1fr 1fr 2fr 1fr 1fr 1fr"
       itemKey="_id"
     >
       <!-- HEADER -->
@@ -33,6 +33,7 @@
         <div>type</div>
         <div>serienummer</div>
         <div>werkhoogte</div>
+        <div>Locatie</div>
         <div class="right">status</div>
       </template>
 
@@ -45,7 +46,7 @@
   <div>{{ item.Type?.naam || item.type || 'Onbekend' }}</div>
   <div>{{ item.serienummer || '-' }}</div>
   <div>{{ isSchaarlift(item) ? item.werkhoogte + ' m' : '—' }}</div>
-
+  <div>{{getWerf(item) }}</div>
   <div class="right">
     <span :class="['status', statusClass(item)]">
       {{ statusLabel(item) }}
@@ -277,6 +278,15 @@ function formatDate(d) {
 /* -------------------- */
 function editAsset(asset) {
   emit('edit-asset', asset)
+}
+
+function getWerf(asset){
+  if(asset.huidigeBoekingen && asset.huidigeBoekingen.length !== 0){
+    return asset.huidigeBoekingen[0].werf.naam
+  }
+  else{
+    return 'wingepark 27'
+  }
 }
 </script>
 
