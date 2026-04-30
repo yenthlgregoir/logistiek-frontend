@@ -24,7 +24,8 @@
     <ExpandedBaseTable
       :items="assets"
       :expand-on-row-click="true"
-      columns="1fr 1fr 2fr 1fr 1fr 1fr"
+      :rowStyle="rowStyle"
+      columns="1fr 1fr 1fr 1fr 1fr 1fr"
       itemKey="_id"
     >
       <!-- HEADER -->
@@ -39,7 +40,7 @@
 
       <!-- ROW -->
       <template #row="{ item }">
-  <div :class="statusRowClass(item)" @click="toggleRow(item)">
+  <div @click="toggleRow(item)">
     {{ item.nummer || item.naam }}
   </div>
 
@@ -209,15 +210,26 @@ function getBoekingStatus(boekingen) {
 function isSchaarlift(item) {
   return item?.werkhoogte !== undefined
 }
-function statusRowClass(item) {
+function rowStyle(item) {
   const b = getBoekingStatus(item.huidigeBoekingen)
 
-  if (item.status === 'Kapot') return 'kapot-row'
-  if (item.status === 'Ongekeurd') return 'ongekeurd-row'
-  if (b === 'bezet') return 'bezet-row'
-  if (b === 'gepland') return 'gepland-row'
+  if (item.status === 'Kapot') {
+    return [{ background: '#fee2e2' }, {color:'#991b1b'}]
+  }
 
-  return 'vrij-row'
+  if (item.status === 'Ongekeurd') {
+    return [{ background: '#f0f0f0' }, {color:'#0153f7'}]
+  }
+
+  if (b === 'bezet') {
+    return [{ background: '#fef3c7' }, {color:'#92400e'}]
+  }
+
+  if (b === 'gepland') {
+    return [{ background: '#91b7f0' }, {color:'#0153f7'}]
+  }
+
+  return [{ background: '#d1fae5' }, {color:'#065f46'}] // vrij
 }
 /* -------------------- */
 /* STATUS UI */
@@ -307,49 +319,6 @@ function getWerf(asset){
   display: contents; /* belangrijk voor grid tables */
 }
 
-/* BEZET */
-.row-bezet > div {
-  background: rgba(254, 243, 199, 0.6);
-}
-.table-row.bezet {
-  background: #dbeafe !important;
-}
-
-.table-row.gepland {
-  background: #bfdbfe !important;
-}
-
-.table-row.kapot {
-  background: #fee2e2 !important;
-}
-
-.table-row.ongekeurd {
-  background: #f3f4f6 !important;
-}
-
-/* hover mag subtiel overlayen */
-.table-row.bezet:hover {
-  background: #93c5fd !important;
-}
-/* GEPLAND */
-.row-gepland > div {
-  background: rgba(147, 197, 253, 0.35);
-}
-
-/* VRIJ */
-.row-vrij > div {
-  background: transparent;
-}
-
-/* KAPOT */
-.row-kapot > div {
-  background: rgba(254, 226, 226, 0.7);
-}
-
-/* ONGEKEURD */
-.row-engekeurd > div {
-  background: rgba(243, 244, 246, 0.8);
-}
 
 /* hover effect */
 .row > div {

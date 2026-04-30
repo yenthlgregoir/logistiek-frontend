@@ -9,13 +9,11 @@
     <div v-for="item in items" :key="getKey(item)">
       <!-- MAIN ROW -->
       <div
-        class="table-row"
-:class="[
-    { 'no-hover': !hover },
-    rowClass?.(item) // 👈 nieuw
-  ]"        :style="gridStyle"
-        @click="toggleRow(item)"
-      >
+  class="table-row"
+  :class="{ 'no-hover': !hover }"
+  :style="[gridStyle, props.rowStyle?.(item)]"
+  @click="toggleRow(item)"
+>
         <slot name="row" :item="item" :open="isOpen(item)" />
       </div>
 
@@ -54,6 +52,10 @@ const props = defineProps({
   hover: {
     type: Boolean,
     default: true,
+  },
+  rowStyle: {
+    type: Function,
+    default: null,
   },
 })
 
@@ -129,8 +131,8 @@ function isOpen(item) {
 
 /* Hover effect */
 .table-row:hover {
-  background: #5786f7;
-  color: white;
+    filter: brightness(0.97);
+
   transform: translateY(-3px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
@@ -212,5 +214,25 @@ function isOpen(item) {
     grid-template-columns: 1fr 1fr !important;
     row-gap: 10px;
   }
+}
+
+.table-row.row-bezet {
+  background: rgba(254, 243, 199, 0.6);
+}
+
+.table-row.row-gepland {
+  background: rgba(147, 197, 253, 0.35);
+}
+
+.table-row.row-kapot {
+  background: rgba(254, 226, 226, 0.7);
+}
+
+.table-row.row-ongekeurd {
+  background: rgba(243, 244, 246, 0.8);
+}
+
+.table-row.row-vrij {
+  background: #ffffff;
 }
 </style>
