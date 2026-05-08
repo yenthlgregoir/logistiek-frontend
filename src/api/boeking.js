@@ -14,6 +14,10 @@ export const boekingApi = {
     const params = new URLSearchParams({ beginDatum, eindDatum, toestelType })
     return api.get(`/renting/boekingen/toestellen/vrij?${params.toString()}`)
   },
+  beschikbareToestellen: ({ beginDatum, eindDatum, toestelType }) => {
+    const params = new URLSearchParams({ beginDatum, eindDatum, toestelType })
+    return api.get(`/renting/boekingen/toestellen/beschikbaar/aantal?${params.toString()}`)
+  },
   assignToestel: (boekingId, toestelId) =>
     api.patch(`/renting/boekingen/${boekingId}/toestellen/assign`, { toestel: toestelId }),
   updatePeriode: (boekingId, beginDatum, eindDatum) =>

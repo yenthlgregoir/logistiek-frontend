@@ -27,24 +27,24 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted } from "vue";
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(["close"]);
 
 function close() {
-  emit('close')
+  emit("close");
 }
 
 function handleKey(e) {
-  if (e.key === 'Escape') close()
+  if (e.key === "Escape") close();
 }
 
 onMounted(() => {
-  window.addEventListener('keydown', handleKey)
-})
+  window.addEventListener("keydown", handleKey);
+});
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKey)
-})
+  window.removeEventListener("keydown", handleKey);
+});
 </script>
 
 <style scoped>
@@ -184,27 +184,7 @@ onUnmounted(() => {
   font-weight: 700;
   color: #111827;
 }
-::v-deep(.search) {
-  position: relative;
-  flex: 1;
-  max-width: 300px;
-}
 
-::v-deep(.search input) {
-  padding: 8px 12px 8px 32px;
-  border-radius: 6px;
-  border: none;
-  background: transparent;
-}
-
-::v-deep(.search i) {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-
-  color: #1b4965;
-}
 
 /* =========================================
    FOOTER

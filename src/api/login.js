@@ -6,5 +6,5 @@ export const loginApi = {
   setPassword: (token, password) =>
     api.post(`/authentication/auth/set-password/${token}`, { password }),
   getUsers: () => api.get('/authentication/auth/users'),
-  me: () => api.get('/authentication/auth/me'), // nieuw: voor fetchMe()
+  me: () => api.get('/authentication/auth/me'), 
 }

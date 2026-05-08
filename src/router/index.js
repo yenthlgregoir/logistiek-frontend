@@ -126,6 +126,17 @@ const routes = [
       title: 'Renting',
     },
   },
+
+  {
+    path: '/renting/toestellen/vrij',
+    name: 'rentingToestellen',
+    component: () => import('@/views/renting/VrijeToestellenview.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'renting'],
+      title: 'Renting',
+    },
+  },
   {
     path: '/renting/agenda',
     name: 'renting',
@@ -145,14 +156,14 @@ const routes = [
       {
         path: 'lijst',
         name: 'rentingLijst',
-        component: () => import('@/components/renting/agenda/BoekingList.vue'),
+        component: () => import('@/views/renting/ListView.vue'),
       },
     ],
   },
   {
     path: '/renting/archief',
     name: 'Archief',
-    component: () => import('@/views/renting/archiefPage.vue'),
+    component: () => import('@/views/renting/ListView.vue'),
     meta: {
       requiresAuth: true,
       roles: ['admin', 'renting'],

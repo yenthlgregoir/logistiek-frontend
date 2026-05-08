@@ -2,6 +2,7 @@
   <Transition name="drawer">
     <div v-if="show" class="drawer-wrapper">
       <div class="drawer">
+
         <!-- HEADER -->
         <div class="drawer-header">
           <h3>Detail</h3>
@@ -10,8 +11,10 @@
 
         <div class="drawer-content">
           <div class="adres-row">
+
             <!-- FACTUUR -->
             <div class="factuuradres">
+
               <div class="form-group">
                 <label>Naam</label>
                 <input v-model="localForm.naam" />
@@ -33,18 +36,22 @@
               </div>
 
               <div class="form-group">
-                <label>BTW-nummer</label>
+  <label>BTW-nummer</label>
 
-                <div style="display: flex; gap: 10px">
-                  <input v-model="localForm.BTWnummer" />
+  <div style="display:flex; gap:10px;">
+    <input v-model="localForm.BTWnummer" />
 
-                  <button class="validate-btn" @click="checkBTW" :disabled="loadingBTW">
-                    {{ loadingBTW ? 'Bezig...' : 'Valideer' }}
-                  </button>
-                </div>
+    <button
+      class="validate-btn"
+      @click="checkBTW"
+      :disabled="loadingBTW"
+    >
+      {{ loadingBTW ? 'Bezig...' : 'Valideer' }}
+    </button>
+  </div>
 
-                <span v-if="btwError" class="error">{{ btwError }}</span>
-              </div>
+  <span v-if="btwError" class="error">{{ btwError }}</span>
+</div>
 
               <h4>Factuuradres</h4>
 
@@ -64,27 +71,29 @@
                   Verwijderen
                 </button>
               </div>
+
             </div>
 
             <div class="divider"></div>
 
             <!-- LEVERADRESSEN -->
             <div class="leveradressen">
+
               <h4>Leveradressen</h4>
 
               <div class="search-row">
                 <input v-model="zoekTerm" placeholder="Zoek..." />
-                <button @click="$emit('leveradresToevoegen', localForm)" class="add-adres">
-                  + Add
-                </button>
+                <button @click="$emit('leveradresToevoegen' , localForm)" class="add-adres">+ Add</button>
               </div>
 
               <div class="leveradressen-container">
+
                 <div
                   v-for="adres in filtered"
                   :key="adres._id ?? adres.naam"
                   class="leveradres-card"
                 >
+
                   <div class="adres-info" @click="$emit('edit-lever-adres', adres)">
                     <strong>{{ adres.naam }}</strong>
                     <div>{{ adres.straat }} {{ adres.huisnummer }}</div>
@@ -92,21 +101,31 @@
                   </div>
 
                   <div class="card-buttons">
-                    <button class="edit-small" @click.stop="$emit('edit-lever-adres', adres)">
+                    <button
+                      class="edit-small"
+                      @click.stop="$emit('edit-lever-adres', adres)"
+                    >
                       ✎
                     </button>
 
-                    <button class="delete-small" @click.stop="$emit('remove-lever-adres', adres)">
+                    <button
+                      class="delete-small"
+                      @click.stop="$emit('remove-lever-adres', adres)"
+                    >
                       ✕
                     </button>
                   </div>
+
                 </div>
 
                 <p v-if="!filtered.length">Geen resultaten</p>
+
               </div>
             </div>
+
           </div>
         </div>
+
       </div>
     </div>
   </Transition>
@@ -114,7 +133,7 @@
 
 <script setup>
 import { reactive, ref, watch, computed } from 'vue'
-import { VAT_REGEX } from '@/utils/vatRegex'
+import {VAT_REGEX} from '@/utils/vatRegex'
 
 const props = defineProps({
   form: { type: Object, required: true },
@@ -129,7 +148,7 @@ const emit = defineEmits([
   'leveradresToevoegen',
   'update-lever-adres',
   'remove-lever-adres',
-  'edit-lever-adres',
+ 'edit-lever-adres'
 ])
 
 /**
@@ -146,9 +165,9 @@ const localForm = reactive({
     straat: '',
     huisnummer: '',
     postcode: '',
-    gemeente: '',
+    gemeente: ''
   },
-  leverAdressen: [],
+  leverAdressen: []
 })
 
 /**
@@ -160,7 +179,7 @@ watch(
     if (!v) return
     Object.assign(localForm, JSON.parse(JSON.stringify(v)))
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 )
 
 const selectedKlant = computed(() => props.selectedKlant)
@@ -173,12 +192,11 @@ const filtered = computed(() => {
 
   if (!q) return list
 
-  return list.filter((a) => (a.naam || '').toLowerCase().includes(q))
+  return list.filter(a =>
+    (a.naam || '').toLowerCase().includes(q)
+  )
 })
 
-/**
- * 🔥 FIX: clone bij emit (geen proxy leakage)
- */
 function emitSave() {
   emit('save', JSON.parse(JSON.stringify(localForm)))
 }
@@ -219,7 +237,9 @@ async function checkBTW() {
   btwError.value = ''
 
   try {
-    const res = await fetch(`https://api.vatcomply.com/vat?vat_number=${clean}`)
+    const res = await fetch(
+      `https://api.vatcomply.com/vat?vat_number=${clean}`
+    )
 
     const data = await res.json()
 
@@ -239,7 +259,8 @@ async function checkBTW() {
     if (data.address) {
       parseAddress(data.address)
     }
-  } catch {
+
+  } catch  {
     btwError.value = 'Fout bij controleren'
   } finally {
     loadingBTW.value = false
@@ -248,32 +269,46 @@ async function checkBTW() {
 function parseAddress(address) {
   if (!address) return
   console.log(address)
-  const lines = address.split('\n').map((l) => l.trim())
+  const lines = address.split('\n').map(l => l.trim())
 
   if (lines.length >= 2) {
     const streetLine = lines[0]
     const cityLine = lines[1]
 
     // straat + nr
-    const matchStreet = streetLine.match(/(.+?)\s(\d+.*)$/)
-    if (matchStreet) {
-      localForm.factuurAdres.straat = matchStreet[1]
-      localForm.factuurAdres.huisnummer = matchStreet[2]
-    } else {
-      localForm.factuurAdres.straat = streetLine
-    }
+    const streetParts = streetLine.trim().split(/\s+/);
+
+const houseNumberIndex = streetParts.findIndex(p => /^\d/.test(p));
+
+if (houseNumberIndex >= 0) {
+  localForm.factuurAdres.straat =
+    streetParts.slice(0, houseNumberIndex).join(' ');
+
+  localForm.factuurAdres.huisnummer =
+    streetParts.slice(houseNumberIndex).join(' ');
+} else {
+  localForm.factuurAdres.straat = streetLine;
+  localForm.factuurAdres.huisnummer = '';
+}
 
     // postcode + stad
-    const matchCity = cityLine.match(/(\d{4})\s(.+)/)
-    if (matchCity) {
-      localForm.factuurAdres.postcode = matchCity[1]
-      localForm.factuurAdres.gemeente = matchCity[2]
-    }
+    const cityParts = cityLine.trim().split(/\s+/);
+
+if (/^\d{4}$/.test(cityParts[0])) {
+  localForm.factuurAdres.postcode = cityParts[0];
+  localForm.factuurAdres.gemeente = cityParts.slice(1).join(' ');
+} else {
+  localForm.factuurAdres.postcode = '';
+  localForm.factuurAdres.gemeente = cityLine;
+}
   }
 }
 function normalizeBTW(value) {
-  return value.toUpperCase().replace(/[^A-Z0-9]/g, '') // 🔥 alles behalve letters/cijfers weg
+  return value
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '') 
 }
+
 </script>
 
 <style scoped>
@@ -565,7 +600,7 @@ input:focus {
 
 /* RESPONSIVE */
 @media (max-width: 1024px) {
-  .drawer {
+  .drawer{
     width: 90vw;
   }
   .adres-row {
@@ -576,7 +611,7 @@ input:focus {
     width: 100%;
   }
 }
-button {
+button{
   border: none;
 }
 </style>
