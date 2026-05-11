@@ -165,12 +165,10 @@ const loadAvailability = async () => {
     })
 
     data.value = res
-    console.log(res)
   } catch (err) {
     console.error(err)
     data.value = null
   }
-
   loading.value = false
 }
 

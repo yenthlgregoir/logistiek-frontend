@@ -163,7 +163,7 @@ const routes = [
   {
     path: '/renting/archief',
     name: 'Archief',
-    component: () => import('@/views/renting/archiefPage.vue'),
+    component: () => import('@/views/renting/ListView.vue'),
     meta: {
       requiresAuth: true,
       roles: ['admin', 'renting'],
@@ -220,7 +220,7 @@ const routes = [
     component: () => import('@/views/Logistics/SchaarliftenLijstView.vue'),
     meta: {
       requiresAuth: true,
-      roles: ['admin', 'logistics'],
+
       title: 'Logistics',
     },
   },
@@ -252,8 +252,8 @@ const routes = [
     component: () => import('@/views/Logistics/HoogtewerkerCardsView.vue'),
     props: { assetModel: 'Hoogtewerker' },
     meta: {
-      requiresAuth: true,
-      roles: ['admin', 'logistics'],
+      requiresAuth: false,
+      noSidebar: true,
       title: 'Logistics',
     },
   },
