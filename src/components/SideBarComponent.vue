@@ -61,6 +61,7 @@ import {
   Hammer,
   MoveVertical,
   Warehouse,
+  Locate
 } from 'lucide-vue-next'
 
 const store = useSidebarStore()
@@ -130,6 +131,8 @@ const linkGroups = {
     },
     { to: '/logistics/werf', label: 'Werven', icon: Hammer },
     { to: '/logistics/projectleiders', label: 'Projectleiders', icon: Users },
+    { to: '/logistics/entiteiten', label: 'Entiteiten', icon: Locate },
+
   ],
   admin: [
     { to: '/admin/users', label: 'Users', icon: User },

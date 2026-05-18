@@ -299,6 +299,16 @@ const routes = [
       title: 'Logistics',
     },
   },
+  {
+    path: '/logistics/entiteiten',
+    name: 'EntiteitenLijst',
+    component: () => import('@/views/Logistics/EntityView.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'logistics'],
+      title: 'Logistics',
+    },
+  },
 ]
 
 const router = createRouter({

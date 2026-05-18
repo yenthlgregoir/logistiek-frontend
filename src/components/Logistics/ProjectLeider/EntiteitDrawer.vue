@@ -1,5 +1,5 @@
 <template>
-  <BaseDrawer :show="show" title="Nieuwe Entiteit" @close="$emit('close')">
+  <BaseDrawer :show="show" :title="isEditMode ? 'Entiteit Bewerken' : 'Nieuwe Entiteit'" @close="$emit('close')">
     <div class="form-container">
       <div class="info-block">
         <label>Naam</label>
@@ -33,25 +33,60 @@
 
     <template #footer>
       <button class="btn btn-secondary" @click="$emit('close')">Cancel</button>
-      <button class="btn btn-primary" @click="save">Save</button>
-    </template>
+<button class="btn btn-primary" @click="save">
+  {{ isEditMode ? 'Update' : 'Save' }}
+</button>    </template>
   </BaseDrawer>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import BaseDrawer from '@/components/base/BaseDrawer.vue'
 
-defineProps({ show: Boolean })
-const emit = defineEmits(['close', 'created'])
+const props = defineProps({
+  show: Boolean,
+  entity: {
+    type: Object,
+    default: null
+  }
+})
 
-const form = ref({
+const emit = defineEmits([
+  'close',
+  'created',
+  'updated'
+])
+
+const defaultForm = {
   naam: '',
   kleur: '#000000',
   icon: '',
-})
+}
+
+const form = ref({ ...defaultForm })
 
 const search = ref('')
+
+/* EDIT MODE */
+const isEditMode = computed(() => !!props.entity)
+
+/* FORM VULLEN BIJ EDIT */
+watch(
+  () => props.entity,
+  (newEntity) => {
+    if (newEntity) {
+      form.value = {
+        naam: newEntity.naam || '',
+        kleur: newEntity.color || '#000000',
+        icon: newEntity.icon || '',
+      }
+    }
+    else {
+      form.value = { ...defaultForm }
+    }
+  },
+  { immediate: true }
+)
 
 const materialIcons = [
   'ac_unit',
@@ -83,7 +118,10 @@ const materialIcons = [
 
 const filteredIcons = computed(() => {
   if (!search.value) return materialIcons
-  return materialIcons.filter((i) => i.toLowerCase().includes(search.value.toLowerCase()))
+
+  return materialIcons.filter((i) =>
+    i.toLowerCase().includes(search.value.toLowerCase())
+  )
 })
 
 function save() {
@@ -91,19 +129,34 @@ function save() {
     alert('Naam is verplicht')
     return
   }
+
   if (!form.value.icon) {
     alert('Icon is verplicht')
     return
   }
-  // Genereer een random id
-  const newEntiteit = {
+
+  const payload = {
     naam: form.value.naam,
     color: form.value.kleur,
     icon: form.value.icon,
   }
-  emit('created', newEntiteit)
+
+  /* EDIT */
+  if (isEditMode.value) {
+    emit('updated', {
+      id: props.entity._id,
+      data: payload
+    })
+  }
+
+  /* CREATE */
+  else {
+    emit('created', payload)
+  }
+
   emit('close')
-  form.value = { naam: '', kleur: '#000000', icon: '' }
+
+  form.value = { ...defaultForm }
 }
 </script>
 
