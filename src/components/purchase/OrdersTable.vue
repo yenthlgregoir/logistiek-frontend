@@ -103,9 +103,6 @@
                   <button @click="emitAndClose('archive', order)" role="menuitem">
                     📦 Archief
                   </button>
-                  <button @click="emitAndClose('open-files', order)" role="menuitem">
-                    📎 Bestanden
-                  </button>
                   <button @click="emitAndClose('delete-file', order)" role="menuitem">
                     🗑️ Verwijderen
                   </button>

@@ -244,8 +244,8 @@ async function updateStatus() {
     showConfirmAfgewerkt.value = true
     return
   }
+      await boekingenStore.changeStatus(boekingenStore.currentBoeking._id, localStatus.value)
 
-  await boekingenStore.changeStatus(localStatus.value)
 }
 
 async function confirmAfgewerkt() {
