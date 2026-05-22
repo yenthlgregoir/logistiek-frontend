@@ -270,7 +270,7 @@ function getStatusLabel(item) {
 .comments-text {
   background: #f9fafb;
   border-radius: 6px;
-  white-space: pre-wrap; /* belangrijk voor vrije tekst */
+  white-space: pre-wrap; 
 }
 .status.gepland {
   background: #91b7f0;
