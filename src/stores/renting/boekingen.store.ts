@@ -52,6 +52,8 @@ export const useBoekingenStore = defineStore('boekingen', {
 
     // 🔥 TYPE FILTER
     selectedType: null as any | null,
+    selectedKlant: null as any | null,
+    selectedStatus: null as any | null,
 
     vrijeToestellen: [],
 
@@ -104,8 +106,10 @@ export const useBoekingenStore = defineStore('boekingen', {
       return JSON.stringify({
         search: this.search,
         range: this.dateRange,
-        type: this.selectedType?._id || null,
+        type: this.selectedType || null,
         archief: this.currentViewMode === 'archief',
+        klant: this.selectedKlant,
+        status: this.selectedStatus,
       })
     },
 
@@ -141,8 +145,10 @@ export const useBoekingenStore = defineStore('boekingen', {
           search: this.search,
           startDatum: this.dateRange[0],
           eindDatum: this.dateRange[1],
-          type: this.selectedType?._id || null,
+          type: this.selectedType?._id || this.selectedType ||null,
           archief: this.currentViewMode === 'archief',
+          klant: this.selectedKlant,
+          status: this.selectedStatus
         })
 
         this.boekingen = data
@@ -201,29 +207,40 @@ export const useBoekingenStore = defineStore('boekingen', {
     // =========================
     // ACTIONS
     // =========================
-    async changeStatus(status: string) {
-      if (!this.currentBoeking) return
+    async changeStatus(id: string, status: string) {
+  this.loading.action = true
+  this.error.action = null
 
-      this.loading.action = true
-      this.error.action = null
+  const item = this.boekingen.find(
+    b => b._id === id
+  )
 
-      const oldStatus = this.currentBoeking.status
+  const oldStatus = item?.status
 
-      try {
-        this.updateLocal(this.currentBoeking._id, { status })
+  try {
+    if (item) {
+      item.status = status
+    }
 
-        await boekingApi.changeState(this.currentBoeking._id, { status })
+    await boekingApi.changeState(id, {
+      status
+    })
 
-        this.detailCache.delete(this.currentBoeking._id)
-        this.invalidateLists()
-      } catch (err) {
-        console.error(err)
-        this.updateLocal(this.currentBoeking._id, { status: oldStatus })
-        this.error.action = err
-      } finally {
-        this.loading.action = false
-      }
-    },
+    this.detailCache.delete(id)
+    this.invalidateLists()
+
+  } catch (err) {
+    console.error(err)
+
+    if (item) {
+      item.status = oldStatus
+    }
+
+    this.error.action = err
+  } finally {
+    this.loading.action = false
+  }
+},
 
     async updatePeriode(id: string, beginDatum: string, eindDatum: string) {
       this.loading.action = true

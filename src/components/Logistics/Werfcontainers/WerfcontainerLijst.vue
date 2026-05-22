@@ -18,6 +18,7 @@
       :expand-on-row-click="true"
       columns="2fr 2fr 1fr 1fr"
       itemKey="_id"
+      :rowStyle="rowStyle"
     >
       <template #header>
         <div>nummer</div>
@@ -140,13 +141,7 @@ defineProps({
 
 const emit = defineEmits(['search', 'openAdd', 'edit-asset'])
 
-// STATUS
-function getStatus(item) {
-  if (item.status === 'Kapot') return 'kapot'
-  if (item.status === 'Ongekeurd') return 'ongekeurd'
-  if (item.huidigeBoekingen?.length > 0) return 'bezet'
-  return 'vrij'
-}
+
 function getContrastColor(hex) {
   if (!hex) return '#fff'
 
@@ -160,12 +155,7 @@ function getContrastColor(hex) {
 
   return luminance > 0.5 ? '#000' : '#fff'
 }
-function getStatusLabel(item) {
-  if (item.status === 'Kapot') return 'Kapot'
-  if (item.status === 'Ongekeurd') return 'Ongekeurd'
-  if (item.huidigeBoekingen?.length > 0) return 'Bezet'
-  return 'Vrij'
-}
+
 
 // DATE
 function formatDate(dateStr) {
@@ -175,6 +165,89 @@ function formatDate(dateStr) {
 
 function editAsset(asset) {
   emit('edit-asset', asset)
+}
+
+function getBoekingStatus(boekingen) {
+  const now = new Date()
+
+  let actief = false
+  let gepland = false
+
+  boekingen?.forEach((b) => {
+    const lever = new Date(b.leverDatum)
+    const ophaal = b.ophaalDatum ? new Date(b.ophaalDatum) : null
+
+    if (lever <= now && (!ophaal || ophaal >= now)) {
+      actief = true
+    }
+
+    if (lever > now) {
+      gepland = true
+    }
+  })
+
+  if (actief) return 'bezet'
+  if (gepland) return 'gepland'
+
+  return null
+}
+
+function rowStyle(item) {
+  const b = getBoekingStatus(item.huidigeBoekingen)
+
+  if (item.status === 'Kapot') {
+    return [{ background: '#fee2e2' }, { color: '#991b1b' }]
+  }
+
+  if (item.status === 'Ongekeurd') {
+    return [{ background: '#f0f0f0' }, { color: '#0153f7' }]
+  }
+
+  if (b === 'bezet') {
+    return [{ background: '#fef3c7' }, { color: '#92400e' }]
+  }
+
+  if (b === 'gepland') {
+    return [{ background: '#91b7f0' }, { color: '#0153f7' }]
+  }
+
+  return [{ background: '#d1fae5' }, { color: '#065f46' }]
+}
+
+/* -------------------- */
+/* STATUS CLASS */
+/* -------------------- */
+function getStatus(item) {
+  if (item.status === 'Kapot') return 'kapot'
+  if (item.status === 'Ongekeurd') return 'ongekeurd'
+
+  const b = getBoekingStatus(item.huidigeBoekingen)
+
+  if (b === 'bezet') return 'bezet'
+  if (b === 'gepland') return 'gepland'
+
+  return 'vrij'
+}
+
+function getStatusLabel(item) {
+  if (item.status === 'Kapot') return 'Kapot'
+  if (item.status === 'Ongekeurd') return 'Ongekeurd'
+
+  const b = getBoekingStatus(item.huidigeBoekingen)
+
+  if (b === 'bezet') return 'Bezet'
+
+  if (b === 'gepland') {
+    const next = item.huidigeBoekingen
+      ?.filter(b => new Date(b.leverDatum) > new Date())
+      ?.sort((a, b) => new Date(a.leverDatum) - new Date(b.leverDatum))[0]
+
+    return next
+      ? `Ingepland • ${formatDate(next.leverDatum)}`
+      : 'Ingepland'
+  }
+
+  return 'Vrij'
 }
 </script>
 <style scoped>
@@ -198,6 +271,10 @@ function editAsset(asset) {
   background: #f9fafb;
   border-radius: 6px;
   white-space: pre-wrap; /* belangrijk voor vrije tekst */
+}
+.status.gepland {
+  background: #91b7f0;
+  color: #0153f7;
 }
 /* Toolbar */
 .toolbar {

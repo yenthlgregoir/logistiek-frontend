@@ -1,6 +1,6 @@
 <template>
   <div class="dropdown-chip" ref="dropdownRef">
-    <!-- Chip -->
+    <!-- CHIP -->
     <div class="chip" @click="toggleDropdown">
       <span>{{ selectedLabel }}</span>
 
@@ -11,42 +11,57 @@
       </button>
     </div>
 
-    <!-- Dropdown -->
-    <div class="dropdown" :class="{ open: open }">
-      <div
-        v-for="option in options"
-        :key="option._id"
-        class="dropdown-item"
-        @click="selectOption(option)"
-      >
-        {{ option.naam }}
-      </div>
+    <!-- DROPDOWN -->
+    <div class="dropdown" :class="{ open }">
+      <el-date-picker
+        v-model="internalValue"
+        type="daterange"
+        range-separator="Tot"
+        start-placeholder="Start datum"
+        end-placeholder="Eind datum"
+        format="DD/MM/YYYY"
+        value-format="YYYY-MM-DD"
+        unlink-panels
+        @change="handleChange"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 
 const props = defineProps({
   modelValue: {
-    type: [String, Number, null],
-    default: null,
+    type: Array,
+    default: () => [],
   },
+
   title: {
     type: String,
-    default: '',
-  },
-  options: {
-    type: Array,
-    required: true,
+    default: "Selecteer periode",
   },
 });
 
-const emit = defineEmits(["update:modelValue", "clear"]);
+const emit = defineEmits([
+  "update:modelValue",
+  "clear",
+]);
 
 const open = ref(false);
 const dropdownRef = ref(null);
+
+const internalValue = ref(props.modelValue);
+
+/**
+ * Sync external model
+ */
+watch(
+  () => props.modelValue,
+  (val) => {
+    internalValue.value = val;
+  }
+);
 
 /**
  * Toggle dropdown
@@ -56,18 +71,18 @@ const toggleDropdown = () => {
 };
 
 /**
- * Select option
+ * Handle date change
  */
-const selectOption = (option) => {
-  emit("update:modelValue", option._id);
-  open.value = false;
+const handleChange = (value) => {
+  emit("update:modelValue", value);
 };
 
 /**
  * Clear selection
  */
 const clearSelection = () => {
-  emit("update:modelValue", null);
+  internalValue.value = [];
+  emit("update:modelValue", []);
   emit("clear");
 };
 
@@ -75,31 +90,40 @@ const clearSelection = () => {
  * Selected label
  */
 const selectedLabel = computed(() => {
-  if (!props.options?.length) return props.title;
+  if (
+    !internalValue.value ||
+    internalValue.value.length !== 2
+  ) {
+    return props.title;
+  }
 
-  const found = props.options.find(
-    (opt) => opt._id === props.modelValue
-  );
-
-  return found ? found.naam : props.title + " ...";
+  return `${internalValue.value[0]} - ${internalValue.value[1]}`;
 });
 
 /**
- * Click outside handler
+ * Click outside
  */
 const handleClickOutside = (e) => {
-  if (!dropdownRef.value) return;
-  if (!dropdownRef.value.contains(e.target)) {
+  if (
+    dropdownRef.value &&
+    !dropdownRef.value.contains(e.target)
+  ) {
     open.value = false;
   }
 };
 
 onMounted(() => {
-  document.addEventListener("click", handleClickOutside);
+  document.addEventListener(
+    "click",
+    handleClickOutside
+  );
 });
 
 onBeforeUnmount(() => {
-  document.removeEventListener("click", handleClickOutside);
+  document.removeEventListener(
+    "click",
+    handleClickOutside
+  );
 });
 </script>
 
@@ -108,7 +132,6 @@ onBeforeUnmount(() => {
   position: relative;
   display: inline-block;
 }
-
 
 /* CHIP */
 .chip {
@@ -132,33 +155,16 @@ onBeforeUnmount(() => {
   background-color: #B7DBFF;
 }
 
-/* divider */
 .devider {
   width: 1px;
   height: 20px;
   background-color: #ccc;
-  transition: background 0.15s ease;
 }
 
-.chip:hover .devider {
-  background-color: #007BF7;
-}
-
-/* close button */
 .close-btn {
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: 14px;
-  transition: color 0.15s ease;
-}
-
-.chip:hover .close-btn {
-  color: #007BF7;
-}
-
-.close-btn:hover {
-  color: #130066;
 }
 
 /* DROPDOWN */
@@ -169,34 +175,24 @@ onBeforeUnmount(() => {
 
   background: white;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 12px;
 
-  min-width: 160px;
+  padding: 12px;
+
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  z-index: 10;
 
   opacity: 0;
   transform: translateY(-6px);
   pointer-events: none;
 
   transition: all 0.15s ease;
+
+  z-index: 999;
 }
 
 .dropdown.open {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
-}
-
-/* items */
-.dropdown-item {
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.dropdown-item:hover {
-  background: #eee;
-  transform: translateX(2px);
 }
 </style>

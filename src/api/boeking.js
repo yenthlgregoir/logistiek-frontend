@@ -1,8 +1,8 @@
 import { api } from './client'
 
 export const boekingApi = {
-  list: ({ search, startDatum, eindDatum, archief, type } = {}) => {
-    const params = new URLSearchParams({ search, startDatum, eindDatum, archief, type })
+  list: ({ search, startDatum, eindDatum, archief, type, klant, status } = {}) => {
+    const params = new URLSearchParams({ search, startDatum, eindDatum, archief, type, klant, status })
     return api.get(`/renting/boekingen?${params.toString()}`)
   },
   get: (id) => api.get(`/renting/boekingen/${id}`),
