@@ -250,7 +250,7 @@ async function updateStatus() {
 
 async function confirmAfgewerkt() {
   showConfirmAfgewerkt.value = false
-  await boekingenStore.changeStatus(pendingStatus.value)
+  await boekingenStore.changeStatus(boekingenStore.currentBoeking._id, pendingStatus.value)
 }
 
 function cancelAfgewerkt() {
