@@ -45,14 +45,15 @@
   </BaseDrawer>
 
   <!-- MODALS -->
-  <VrijeToestellenModal
-    v-if="showToestelModal"
-    :toestellen="vrijeToestellen"
-    :selected-toestel="verhuurCopy.asset"
-    @select="selectToestel"
-    @filter-change="handleToestelFilterChange"
-    @close="showToestelModal = false"
-  />
+ <VrijeToestellenModal
+  v-if="showToestelModal"
+  :toestellen="vrijeToestellen"
+  :selected-toestel="verhuurCopy.asset"
+  :toon-werkhoogte-filter="isHoogtewerker"
+  @select="selectToestel"
+  @filter-change="handleToestelFilterChange"
+  @close="showToestelModal = false"
+/>
 
   <WerfWijzigenModal
     v-if="showWerfModal"
@@ -102,7 +103,11 @@ const showWerfModal = ref(false)
 const showProjectleiderModal = ref(false)
 const showPeriodeModal = ref(false)
 const showToestelModal = ref(false)
-
+const isHoogtewerker = computed(() => {
+  const naam = verhuurCopy.assetModel?.toLowerCase() || ''
+  console.log(naam)
+  return naam.includes('hoogtewerker') || naam.includes('schaarlift')
+})
 // --- DATA ---
 const alleProjectleiders = ref([])
 const alleWerven = ref([])

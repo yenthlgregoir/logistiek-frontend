@@ -2,7 +2,7 @@
   <div class="modal-overlay" @click.self="close">
     <div class="modal">
       <div class="modal-header">
-        <h2>Kies Schaarlift</h2>
+        <h2>Kies Toestel</h2>
         <button class="close-btn" @click="close">✕</button>
       </div>
 
@@ -14,7 +14,7 @@
         class="search-input"
       />
 
-      <div class="filter-toggle">
+      <div v-if="toonWerkhoogteFilter" class="filter-toggle">
         <button
           type="button"
           :class="{ active: !filterOpWerkhoogte }"
@@ -41,8 +41,11 @@
         >
           <div class="toestel-title">{{ toestel.nummer }}</div>
           <div class="toestel-subtitle">
-            {{ toestel.Type?.naam || '-' }} - Werkhoogte:
-            {{ toestel.werkhoogte || '-' }}m
+            {{ toestel.Type?.naam || '-' }}
+
+            <template v-if="toonWerkhoogteFilter">
+              - Werkhoogte: {{ toestel.werkhoogte || '-' }}m
+            </template>
           </div>
         </li>
 
@@ -67,6 +70,12 @@ const props = defineProps({
     required: true,
   },
   selectedToestel: Object,
+
+  // Alleen true zetten bij hoogtewerkers/schaarliften
+  toonWerkhoogteFilter: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['select', 'close', 'filter-change'])
@@ -75,7 +84,6 @@ const search = ref('')
 const inputRef = ref(null)
 const localToestel = ref(props.selectedToestel || null)
 
-// standaard: filter op werkhoogte
 const filterOpWerkhoogte = ref(true)
 
 const gefilterdeToestellen = computed(() => {
@@ -91,6 +99,8 @@ const gefilterdeToestellen = computed(() => {
 })
 
 function setFilterOpWerkhoogte(value) {
+  if (!props.toonWerkhoogteFilter) return
+
   filterOpWerkhoogte.value = value
 
   emit('filter-change', {
