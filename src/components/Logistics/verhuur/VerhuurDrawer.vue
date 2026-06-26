@@ -48,22 +48,26 @@
   <VrijeToestellenModal
     v-if="showToestelModal"
     :toestellen="vrijeToestellen"
-    :selectedToestel="verhuurCopy.asset"
-    @select="(v) => (verhuurCopy.asset = v)"
+    :selected-toestel="verhuurCopy.asset"
+    @select="selectToestel"
+    @filter-change="handleToestelFilterChange"
     @close="showToestelModal = false"
   />
+
   <WerfWijzigenModal
     v-if="showWerfModal"
     :werven="alleWerven"
     @select="(v) => (verhuurCopy.werf = v)"
     @close="showWerfModal = false"
   />
+
   <ProjectleiderWijzigenModal
     v-if="showProjectleiderModal"
     :projectleiders="alleProjectleiders"
     @select="(v) => (verhuurCopy.projectleider = v)"
     @close="showProjectleiderModal = false"
   />
+
   <PeriodeWijzigenModal
     v-if="showPeriodeModal"
     :boeking="verhuurCopy"
@@ -90,6 +94,7 @@ const props = defineProps({
   loading: Boolean,
   error: String,
 })
+
 const emit = defineEmits(['close', 'edit', 'delete'])
 
 // --- MODALS ---
@@ -114,7 +119,7 @@ const verhuurCopy = reactive({
   leverDatum: '',
   ophaalDatum: '',
   status: 'Leveren',
-  werkhoogte: null,
+  werkhoogte: 0,
   logistiekeReferentie: '',
 })
 
@@ -131,7 +136,7 @@ watch(
       projectleider: v.projectleider || null,
       assetModel: v.assetModel || null,
       asset: v.asset || null,
-      leverDatum: v.leverDatum || '',
+      leverDatum: v.leverDatum || null,
       ophaalDatum: v.ophaalDatum || '',
       status: v.status || 'Leveren',
       werkhoogte: v.werkhoogte || 0,
@@ -164,7 +169,11 @@ const blocks = computed(() => [
   {
     label: 'Periode',
     content: verhuurCopy.leverDatum
-      ? `${formatDate(verhuurCopy.leverDatum)} - ${verhuurCopy.ophaalDatum ? formatDate(verhuurCopy.ophaalDatum) : 'nog geen ophaaldatum'}`
+      ? `${formatDate(verhuurCopy.leverDatum)} - ${
+          verhuurCopy.ophaalDatum
+            ? formatDate(verhuurCopy.ophaalDatum)
+            : 'nog geen ophaaldatum'
+        }`
       : 'Niet ingesteld',
     actionLabel: 'Wijzigen',
     action: () => openModal('periode'),
@@ -175,6 +184,41 @@ const blocks = computed(() => [
 function formatDate(d) {
   if (!d) return ''
   return new Date(d).toLocaleDateString('nl-BE')
+}
+
+function selectToestel(toestel) {
+  verhuurCopy.asset = toestel
+}
+
+function cleanDate(value) {
+  if (!value) return null
+
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return null
+  }
+
+  return date.toISOString()
+}
+
+async function fetchVrijeToestellen(werkhoogte = verhuurCopy.werkhoogte || 0) {
+  const data = {
+    assetModel: verhuurCopy.assetModel,
+    leverDatum: cleanDate(verhuurCopy.leverDatum),
+    ophaalDatum: verhuurCopy.ophaalDatum,
+    werkhoogte: Number(werkhoogte) || 0,
+  }
+
+  vrijeToestellen.value = await verhuurApi.vrijeToestellen(data)
+}
+
+async function handleToestelFilterChange({ gebruikWerkhoogte }) {
+  const werkhoogteVoorRequest = gebruikWerkhoogte
+    ? verhuurCopy.werkhoogte || 0
+    : 0
+
+  await fetchVrijeToestellen(werkhoogteVoorRequest)
 }
 
 async function openModal(field) {
@@ -189,17 +233,10 @@ async function openModal(field) {
       showProjectleiderModal.value = true
       break
 
-    case 'machine': {
-      const data = {
-        assetModel: verhuurCopy.assetModel,
-        leverDatum: verhuurCopy.leverDatum || null,
-        ophaalDatum: verhuurCopy.ophaalDatum,
-        werkhoogte: verhuurCopy.werkhoogte || 0,
-      }
-      vrijeToestellen.value = await verhuurApi.vrijeToestellen(data)
+    case 'machine':
+      await fetchVrijeToestellen(verhuurCopy.werkhoogte || 0)
       showToestelModal.value = true
       break
-    }
 
     case 'periode':
       showPeriodeModal.value = true
@@ -211,9 +248,11 @@ async function openModal(field) {
 async function saveVerhuur() {
   emit('edit', { ...verhuurCopy })
 }
+
 function onDelete() {
   emit('delete', verhuurCopy._id)
 }
+
 function updatePeriode({ leverDatum, ophaalDatum }) {
   verhuurCopy.leverDatum = leverDatum
   verhuurCopy.ophaalDatum = ophaalDatum
@@ -234,6 +273,7 @@ async function downloadPDF() {
   }
 }
 </script>
+
 <style scoped>
 .info-card {
   background: #f3f4f6;
@@ -242,17 +282,20 @@ async function downloadPDF() {
   box-shadow: 0 2px 6px rgb(0 0 0 / 8%);
   margin-bottom: 14px;
 }
+
 .card-label {
   font-size: 12px;
   color: #6b7280;
   font-weight: 600;
   margin-bottom: 8px;
 }
+
 .card-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .link-btn {
   background: none;
   border: none;
@@ -260,11 +303,13 @@ async function downloadPDF() {
   cursor: pointer;
   font-weight: 600;
 }
+
 .status-select {
   padding: 8px;
   border-radius: 8px;
   border: 1px solid #d1d5db;
 }
+
 .error-box {
   background: #fee2e2;
   color: #7f1d1d;
@@ -272,6 +317,7 @@ async function downloadPDF() {
   border-radius: 8px;
   margin-top: 10px;
 }
+
 .btn {
   border: none;
   padding: 10px 22px;
@@ -279,14 +325,17 @@ async function downloadPDF() {
   font-weight: 600;
   cursor: pointer;
 }
+
 .btn-blue {
   background: #2563eb;
   color: white;
 }
+
 .btn-gray {
   background: #6b7280;
   color: white;
 }
+
 .btn-red {
   background: #dc2626;
   color: white;

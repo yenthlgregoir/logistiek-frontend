@@ -14,6 +14,24 @@
         class="search-input"
       />
 
+      <div class="filter-toggle">
+        <button
+          type="button"
+          :class="{ active: !filterOpWerkhoogte }"
+          @click="setFilterOpWerkhoogte(false)"
+        >
+          Alle vrije toestellen
+        </button>
+
+        <button
+          type="button"
+          :class="{ active: filterOpWerkhoogte }"
+          @click="setFilterOpWerkhoogte(true)"
+        >
+          Op werkhoogte
+        </button>
+      </div>
+
       <ul class="toestel-list">
         <li
           v-for="toestel in gefilterdeToestellen"
@@ -23,11 +41,14 @@
         >
           <div class="toestel-title">{{ toestel.nummer }}</div>
           <div class="toestel-subtitle">
-            {{ toestel.Type?.naam || '-' }} - Werkhoogte: {{ toestel.werkhoogte }}m
+            {{ toestel.Type?.naam || '-' }} - Werkhoogte:
+            {{ toestel.werkhoogte || '-' }}m
           </div>
         </li>
 
-        <li v-if="!gefilterdeToestellen.length" class="no-results">Geen toestellen gevonden</li>
+        <li v-if="!gefilterdeToestellen.length" class="no-results">
+          Geen toestellen gevonden
+        </li>
       </ul>
 
       <div class="modal-footer">
@@ -45,27 +66,40 @@ const props = defineProps({
     type: Array,
     required: true,
   },
-  // De huidige geselecteerde toestel (optioneel) voor lokale copy
   selectedToestel: Object,
 })
 
-const emit = defineEmits(['select', 'close'])
+const emit = defineEmits(['select', 'close', 'filter-change'])
 
 const search = ref('')
 const inputRef = ref(null)
 const localToestel = ref(props.selectedToestel || null)
 
-// Filter de toestellen op zoekterm
+// standaard: filter op werkhoogte
+const filterOpWerkhoogte = ref(true)
+
 const gefilterdeToestellen = computed(() => {
   if (!search.value) return props.toestellen
+
   const q = search.value.toLowerCase()
+
   return props.toestellen.filter(
-    (t) => t.nummer?.toLowerCase().includes(q) || t.Type?.naam?.toLowerCase().includes(q),
+    (t) =>
+      t.nummer?.toLowerCase().includes(q) ||
+      t.Type?.naam?.toLowerCase().includes(q),
   )
 })
 
+function setFilterOpWerkhoogte(value) {
+  filterOpWerkhoogte.value = value
+
+  emit('filter-change', {
+    gebruikWerkhoogte: value,
+    werkhoogte: value ? undefined : 0,
+  })
+}
+
 function selectToestel(toestel) {
-  // Lokaal opslaan en terugsturen naar parent drawer
   localToestel.value = toestel
   emit('select', localToestel.value)
   close()
@@ -88,7 +122,6 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKey)
 })
 
-// Watch voor props.selectedToestel zodat lokale copy altijd up-to-date blijft
 watch(
   () => props.selectedToestel,
   (v) => {
@@ -96,10 +129,8 @@ watch(
   },
 )
 </script>
+
 <style scoped>
-/* =========================================
-   OVERLAY
-========================================= */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -113,9 +144,6 @@ watch(
   animation: fadeIn 0.25s ease-out;
 }
 
-/* =========================================
-   MODAL CONTAINER
-========================================= */
 .modal {
   width: 95%;
   max-width: 480px;
@@ -130,9 +158,6 @@ watch(
   font-family: 'Inter', sans-serif;
 }
 
-/* =========================================
-   HEADER
-========================================= */
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -149,7 +174,6 @@ watch(
   margin: 0;
 }
 
-/* Close Button */
 .close-btn {
   width: 38px;
   height: 38px;
@@ -170,9 +194,6 @@ watch(
   color: #ffffff;
 }
 
-/* =========================================
-   SEARCH INPUT
-========================================= */
 .search-input {
   width: 100%;
   padding: 12px 14px;
@@ -192,9 +213,38 @@ watch(
   box-shadow: 0 0 0 4px rgba(79, 115, 255, 0.2);
 }
 
-/* =========================================
-   TOESTELLEN LIST
-========================================= */
+.filter-toggle {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  background: rgba(241, 245, 249, 0.9);
+  padding: 6px;
+  border-radius: 14px;
+}
+
+.filter-toggle button {
+  flex: 1;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 700;
+  color: #64748b;
+  transition: 0.25s ease;
+}
+
+.filter-toggle button:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.filter-toggle button.active {
+  background: white;
+  color: #1d4ed8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
 .toestel-list {
   max-height: 420px;
   overflow-y: auto;
@@ -207,7 +257,6 @@ watch(
   margin-top: 12px;
 }
 
-/* High-end toestel card */
 .toestel-item {
   padding: 14px 16px;
   background: rgba(248, 250, 252, 0.85);
@@ -237,16 +286,25 @@ watch(
   color: #111827;
 }
 
-/* =========================================
-   FOOTER
-========================================= */
+.toestel-subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.no-results {
+  padding: 16px;
+  text-align: center;
+  color: #64748b;
+  font-weight: 600;
+}
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   margin-top: 20px;
 }
 
-/* Cancel button */
 .btn-cancel {
   background: rgba(0, 0, 0, 0.06);
   border: none;
@@ -262,9 +320,6 @@ watch(
   background: rgba(0, 0, 0, 0.12);
 }
 
-/* =========================================
-   ANIMATIONS
-========================================= */
 @keyframes fadeIn {
   from {
     opacity: 0;
