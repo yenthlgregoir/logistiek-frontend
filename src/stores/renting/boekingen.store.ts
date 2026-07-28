@@ -283,6 +283,13 @@ export const useBoekingenStore = defineStore('boekingen', {
       }
     },
 
+    async updateLeverAdres(adres: object){
+      if(!this.currentBoeking) return
+      const id = adres._id;
+      await boekingApi.update(this.currentBoeking._id, { leverAdres: id})
+      this.updateLocal(this.currentBoeking._id, {leverAdresDetails : adres});
+    },
+
     async deleteBoeking() {
       if (!this.currentBoeking) return
 

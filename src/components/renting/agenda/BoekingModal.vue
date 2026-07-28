@@ -201,6 +201,8 @@ function save() {
 }
 
 async function updateLeverAdres(adres) {
+    console.log(adres)
+
   await boekingenStore.updateLeverAdres(adres)
   showLeveradresModal.value = false
 }
