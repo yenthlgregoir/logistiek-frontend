@@ -1,12 +1,31 @@
 import { api } from './client'
 
+const BASE = '/werfcontainers'
+
 export const werfcontainerApi = {
   list: (query = {}) => {
-    const params = new URLSearchParams(query).toString()
-    return api.get(`/logistics/werfcontainer?${params}`)
+    const params = new URLSearchParams()
+
+    for (const [key, value] of Object.entries(query)) {
+      if (value != null && value !== '' && value !== 'undefined') {
+        params.set(key, String(value))
+      }
+    }
+
+    const search = params.toString()
+    return api.get(`${BASE}${search ? `?${search}` : ''}`)
   },
-  create: (data) => api.post('/logistics/werfcontainer', data),
-  update: (id, data) => api.patch(`/logistics/werfcontainer/${id}`, data),
-  getTypes: () => api.get('/logistics/werfcontainer/types/all'),
-  createType: (data) => api.post('/logistics/hoogtewerker/types', data),
+
+  create: (data) => api.post(BASE, data),
+
+  update: (id, data) =>
+    api.put(`${BASE}/${encodeURIComponent(id)}`, data),
+
+  getTypes: () => api.get(`${BASE}/types`),
+
+  createType: (data) =>
+    api.post('/machinetypes', {
+      ...data,
+      type: 'Werfcontainer',
+    }),
 }

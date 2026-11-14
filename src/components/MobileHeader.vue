@@ -1,50 +1,69 @@
 <template>
   <header class="mobile-header">
-    <button class="menu-btn" @click="$emit('openSidebar')">
-      <svg width="28" height="28" viewBox="0 0 24 24" stroke="white" fill="none" stroke-width="2">
+    <button class="menu-btn" type="button" aria-label="Menu openen" @click="$emit('openSidebar')">
+      <svg
+        width="21"
+        height="21"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        fill="none"
+        stroke-width="1.7"
+        aria-hidden="true"
+      >
         <path d="M3 6h18M3 12h18M3 18h18" />
       </svg>
     </button>
-    <RouterLink to="/" class="logo-wrapper">
-      <img src="../assets/logo_ops.png" class="logo" />
+    <RouterLink to="/" class="logo-wrapper" aria-label="Naar modules">
+      <img src="../assets/logo_ops_home.svg" class="logo" alt="Bumaco Ops platform" />
     </RouterLink>
   </header>
 </template>
-
+<script setup>
+defineEmits(['openSidebar'])
+</script>
 <style scoped>
 .mobile-header {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 9vh;
-  background: linear-gradient(180deg, #5a89ff, #3553f2);
-  color: white;
+  inset: 0 0 auto 0;
+  height: 60px;
+  background: #fff;
+  border-bottom: 1px solid #e3e9f1;
+  color: #6e85a3;
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  gap: 16px;
+  padding: 0 17px;
   z-index: 1000;
 }
-
 .menu-btn {
-  background: transparent;
-  border: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: #fff;
+  border: 1px solid #e3e9f1;
+  border-radius: 7px;
+  color: inherit;
   cursor: pointer;
-  padding: 4px;
 }
-
-.title {
-  font-size: 1.2rem;
-  font-weight: 600;
+.menu-btn:hover {
+  background: #f4f7fb;
+  color: #346acd;
 }
 .logo-wrapper {
-  display: block;
-  justify-content: center;
+  display: flex;
   align-items: center;
-  margin-top: 10px;
+  min-height: 40px;
+  border-radius: 6px;
 }
 .logo {
-  width: 150px;
-  transition: all 0.25s ease;
+  display: block;
+  width: 126px;
+  height: auto;
+}
+.mobile-header :is(a, button):focus-visible {
+  outline: 3px solid #91b0de;
+  outline-offset: 3px;
 }
 </style>

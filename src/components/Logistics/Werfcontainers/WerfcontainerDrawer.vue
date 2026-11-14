@@ -1,63 +1,142 @@
 <template>
-  <BaseDrawer :show="show" title="Werfcontainer Toevoegen / Bewerken" @close="$emit('close')">
-    <!-- CONTENT -->
-    <form @submit.prevent="handleSubmit" class="container-form">
+  <BaseDrawer
+    :show="show"
+    :title="model ? 'Werfcontainer Bewerken' : 'Werfcontainer Toevoegen'"
+    @close="emit('close')"
+  >
+    <form
+      ref="formElement"
+      class="container-form"
+      @submit.prevent="handleSubmit"
+    >
       <div class="info-block">
         <label>Nummer *</label>
-        <input type="text" v-model="form.nummer" placeholder="Bijv. WC-001" required />
+        <input
+          v-model.trim="form.nummer"
+          type="text"
+          placeholder="Bijv. WC-001"
+          required
+        />
       </div>
 
-      <!-- TYPE SELECT + ADD -->
       <div class="info-block type-block">
         <label>Type *</label>
+
         <div class="type-select-wrapper">
-          <select v-model="form.Type" required>
-            <option v-for="type in types" :key="type._id" :value="type._id">
+          <select
+            v-model="form.machineTypeId"
+            :disabled="loadingTypes"
+            required
+          >
+            <option disabled value="">
+              {{ loadingTypes ? 'Types laden...' : 'Selecteer type' }}
+            </option>
+
+            <option
+              v-for="type in types"
+              :key="type.id"
+              :value="type.id"
+            >
               {{ type.naam }} ({{ type.type }})
             </option>
           </select>
-          <button type="button" class="btn-add" @click="showTypeForm = !showTypeForm">+</button>
+
+          <button
+            type="button"
+            class="btn-add"
+            :disabled="savingType"
+            aria-label="Nieuw type toevoegen"
+            @click="showTypeForm = !showTypeForm"
+          >
+            +
+          </button>
         </div>
 
-        <!-- INLINE TYPE FORM -->
         <div v-if="showTypeForm" class="new-type-form">
-          <input type="text" v-model="newType.naam" placeholder="Naam type" />
-          <select v-model="newType.type">
+          <input
+            v-model.trim="newType.naam"
+            type="text"
+            placeholder="Naam type"
+            :disabled="savingType"
+            @keydown.enter.prevent="addType"
+          />
+
+          <select v-model="newType.type" :disabled="savingType">
             <option value="Werfcontainer">Werfcontainer</option>
           </select>
-          <button type="button" class="btn-save-type" @click="addType">Opslaan</button>
+
+          <button
+            type="button"
+            class="btn-save-type"
+            :disabled="savingType || loadingTypes"
+            @click="addType"
+          >
+            {{ savingType ? 'Opslaan...' : 'Opslaan' }}
+          </button>
         </div>
       </div>
+
       <div class="info-block">
-        <label>Entiteit</label>
-        <select v-model="form.entiteit">
+        <label>Entiteit *</label>
+
+        <select v-model="form.entiteitId" required>
           <option disabled value="">Selecteer entiteit</option>
-          <option v-for="entiteit in entiteiten" :key="entiteit._id" :value="entiteit._id">
+
+          <option
+            v-for="entiteit in entiteiten"
+            :key="entiteit.id"
+            :value="entiteit.id"
+          >
             {{ entiteit.naam }}
           </option>
         </select>
       </div>
+
       <div class="info-block">
-        <label>Verandwoordelijke</label>
-        <input type="text" v-model="form.verantwoordelijke" placeholder="Ploeg van Tom" />
+        <label>Verantwoordelijke</label>
+        <input
+          v-model.trim="form.verantwoordelijke"
+          type="text"
+          placeholder="Ploeg van Tom"
+        />
       </div>
+
       <div class="info-block">
         <label>Opmerkingen</label>
-        <input type="text" v-model="form.comment" placeholder="Opmerkingen" />
+        <input
+          v-model.trim="form.comment"
+          type="text"
+          placeholder="Opmerkingen"
+        />
       </div>
+
       <div class="info-block">
-        <label>status</label>
-        <select v-model="form.status">
-          <option value="Vrij">vrij</option>
-          <option value="Kapot">kapot</option>
+        <label>Status *</label>
+
+        <select v-model="form.status" required>
+          <option value="VRIJ">Vrij</option>
+          <option value="KAPOT">Kapot</option>
         </select>
       </div>
     </form>
 
-    <!-- FOOTER -->
     <template #footer>
-      <button class="btn btn-secondary" @click="$emit('close')">Cancel</button>
-      <button class="btn btn-primary" @click="handleSubmit">Opslaan</button>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        @click="emit('close')"
+      >
+        Annuleren
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        :disabled="loadingTypes || savingType"
+        @click="submitForm"
+      >
+        Opslaan
+      </button>
     </template>
   </BaseDrawer>
 </template>
@@ -75,91 +154,180 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'save'])
 
-/* -------------------------
-   FORM STATE
-------------------------- */
+const formElement = ref(null)
+const types = ref([])
+const loadingTypes = ref(false)
+const savingType = ref(false)
+const showTypeForm = ref(false)
+
 const form = reactive({
   nummer: '',
-  Type: '',
-  entiteit: '',
-  status: 'Vrij',
+  machineTypeId: '',
+  entiteitId: '',
+  status: 'VRIJ',
   verantwoordelijke: '',
   comment: '',
 })
 
-/* -------------------------
-   TYPES
-------------------------- */
-const types = reactive([])
-const showTypeForm = ref(false)
-const newType = reactive({ naam: '', type: 'Werfcontainer' })
+const newType = reactive({
+  naam: '',
+  type: 'Werfcontainer',
+})
+
+// Ondersteunt zowel een Axios-response als reeds uitgepakte data.
+function getResponseData(response) {
+  return response?.data ?? response
+}
+
+function showError(error, fallback) {
+  console.error(error)
+
+  const message = error?.response?.data?.message
+  alert(typeof message === 'string' ? message : fallback)
+}
 
 async function getTypes() {
+  loadingTypes.value = true
+
   try {
-    const res = await werfcontainerApi.getTypes()
-    types.splice(0, types.length, ...res)
-  } catch (err) {
-    console.error(err)
+    const response = await werfcontainerApi.getTypes()
+    const data = getResponseData(response)
+
+    if (!Array.isArray(data)) {
+      throw new Error('De API gaf geen lijst met types terug.')
+    }
+
+    types.value = data
+  } catch (error) {
+    types.value = []
+    showError(error, 'Types ophalen is mislukt.')
+  } finally {
+    loadingTypes.value = false
   }
 }
 
 async function addType() {
-  if (!newType.naam || !newType.type) return alert('Naam en type verplicht!')
+  if (savingType.value || loadingTypes.value) return
+
+  const naam = newType.naam.trim()
+
+  if (!naam) {
+    alert('Vul een naam voor het type in.')
+    return
+  }
+
+  savingType.value = true
 
   try {
-    const saved = await werfcontainerApi.createType({ ...newType })
-    types.push(saved)
-    form.Type = saved._id
+    const response = await werfcontainerApi.createType({
+      naam,
+      type: 'Werfcontainer',
+    })
 
+    const saved = getResponseData(response)
+
+    if (!saved?.id) {
+      throw new Error('De API gaf geen type met een ID terug.')
+    }
+
+    const index = types.value.findIndex((type) => type.id === saved.id)
+
+    if (index === -1) {
+      types.value.push(saved)
+    } else {
+      types.value[index] = saved
+    }
+
+    form.machineTypeId = saved.id
     newType.naam = ''
     newType.type = 'Werfcontainer'
     showTypeForm.value = false
-  } catch (err) {
-    console.error(err)
+  } catch (error) {
+    showError(error, 'Type opslaan is mislukt.')
+  } finally {
+    savingType.value = false
   }
 }
 
-/* -------------------------
-   WATCH DRAWER OPEN
-------------------------- */
-watch(
-  () => props.show,
-  (val) => {
-    if (!val) return
+function resetForm() {
+  Object.assign(form, {
+    nummer: '',
+    machineTypeId: '',
+    entiteitId: '',
+    status: 'VRIJ',
+    verantwoordelijke: '',
+    comment: '',
+  })
 
-    getTypes()
+  newType.naam = ''
+  newType.type = 'Werfcontainer'
+  showTypeForm.value = false
+}
+
+function fillForm(model) {
+  Object.assign(form, {
+    nummer: model.nummer ?? '',
+    machineTypeId: model.machineTypeId ?? model.machineType?.id ?? '',
+    entiteitId: model.entiteitId ?? model.entiteit?.id ?? '',
+    status: String(model.status ?? 'VRIJ').trim().toUpperCase(),
+    verantwoordelijke: model.verantwoordelijke ?? '',
+    comment: model.comment ?? '',
+  })
+}
+
+// Werkt ook wanneer het component meteen geopend wordt gemount,
+// of wanneer tijdens het openen een ander model wordt geselecteerd.
+watch(
+  [() => props.show, () => props.model],
+  ([show], previous) => {
+    if (!show) return
+
+    resetForm()
 
     if (props.model) {
-      Object.assign(form, {
-        ...props.model,
-        Type: props.model.Type?._id || props.model.Type || '',
-        entiteit: props.model.entiteit?._id || props.model.entiteit || '',
-      })
-    } else {
-      resetForm()
+      fillForm(props.model)
+    }
+
+    const wasOpen = previous?.[0] ?? false
+
+    if (!wasOpen) {
+      getTypes()
     }
   },
+  { immediate: true },
 )
-function resetForm() {
-  form.nummer = ''
-  form.Type = ''
-  form.entiteit = ''
-  ;((form.status = 'Vrij'), (form.verantwoordelijke = ''))
+
+function submitForm() {
+  // Activeert ook de HTML-validatie vanuit de drawer-footer.
+  formElement.value?.requestSubmit()
 }
 
-/* -------------------------
-   SUBMIT
-------------------------- */
 function handleSubmit() {
-  if (!form.nummer || !form.Type) {
-    alert('Nummer en Type zijn verplicht.')
+  if (loadingTypes.value || savingType.value) return
+
+  const nummer = form.nummer.trim()
+
+  if (!nummer || !form.machineTypeId || !form.entiteitId) {
+    alert('Nummer, type en entiteit zijn verplicht.')
     return
   }
-  console.log(form)
-  emit('save', { ...form })
+
+  if (!form.status) {
+    alert('Selecteer een status.')
+    return
+  }
+
+  emit('save', {
+    ...(props.model?.id ? { id: props.model.id } : {}),
+    nummer,
+    machineTypeId: form.machineTypeId,
+    entiteitId: form.entiteitId,
+    verantwoordelijke: form.verantwoordelijke.trim(),
+    status: form.status,
+    comment: form.comment.trim(),
+  })
 }
 </script>
-
 <style scoped>
 .info-block {
   display: flex;

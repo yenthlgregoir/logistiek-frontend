@@ -91,7 +91,7 @@ onBeforeUnmount(() => {
 async function getLeaders() {
   try {
     const response = await leiderApi.list()
-    leaders.value = Array.isArray(response) ? response : (response.items ?? [])
+    leaders.value = Array.isArray(response) ? response : (response.data ?? [])
   } catch (error) {
     console.error(error)
   }
@@ -130,7 +130,7 @@ async function deleteLeader(leaderId) {
 
 async function editLeader(data) {
   try {
-    await leiderApi.update(data._id, data)
+    await leiderApi.update(data.id, data)
     await getLeaders()
   } catch (err) {
     console.error(err)
@@ -143,7 +143,7 @@ async function editLeader(data) {
 async function getEntiteiten() {
   try {
     const res = await entiteitApi.getEntiteiten()
-    entiteiten.value = res
+    entiteiten.value = Array.isArray(res) ? res : (res.data ?? [])
   } catch (err) {
     console.error(err)
   }

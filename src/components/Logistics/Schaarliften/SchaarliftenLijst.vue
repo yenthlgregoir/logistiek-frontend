@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page" :aria-busy="loading">
     <!-- Toolbar -->
     <div class="toolbar">
       <SearchBar
@@ -11,10 +11,10 @@
       />
 
       <div class="buttons">
-        <button class="btn btn-primary btn1" @click="$emit('toPDF')">
-          PDF exporteren
+        <button type="button" class="btn btn-primary btn1" :disabled="exporting" @click="emit('toPDF')">
+          {{ exporting ? 'PDF maken…' : 'PDF exporteren' }}
         </button>
-        <button class="btn btn-primary" @click="$emit('openAdd')">
+        <button type="button" class="btn btn-primary" @click="emit('openAdd')">
           + Asset
         </button>
       </div>
@@ -26,7 +26,7 @@
       :expand-on-row-click="true"
       :rowStyle="rowStyle"
       columns="1fr 1fr 1fr 1fr 1fr 1fr"
-      itemKey="_id"
+      itemKey="id"
     >
       <!-- HEADER -->
       <template #header>
@@ -40,13 +40,13 @@
 
       <!-- ROW -->
       <template #row="{ item }">
-  <div @click="toggleRow(item)">
+  <div>
     {{ item.nummer || item.naam }}
   </div>
 
-  <div>{{ item.Type?.naam || item.type || 'Onbekend' }}</div>
+  <div>{{ typeName(item) }}</div>
   <div>{{ item.serienummer || '-' }}</div>
-  <div>{{ isSchaarlift(item) ? item.werkhoogte + ' m' : '—' }}</div>
+  <div>{{ isSchaarlift(item) ? heightLabel(item.werkhoogte) : '—' }}</div>
   <div>{{getWerf(item) }}</div>
   <div class="right">
     <span :class="['status', statusClass(item)]">
@@ -62,7 +62,7 @@
           <div class="expanded-left">
             <div class="section-header">
               <div class="section-title">Asset info</div>
-              <button class="edit-btn" @click="editAsset(item)">✏️</button>
+              <button type="button" class="edit-btn" aria-label="Asset bewerken" @click.stop="editAsset(item)">Bewerken</button>
             </div>
 
             <div class="divider"></div>
@@ -73,7 +73,7 @@
                 <div>{{ item.nummer || item.naam }}</div>
 
                 <div><strong>type</strong></div>
-                <div>{{ item.Type?.naam || '-' }}</div>
+                <div>{{ typeName(item) }}</div>
 
                 <div><strong>serienummer</strong></div>
                 <div>{{ item.serienummer || '-' }}</div>
@@ -81,10 +81,10 @@
 
               <div v-if="isSchaarlift(item)" class="column">
                 <div><strong>werkhoogte</strong></div>
-                <div>{{ item.werkhoogte }} m</div>
+                <div>{{ heightLabel(item.werkhoogte) }}</div>
 
                 <div><strong>platformhoogte</strong></div>
-                <div>{{ item.platformhoogte }} m</div>
+                <div>{{ heightLabel(item.platformhoogte) }}</div>
 
                 <div><strong>bouwjaar</strong></div>
                 <div>{{ item.bouwjaar || '-' }}</div>
@@ -101,7 +101,8 @@
               <div v-if="isSchaarlift(item)" class="keuring">
                 <div class="keuring-title"><strong>Keuring</strong></div>
 
-                <div v-if="isKeuringVerlopen(item.keuringDatum)" class="expired-text">
+                <div v-if="daysUntilKeuring(item.keuringDatum) === null" class="missing-date">Geen geldige keuringsdatum ingesteld</div>
+                <div v-else-if="isKeuringVerlopen(item.keuringDatum)" class="expired-text">
                   Keuring verlopen {{ formatDate(item.keuringDatum) }}
                 </div>
 
@@ -111,7 +112,7 @@
                     <div>{{ formatDate(item.keuringDatum) }}</div>
                   </div>
 
-                  <progress :value="progressValue(item.keuringDatum)" max="365" />
+                  <progress :value="progressValue(item.keuringDatum)" max="365" aria-label="Verstreken deel van een keuringsperiode van 365 dagen" />
                 </template>
               </div>
             </div>
@@ -128,7 +129,7 @@
             <div v-if="item.huidigeBoekingen?.length">
               <div
                 v-for="(b, i) in item.huidigeBoekingen"
-                :key="i"
+                :key="b.id ?? b._id ?? i"
                 class="boeking-grid"
               >
                 <div class="column">
@@ -163,143 +164,120 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import ExpandedBaseTable from '@/components/base/ExpandedBaseTable.vue'
 import SearchBar from '@/components/base/SearchBar.vue'
 
-defineProps({ assets: { type: Array, default: () => [] } })
+const props = defineProps({ assets: { type: Array, default: () => [] }, loading: Boolean, exporting: Boolean })
 const emit = defineEmits(['search', 'openAdd', 'edit-asset', 'toPDF'])
-
 const searchQuery = ref('')
-const openRowId = ref(null)
-
-function toggleRow(asset) {
-  openRowId.value = openRowId.value === asset._id ? null : asset._id
-}
-
-/* -------------------- */
-/* STATUS LOGICA 🔥 */
-/* -------------------- */
-function getBoekingStatus(boekingen) {
-  const now = new Date()
-
-  let actief = false
-  let gepland = false
-
-  boekingen?.forEach((b) => {
-    const lever = new Date(b.leverDatum)
-    const ophaal = b.ophaalDatum ? new Date(b.ophaalDatum) : null
-
-    if (lever <= now && (!ophaal || ophaal >= now)) {
-      actief = true
+const DAY = 86400000
+function calendarDay(value) {
+  if (value == null || value === '') return null
+  if (typeof value === 'string') {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+    if (match) {
+      const [, year, month, day] = match.map(Number)
+      const date = new Date(0)
+      date.setUTCFullYear(year, month - 1, day)
+      date.setUTCHours(0, 0, 0, 0)
+      return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day ? date.getTime() / DAY : null
     }
+  }
+  if (!(value instanceof Date) && typeof value !== 'string' && typeof value !== 'number') return null
+  const date = new Date(value)
+  if (!Number.isFinite(date.getTime())) return null
+  const localDay = new Date(0)
+  localDay.setUTCFullYear(date.getFullYear(), date.getMonth(), date.getDate())
+  localDay.setUTCHours(0, 0, 0, 0)
+  return localDay.getTime() / DAY
+}
+const today = ref(calendarDay(new Date()))
+let midnightTimer
+function updateToday() {
+  today.value = calendarDay(new Date())
+  const next = new Date()
+  next.setHours(24, 0, 0, 0)
+  midnightTimer = setTimeout(updateToday, Math.max(1000, next.getTime() - Date.now() + 100))
+}
+onMounted(updateToday)
+onBeforeUnmount(() => clearTimeout(midnightTimer))
 
-    if (lever > now) {
-      gepland = true
+function bookingState(bookings) {
+  let active = null
+  let next = null
+  for (const booking of Array.isArray(bookings) ? bookings : []) {
+    if (!booking) continue
+    const status = String(booking.status ?? '').trim().toUpperCase()
+    if (['AFGEWERKT', 'OPGEHAALD', 'GEANNULEERD'].includes(status)) continue
+    const start = calendarDay(booking.leverDatum)
+    const end = booking.ophaalDatum == null || booking.ophaalDatum === '' ? Infinity : calendarDay(booking.ophaalDatum)
+    if (start === null || end === null || end < start) continue
+    if (start <= today.value && end >= today.value) {
+      if (!active || start > active.start) active = { booking, start }
+    } else if (start > today.value) {
+      if (!next || start < next.start) next = { booking, start }
     }
-  })
-
-  if (actief) return 'bezet'
-  if (gepland) return 'gepland'
-  return null
+  }
+  return { status: active ? 'BEZET' : next ? 'GEPLAND' : null, active: active?.booking ?? null, next: next?.booking ?? null }
 }
-
-/* -------------------- */
-/* TYPE CHECK */
-/* -------------------- */
-function isSchaarlift(item) {
-  return item?.werkhoogte !== undefined
+const assetStates = computed(() => new Map((props.assets ?? []).filter(Boolean).map(asset => [asset, bookingState(asset.huidigeBoekingen)])))
+function getState(asset) { return assetStates.value.get(asset) ?? bookingState(asset?.huidigeBoekingen) }
+function normalizedStatus(asset) { return String(asset?.status ?? '').trim().toUpperCase() }
+function statusClass(asset) {
+  const status = normalizedStatus(asset)
+  if (status === 'KAPOT') return 'kapot'
+  if (status === 'ONGEKEURD') return 'ongekeurd'
+  return getState(asset).status?.toLowerCase() || 'vrij'
 }
-function rowStyle(item) {
-  const b = getBoekingStatus(item.huidigeBoekingen)
-
-  if (item.status === 'Kapot') {
-    return [{ background: '#fee2e2' }, {color:'#991b1b'}]
+function statusLabel(asset) {
+  const status = statusClass(asset)
+  if (status === 'kapot') return 'Kapot'
+  if (status === 'ongekeurd') return 'Ongekeurd'
+  if (status === 'bezet') return 'Bezet'
+  if (status === 'gepland') {
+    const next = getState(asset).next
+    return next ? `Ingepland · ${formatDate(next.leverDatum)}` : 'Ingepland'
   }
-
-  if (item.status === 'Ongekeurd') {
-    return [{ background: '#f0f0f0' }, {color:'#0153f7'}]
-  }
-
-  if (b === 'bezet') {
-    return [{ background: '#fef3c7' }, {color:'#92400e'}]
-  }
-
-  if (b === 'gepland') {
-    return [{ background: '#91b7f0' }, {color:'#0153f7'}]
-  }
-
-  return [{ background: '#d1fae5' }, {color:'#065f46'}] // vrij
-}
-/* -------------------- */
-/* STATUS UI */
-/* -------------------- */
-function statusClass(item) {
-  if (item.status === 'Kapot') return 'kapot'
-  if (item.status === 'Ongekeurd') return 'ongekeurd'
-
-  const b = getBoekingStatus(item.huidigeBoekingen)
-  if (b === 'bezet') return 'bezet'
-  if (b === 'gepland') return 'gepland'
-
-  return 'vrij'
-}
-
-function statusLabel(item) {
-  if (item.status === 'Kapot') return 'Kapot'
-  if (item.status === 'Ongekeurd') return 'Ongekeurd'
-
-  const b = getBoekingStatus(item.huidigeBoekingen)
-
-  if (b === 'bezet') return 'Bezet'
-
-  if (b === 'gepland') {
-    const next = item.huidigeBoekingen
-      ?.filter(b => new Date(b.leverDatum) > new Date())
-      ?.sort((a, b) => new Date(a.leverDatum) - new Date(b.leverDatum))[0]
-
-    return next
-      ? `Ingepland • ${formatDate(next.leverDatum)}`
-      : 'Ingepland'
-  }
-
   return 'Vrij'
 }
-/* -------------------- */
-/* KEURING */
-/* -------------------- */
-function daysUntilKeuring(d) {
-  if (!d) return 0
-  return Math.ceil((new Date(d) - new Date()) / (1000 * 60 * 60 * 24))
+function rowStyle(asset) {
+  return {
+    kapot: { background: '#fff1f2', color: '#92333e' },
+    ongekeurd: { background: '#f3f5f8', color: '#596b82' },
+    bezet: { background: '#fff8e7', color: '#866229' },
+    gepland: { background: '#edf4ff', color: '#3c629c' },
+    vrij: { background: '#f0faf5', color: '#35745b' },
+  }[statusClass(asset)]
 }
-
-function isKeuringVerlopen(d) {
-  return d && new Date(d) < new Date()
+function isSchaarlift(asset) {
+  const model = String(asset?.assetModel ?? '').toUpperCase()
+  return asset?.werkhoogte != null || ['HOOGTEWERKER', 'SCHAARLIFT', 'KNIKARM'].includes(model)
 }
-
-function progressValue(d) {
-  return 365 - daysUntilKeuring(d)
+function typeName(asset) {
+  console.log(asset)
+  return asset?.machineType?.naam || asset?.machineType?.naam || asset?.type?.naam
+    || (typeof asset?.machineTypeId === 'string' ? asset.machineTypeId : asset?.machineType?.naam) || 'Onbekend'
 }
-
-function formatDate(d) {
-  return d ? new Date(d).toLocaleDateString('nl-BE') : ''
+function heightLabel(value) { return value == null || value === '' ? '—' : `${value} m` }
+function getWerf(asset) {
+  const active = getState(asset).active
+  if (active) return active.werf?.naam || 'Werf niet ingesteld'
+  const location = asset?.locatie
+  return (typeof location === 'string' ? location : location?.naam) || 'Wingepark 27'
 }
-
-/* -------------------- */
-/* EDIT */
-/* -------------------- */
-function editAsset(asset) {
-  emit('edit-asset', asset)
+function daysUntilKeuring(value) {
+  const day = calendarDay(value)
+  return day === null ? null : day - today.value
 }
-
-function getWerf(asset){
-  if(asset.huidigeBoekingen && asset.huidigeBoekingen.length !== 0){
-    return asset.huidigeBoekingen[0].werf.naam
-  }
-  else{
-    return 'wingepark 27'
-  }
+function isKeuringVerlopen(value) { const remaining = daysUntilKeuring(value); return remaining !== null && remaining < 0 }
+function progressValue(value) {
+  const remaining = daysUntilKeuring(value)
+  return remaining === null ? 0 : Math.max(0, Math.min(365, 365 - remaining))
 }
+const dateFormatter = new Intl.DateTimeFormat('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' })
+function formatDate(value) { const day = calendarDay(value); return day === null ? '' : dateFormatter.format(new Date(day * DAY)) }
+function editAsset(asset) { emit('edit-asset', asset) }
 </script>
 
 <style scoped>
@@ -316,7 +294,7 @@ function getWerf(asset){
   font-weight: 600;
 }
 .row {
-  display: contents; /* belangrijk voor grid tables */
+  display: contents; 
 }
 
 
@@ -329,8 +307,13 @@ function getWerf(asset){
   border-radius: 6px;
   white-space: pre-wrap; /* belangrijk voor vrije tekst */
 }
-.page { width: 100% }
-.toolbar { display: flex; justify-content: space-between; margin-bottom: 15px }
+.page { width: 100%; max-width: 100%; min-width: 0 }
+.toolbar { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; margin-bottom: 15px }
+.buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.page, .page :deep(*) { box-sizing: border-box; }
+.page button:focus-visible { outline: 3px solid #83abe6; outline-offset: 3px; }
+.page button:disabled { opacity: .5; cursor: wait; }
+.missing-date { grid-column: 1 / -1; color: #8391a5; font-size: 12px; font-weight: 400; }
 .clickable { cursor: pointer; font-weight: 500 }
 
 .expanded-row-container { display: flex; gap: 20px; padding: 20px; border-radius: 8px }
@@ -381,9 +364,9 @@ progress::-webkit-progress-value {
 .boeking-grid:last-child { border-bottom: none; margin-bottom: 0 }
 
 .btn1{
-  margin-right: 1rem;
   background-color: #969191;
 }
+@media (max-width: 900px) { .expanded-row-container { flex-direction: column; } }
 </style>
 
 

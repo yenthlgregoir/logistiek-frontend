@@ -6,6 +6,7 @@
     <!-- SIDEBAR -->
     <SidebarComponent
       v-if="hasSidebar"
+      :open="!isMobile || mobileSidebarOpen"
       :class="['sidebar-wrapper', { 'mobile-open': mobileSidebarOpen && isMobile }]"
       @closeSidebar="mobileSidebarOpen = false"
     />
@@ -13,11 +14,9 @@
     <!-- MOBILE HEADER -->
     <MobileHeader v-if="isMobile && hasSidebar" @openSidebar="mobileSidebarOpen = true" />
 
-    <!-- OVERLAY -->
-    <div v-if="mobileSidebarOpen && isMobile" class="overlay" @click="mobileSidebarOpen = false" />
-
     <!-- 🚀 MAIN -->
     <main
+      :inert="hasSidebar && isMobile && mobileSidebarOpen"
       :class="[
         'main-content',
         mainClass,
@@ -88,6 +87,7 @@ function handleResize() {
 watch(
   () => hasSidebar.value,
   () => {
+    if (!hasSidebar.value) mobileSidebarOpen.value = false
     disableLayoutTransition.value = true
 
     requestAnimationFrame(() => {
@@ -124,6 +124,8 @@ onBeforeUnmount(() => {
 ========================= */
 
 .app-layout {
+  --sidebar-width: 244px;
+  --sidebar-collapsed-width: 76px;
   display: flex;
   min-height: 100vh;
   position: relative;
@@ -134,22 +136,23 @@ onBeforeUnmount(() => {
 ========================= */
 
 .main-content {
+  min-width: 0;
   flex: 1;
   background: #ebeffa;
 }
 
 /* ✅ sidebar states (desktop) */
 .main-content.expanded {
-  margin-left: 260px;
+  margin-left: var(--sidebar-width);
 }
 
 .main-content.collapsed {
-  margin-left: 80px;
+  margin-left: var(--sidebar-collapsed-width);
 }
 
 .main-content.expanded,
 .main-content.collapsed {
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.2s ease;
 }
 
 /* ✅ no sidebar */
@@ -170,7 +173,7 @@ onBeforeUnmount(() => {
 }
 
 /* mobile */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .main-content.mobile {
     margin-left: 0 !important;
   }
@@ -185,20 +188,8 @@ onBeforeUnmount(() => {
   top: 0;
   left: 0;
   height: 100vh;
-  width: 260px;
   z-index: 1000;
   transition: transform 0.3s ease;
-}
-
-@media (max-width: 768px) {
-  .sidebar-wrapper {
-    width: 100vw;
-    transform: translateX(-100%);
-  }
-}
-
-.sidebar-wrapper.mobile-open {
-  transform: translateX(0);
 }
 
 /* =========================

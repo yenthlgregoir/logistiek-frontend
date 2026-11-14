@@ -4,7 +4,10 @@
       <!-- HEADER -->
       <div class="modal-header">
         <h3>Boeking</h3>
-        <button class="close-btn" @click="close">✖</button>
+        <div class="boeking-header-actions">
+          <ChangeHistory v-if="boekingId" compact :entity-id="boekingId" entity-type="boeking" :revision="boekingenStore.historyRevision" />
+          <button class="close-btn" @click="close">✖</button>
+        </div>
       </div>
 
       <!-- BODY -->
@@ -152,6 +155,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import ChangeHistory from '@/components/base/ChangeHistory.vue'
 import { useBoekingenStore } from '@/stores/renting/boekingen.store.js'
 import SelectLeverAdresModal from './SelectLeverAdresModal.vue'
 import DatumAanpassenModal from './DatumAanpassenModal.vue'
@@ -266,6 +270,7 @@ function assignToestel(boekingId) {
 </script>
 
 <style scoped>
+.boeking-header-actions { display: flex; align-items: center; gap: 8px; }
 .modal-overlay {
   position: fixed;
   inset: 0;

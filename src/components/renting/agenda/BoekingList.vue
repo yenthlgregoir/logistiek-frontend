@@ -1,9 +1,8 @@
 <template>
   <div class="lijstweergave">
     <!-- ======================= -->
-    <!--      TOOLBAR (ONGEWIJZIGD) -->
+    <!--         TOOLBAR         -->
     <!-- ======================= -->
-
     <div class="toolbar">
       <SearchBar
         placeholder="Zoek"
@@ -12,26 +11,47 @@
         @update:modelValue="emit('update:search', $event)"
       />
 
-      <div class="item">
-        <el-date-picker
-          v-model="localDateRange"
-          type="daterange"
-          start-placeholder="Startdatum"
-          end-placeholder="Einddatum"
-          format="YYYY-MM-DD"
-          value-format="YYYY-MM-DD"
-          :picker-options="pickerOptions"
-          clearable
-          @change="updateDateRange"
-          style="width: 260px"
+      <div class="filters" role="toolbar" aria-label="Filters">
+        <FilterChip
+          :modelValue="klant"
+          :options="klanten"
+          title="Klant"
+          @update:modelValue="emit('update:klant', $event)"
         />
+        <FilterChip
+          :modelValue="status"
+          :options="statusOptions"
+          title="Status"
+          @update:modelValue="emit('update:status', $event)"
+        />
+        <FilterChip
+          :modelValue="type"
+          :options="types"
+          title="Type"
+          @update:modelValue="emit('update:type', $event)"
+        />
+        <DateRangeChip
+          :modelValue="dateRange"
+          title="Periode"
+          @update:modelValue="updateDateRange"
+        />
+
+        <button
+          v-if="activeFilterCount"
+          type="button"
+          class="filters__reset"
+          @click="resetFilters"
+        >
+          Wis filters
+          <span class="filters__badge">{{ activeFilterCount }}</span>
+        </button>
       </div>
     </div>
 
     <BaseTable
       :items="boekingen"
       columns="1fr 1.2fr 2fr 1.4fr 1fr"
-      @row-click="(b) => $emit('openBoeking', b._id)"
+      @row-click="(b) => $emit('openBoeking', b.id)"
     >
       <!-- HEADER -->
       <template #header>
@@ -69,32 +89,80 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { klantApi } from '@/api/klant'
+import { toestelApi } from '@/api/toestel'
 import BaseTable from '@/components/base/BaseTable.vue'
 import SearchBar from '@/components/base/SearchBar.vue'
+import FilterChip from '@/components/base/FilterChip.vue'
+import DateRangeChip from '@/components/base/DateRangeChip.vue'
 
-defineProps({
-  boekingen: {
-    type: Array,
-    default: () => [],
-  },
+const props = defineProps({
+  boekingen: { type: Array, default: () => [] },
+
+  /* v-model's */
+  search: { type: String, default: '' },
+  dateRange: { type: Array, default: () => [null, null] },
+  klant: { default: null },
+  status: { default: null },
+  type: { default: null },
 })
 
-const emit = defineEmits(['openBoeking', 'addBoeking', 'update:search', 'update:dateRange'])
+const emit = defineEmits([
+  'openBoeking',
+  'addBoeking',
+  'update:search',
+  'update:dateRange',
+  'update:klant',
+  'update:status',
+  'update:type',
+])
 
-const localDateRange = ref([null, null])
+/* ---------- filteropties ---------- */
+const klanten = ref([])
+const types = ref([])
 
-// ✅ ONGEWIJZIGD
-const pickerOptions = {
-  disabledDate(date) {
-    const maxDate = new Date()
-    maxDate.setFullYear(maxDate.getFullYear() + 2)
-    return date > maxDate
-  },
+function normalizeOptions(value, key) {
+  const items = Array.isArray(value) ? value
+    : Array.isArray(value?.data) ? value.data : value?.[key] ?? []
+  return (Array.isArray(items) ? items : [])
+    .filter(Boolean)
+    .map(item => ({ ...item, id: item.id ?? item._id }))
+    .filter(item => item.id != null)
 }
 
+async function loadFilterOptions() {
+  const [k, t] = await Promise.allSettled([klantApi.list(), toestelApi.getTypes()])
+  if (k.status === 'fulfilled') klanten.value = normalizeOptions(k.value, 'items')
+  if (t.status === 'fulfilled') types.value = normalizeOptions(t.value, 'types')
+}
+
+onMounted(loadFilterOptions)
+
+const statusOptions = [
+  'Aangevraagd', 'Bevestigd', 'Leveren', 'Geleverd', 'Opgehaald', 'Afgewerkt',
+].map(naam => ({ id: naam, naam }))
+
+const isSet = v => v != null && v !== ''
+
+const activeFilterCount = computed(() =>
+  [
+    isSet(props.klant),
+    isSet(props.status),
+    isSet(props.type),
+    (props.dateRange ?? []).some(Boolean),
+  ].filter(Boolean).length
+)
+
 function updateDateRange(val) {
-  emit('update:dateRange', val || [null, null])
+  emit('update:dateRange', Array.isArray(val) && val.length === 2 ? val : [null, null])
+}
+
+function resetFilters() {
+  emit('update:klant', null)
+  emit('update:status', null)
+  emit('update:type', null)
+  emit('update:dateRange', [null, null])
 }
 
 // ✅ EXACT dezelfde helpers behouden
@@ -125,12 +193,53 @@ function formatPeriode(b) {
 </script>
 
 <style scoped>
-/* toolbar blijft hetzelfde */
 .toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   margin-bottom: 20px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.filters__reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #3b6cf6;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filters__reset:hover {
+  background: #edf2ff;
+}
+
+.filters__badge {
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #3b6cf6;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 /* status styling blijft hetzelfde */
@@ -171,16 +280,15 @@ function formatPeriode(b) {
 @media (max-width: 768px) {
   .toolbar {
     flex-direction: column;
-    align-items: stretch; /* zodat items 100% breed worden */
-    gap: 12px; /* ruimte tussen search en datepicker */
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .filters {
+    justify-content: flex-start;
   }
 
   .toolbar .search,
-  .toolbar .item {
-    width: 100%; /* full width op mobiel */
-  }
-
-  /* Optional: de input en datepicker aanpassen zodat ze mooi passen */
   .toolbar .search input {
     width: 100%;
   }

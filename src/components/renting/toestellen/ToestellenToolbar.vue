@@ -40,7 +40,7 @@
               type="daterange"
               start-placeholder="Startdatum"
               end-placeholder="Einddatum"
-              format="YYYY-MM-DD"
+              format="YYYY-MM-DD" value-format="YYYY-MM-DD"
               :picker-options="pickerOptions"
               style="width: 100%"
             />

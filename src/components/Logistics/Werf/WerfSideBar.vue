@@ -29,8 +29,8 @@
 
               <div class="info-block">
                 <label>Status</label>
-                <div class="value status" :class="werf.status">
-                  {{ werf.status }}
+                <div class="value status" :class="statusClass(werf.status)">
+                  {{ statusLabel(werf.status) }}
                 </div>
               </div>
 
@@ -70,9 +70,9 @@
               <div class="info-block">
                 <label>Status</label>
                 <select v-model="editableWerf.status">
-                  <option>Bezig</option>
-                  <option>Afgerond</option>
-                  <option>Onderhoud</option>
+                  <option value="BEZIG">Bezig</option>
+                  <option value="AFGEROND">Afgerond</option>
+                  <option value="ONDERHOUD">Onderhoud</option>
                 </select>
               </div>
 
@@ -134,25 +134,46 @@ const showConfirm = ref(false)
 const isEditing = ref(false)
 const editableWerf = ref({})
 
-// Sync props → editable copy
-watch(
-  () => props.werf,
-  (val) => {
-    editableWerf.value = JSON.parse(JSON.stringify(val))
+function normalizeStatus(status) {
+  return String(status ?? '').trim().toUpperCase()
+}
 
-    // fallback voor adres
-    if (!editableWerf.value.adres) {
-      editableWerf.value.adres = {
-        straat: '',
-        huisnummer: '',
-        postcode: '',
-        gemeente: '',
-      }
-    }
+function statusClass(status) {
+  return normalizeStatus(status).toLowerCase()
+}
+
+function statusLabel(status) {
+  return {
+    BEZIG: 'Bezig',
+    AFGEROND: 'Afgerond',
+    ONDERHOUD: 'Onderhoud',
+  }[normalizeStatus(status)] || String(status ?? '').trim() || 'Onbekend'
+}
+
+function resetEditableWerf() {
+  const copy = JSON.parse(JSON.stringify(props.werf ?? {}))
+  editableWerf.value = {
+    ...copy,
+    status: normalizeStatus(copy.status),
+    adres: {
+      straat: '',
+      huisnummer: '',
+      postcode: '',
+      gemeente: '',
+      ...(copy.adres ?? {}),
+    },
+  }
+}
+
+watch(
+  [() => props.werf, () => props.show],
+  () => {
+    resetEditableWerf()
+    isEditing.value = false
+    showConfirm.value = false
   },
   { immediate: true },
 )
-
 function formatLocatie(w) {
   if (!w.adres) return 'Onbekend'
   return `${w.adres.straat || ''} ${w.adres.huisnummer || ''}, ${
@@ -169,18 +190,21 @@ const mapUrl = computed(() => {
 
 // DELETE
 function confirmDelete() {
-  emit('delete', props.werf._id)
+  const id = props.werf.id ?? props.werf._id
+  if (id == null) return
+  emit('delete', id)
   showConfirm.value = false
 }
 
 // EDIT
 function startEdit() {
+  resetEditableWerf()
   isEditing.value = true
 }
 
 function cancelEdit() {
   isEditing.value = false
-  editableWerf.value = JSON.parse(JSON.stringify(props.werf))
+  resetEditableWerf()
 }
 
 function saveEdit() {
@@ -301,15 +325,15 @@ function saveEdit() {
   width: fit-content;
 }
 
-.status.Bezig {
+.status.bezig {
   background: #9add91;
   color: #065f46;
 }
-.status.Afgerond {
+.status.afgerond {
   background: #fee2e2;
   color: #7f1d1d;
 }
-.status.Onderhoud {
+.status.onderhoud {
   background: #5786f7;
   color: #e0f2fe;
 }
@@ -357,3 +381,4 @@ select:focus {
   }
 }
 </style>
+

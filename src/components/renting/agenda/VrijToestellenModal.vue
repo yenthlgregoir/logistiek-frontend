@@ -11,7 +11,7 @@
     <ul class="toestel-list">
       <li
         v-for="toestel in gefilterdeToestellen"
-        :key="toestel._id"
+        :key="toestel.id"
         @click="selectToestel(toestel)"
         class="toestel-item"
       >

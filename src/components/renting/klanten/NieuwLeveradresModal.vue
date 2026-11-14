@@ -49,7 +49,7 @@ const emit = defineEmits(['close', 'save'])
 
 // Interne kopie van adres
 const adres = reactive({
-  _id: '',
+  id: '',
   naam: '',
   straat: '',
   huisnummer: '',
@@ -71,8 +71,8 @@ watch(
 )
 
 function save() {
-  if (!adres._id) {
-    delete adres._id
+  if (!adres.id) {
+    delete adres.id
   }
   emit('save', { ...adres })
 }

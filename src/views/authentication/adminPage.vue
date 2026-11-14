@@ -1,278 +1,426 @@
 <template>
-  <div class="page">
-    <!-- TITLE + SEARCH CENTERED -->
-    <div class="title-wrapper">
-      <h1>Admin - Users</h1>
-
+  <div class="access-page">
+    <header class="access-head">
+      <div>
+        <h1>Toegangsbeheer</h1>
+        <p>Beoordeel aanvragen en beheer de moduletoegang van Microsoft-gebruikers.</p>
+      </div>
+      <button class="access-button" :disabled="loading || saving" @click="load">Vernieuwen</button>
+    </header>
+    <p v-if="error" class="access-error" role="alert">{{ error }}</p>
+    <p v-if="notice" class="access-success" role="status">{{ notice }}</p>
+    <nav class="access-tabs" aria-label="Toegangsbeheer">
+      <button
+        v-for="item in tabs"
+        :key="item.key"
+        class="access-button"
+        :class="{ active: tab === item.key }"
+        @click="tab = item.key"
+      >
+        {{ item.label
+        }}{{
+          item.key === 'requests'
+            ? ' (' + requests.filter((request) => request.status === 'PENDING').length + ')'
+            : ''
+        }}
+      </button>
+    </nav>
+    <div class="access-toolbar">
       <input
         v-model="search"
-        type="text"
-        placeholder="Zoek op naam, email of rol..."
-        class="search"
-      />
+        aria-label="Toegangsbeheer zoeken"
+        placeholder="Zoek gebruiker, module of reden"
+      /><select v-if="tab === 'requests'" v-model="status" aria-label="Aanvraagstatus">
+        <option value="PENDING">In behandeling</option>
+        <option value="">Alle aanvragen</option>
+        <option value="APPROVED">Goedgekeurd</option>
+        <option value="REJECTED">Afgewezen</option>
+      </select>
     </div>
-
-    <!-- TABLE + CARDS -->
-    <div class="user-table-wrapper">
-      <div class="table-header">
-        <div>Naam</div>
-        <div>Email</div>
-        <div>Rol</div>
-        <div class="right">Actions</div>
-      </div>
-
-      <div
-        v-for="user in paginatedUsers"
-        :key="user.id"
-        class="user-card"
-        @dblclick="editUser(user)"
+    <p v-if="loading" class="access-note" role="status">Toegangsbeheer laden…</p>
+    <template v-if="tab === 'requests'">
+      <BaseTable
+        :items="paginatedItems"
+        item-key="id"
+        columns="1.3fr .8fr 1.5fr 1.2fr"
+        min-width="850px"
+        :hover="false"
+        ><template #header
+          ><div>Gebruiker / module</div>
+          <div>Status</div>
+          <div>Reden / beoordeling</div>
+          <div>Actie</div></template
+        ><template #row="{ item }"
+          ><div>
+            <strong>{{ item.name || item.username }}</strong
+            ><span class="access-sub">{{ item.username }}</span
+            ><span class="access-sub"
+              >{{ roleLabels[item.role] }} · {{ stamp(item.createdAt) }}</span
+            >
+          </div>
+          <div>
+            <span class="access-badge" :class="item.status">{{ requestLabels[item.status] }}</span>
+          </div>
+          <div class="access-reason">
+            {{ item.reason
+            }}<span v-if="item.reviewNote" class="access-sub"
+              >{{ item.reviewNote }} · {{ item.reviewedByName }}</span
+            >
+          </div>
+          <div>
+            <button
+              v-if="item.status === 'PENDING'"
+              class="access-button primary"
+              :disabled="saving || item.userId === currentId"
+              @click="openReview(item)"
+            >
+              {{ item.userId === currentId ? 'Eigen aanvraag' : 'Beoordelen' }}</button
+            ><span v-else class="access-sub">{{ stamp(item.reviewedAt) }}</span>
+          </div></template
+        ><template #empty>{{ emptyText }}</template></BaseTable
       >
-        <div class="info">{{ user.naam || 'Onbekend' }}</div>
-        <div class="info">{{ user.email || 'Geen email' }}</div>
+    </template>
+    <template v-else-if="tab === 'users'">
+      <p class="access-note">
+        Gebruikers verschijnen na hun eerste Microsoft-aanmelding. Moduletoegang wordt afzonderlijk
+        beheerd. Je kunt een gebruiker ook adminrechten geven; die krijgt dan toegang tot alle
+        modules en het gebruikersbeheer.
+      </p>
+      <BaseTable
+        :items="paginatedItems"
+        item-key="id"
+        columns="1fr 1.3fr 1.7fr"
+        min-width="780px"
+        :hover="false"
+        ><template #header
+          ><div>Naam</div>
+          <div>E-mail</div>
+          <div>Moduletoegang</div></template
+        ><template #row="{ item }"
+          ><div>
+            <strong>{{ item.name || 'Onbekend' }}</strong>
+          </div>
+          <div>{{ item.username }}</div>
+          <div>
+            <span v-if="!item.roles.length" class="access-sub">Nog geen moduletoegang</span>
+            <div v-for="role in item.roles" :key="role" class="access-role-row">
+              <span class="access-badge">{{ roleLabels[role] || role }}</span
+              ><button
+                v-if="role !== 'admin' && !item.roles.includes('admin')"
+                class="access-button danger"
+                :disabled="saving"
+                @click="openRevoke(item, role)"
+              >
+                Intrekken
+              </button>
+            </div>
+            <button
+              v-if="!item.roles.includes('admin') && item.id !== currentId"
+              class="access-button"
+              :disabled="saving || loading"
+              @click="openGrantAdmin(item)"
+            >
+              Adminrechten geven
+            </button>
+          </div></template
+        ><template #empty>{{ emptyText }}</template></BaseTable
+      >
+    </template>
+    <template v-else>
+      <p class="access-note">
+        Laatste 250 gebeurtenissen. Beslissingen, adminrechten en intrekkingen worden samen met de
+        rechtenwijziging opgeslagen.
+      </p>
+      <BaseTable
+        :items="paginatedItems"
+        item-key="id"
+        columns="1fr 1.3fr 1fr 1.6fr"
+        min-width="850px"
+        :hover="false"
+        ><template #header
+          ><div>Datum / actie</div>
+          <div>Gebruiker / module</div>
+          <div>Uitgevoerd door</div>
+          <div>Reden</div></template
+        ><template #row="{ item }"
+          ><div>
+            {{ stamp(item.at) }}<span class="access-sub">{{ auditLabels[item.action] }}</span>
+          </div>
+          <div>
+            {{ item.userName }}<span class="access-sub">{{ roleLabels[item.role] }}</span>
+          </div>
+          <div>{{ item.actorName }}</div>
+          <div class="access-reason">{{ item.reason }}</div></template
+        ><template #empty>{{ emptyText }}</template></BaseTable
+      >
+    </template>
+    <BasePagination
+      :current-page="currentPage"
+      :total-pages="totalPages"
+      @next="next"
+      @prev="prev"
+    />
 
-        <div class="info">
-          <span class="role-tag" :class="user.role">
-            {{ user.role || 'user' }}
-          </span>
-        </div>
-
-        <div class="actions">
-          <button class="icon-btn" @click.stop="editUser(user)">✏️</button>
-          <button class="icon-btn" @click.stop="resetPassword(user)">🔑</button>
-        </div>
-      </div>
-
-      <div v-if="!paginatedUsers.length" class="no-results">Geen users gevonden</div>
-
-      <!-- PAGINATION -->
-      <div class="pagination" v-if="totalPages > 1">
-        <button class="page-btn" :disabled="page === 1" @click="page--">‹</button>
-
-        <button
-          v-for="p in totalPages"
-          :key="p"
-          class="page-number"
-          :class="{ active: p === page }"
-          @click="page = p"
+    <BaseModal
+      v-if="reviewing"
+      title="Toegangsaanvraag beoordelen"
+      :busy="saving"
+      @close="closeDialog"
+    >
+      <p class="access-note">
+        <strong>{{ reviewing.name || reviewing.username }}</strong
+        ><br />{{ reviewing.username }}<br />Vraagt toegang tot {{ roleLabels[reviewing.role] }}
+      </p>
+      <p class="access-reason">{{ reviewing.reason }}</p>
+      <form id="access-review-form" class="access-form" @submit.prevent="review">
+        <fieldset :disabled="saving">
+          <label class="access-field"
+            >Beslissing<select v-model="decision" required>
+              <option value="APPROVED">Goedkeuren</option>
+              <option value="REJECTED">Afwijzen</option>
+            </select></label
+          ><label class="access-field"
+            >Reden voor je beslissing<textarea v-model.trim="note" required maxlength="1000" />
+          </label>
+        </fieldset>
+        <p v-if="dialogError" class="access-error" role="alert">{{ dialogError }}</p>
+      </form>
+      <template #footer
+        ><button class="access-button" :disabled="saving" @click="closeDialog">Annuleren</button
+        ><button
+          class="access-button primary"
+          type="submit"
+          form="access-review-form"
+          :disabled="saving"
         >
-          {{ p }}
+          {{ saving ? 'Opslaan…' : 'Beslissing opslaan' }}
+        </button></template
+      >
+    </BaseModal>
+    <BaseModal v-if="grantingAdmin" title="Adminrechten geven" :busy="saving" @close="closeDialog">
+      <p class="access-note">
+        Je maakt <strong>{{ grantingAdmin.name || grantingAdmin.username }}</strong> ({{
+          grantingAdmin.username
+        }}) beheerder. Deze gebruiker krijgt toegang tot alle modules en kan toegangsaanvragen
+        beoordelen en andere gebruikers adminrechten geven.
+      </p>
+      <form id="access-admin-form" class="access-form" @submit.prevent="grantAdmin">
+        <label class="access-field"
+          >Reden voor adminrechten
+          <textarea
+            v-model.trim="note"
+            aria-label="Reden voor adminrechten"
+            required
+            maxlength="1000"
+            :disabled="saving"
+          />
+        </label>
+        <p v-if="dialogError" class="access-error" role="alert">{{ dialogError }}</p>
+      </form>
+      <template #footer>
+        <button class="access-button" :disabled="saving" @click="closeDialog">Annuleren</button>
+        <button
+          class="access-button primary"
+          type="submit"
+          form="access-admin-form"
+          :disabled="saving || !note.trim()"
+        >
+          {{ saving ? 'Opslaan…' : 'Adminrechten toekennen' }}
         </button>
-
-        <button class="page-btn" :disabled="page === totalPages" @click="page++">›</button>
-      </div>
-    </div>
+      </template>
+    </BaseModal>
+    <BaseModal v-if="revoking" title="Moduletoegang intrekken" :busy="saving" @close="closeDialog">
+      <p class="access-note">
+        Je trekt {{ roleLabels[revoking.role] }} in voor
+        <strong>{{ revoking.user.name || revoking.user.username }}</strong
+        >. Dit geldt vanaf de volgende API-aanroep, ook in bestaande sessies. Andere rollen kunnen
+        nog toegang tot dezelfde module geven.
+      </p>
+      <form id="access-revoke-form" class="access-form" @submit.prevent="revoke">
+        <label class="access-field"
+          >Reden voor intrekken<textarea
+            v-model.trim="note"
+            required
+            maxlength="1000"
+            :disabled="saving"
+          />
+        </label>
+        <p v-if="dialogError" class="access-error" role="alert">{{ dialogError }}</p>
+      </form>
+      <template #footer
+        ><button class="access-button" :disabled="saving" @click="closeDialog">Annuleren</button
+        ><button
+          class="access-button danger"
+          type="submit"
+          form="access-revoke-form"
+          :disabled="saving"
+        >
+          {{ saving ? 'Opslaan…' : 'Toegang intrekken' }}
+        </button></template
+      >
+    </BaseModal>
   </div>
 </template>
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
-import { loginApi } from '@/api/login'
-
-const users = ref([])
-const search = ref('')
-
-const page = ref(1)
-const perPage = 5
-
-onMounted(() => {
-  getUsers()
-})
-
-async function getUsers() {
-  try {
-    users.value = await loginApi.getUsers()
-  } catch (err) {
-    console.error(err)
-  }
-}
-
-const gefilterdeUsers = computed(() => {
-  const term = search.value.toLowerCase()
-  return users.value.filter(
-    (u) =>
-      u.naam?.toLowerCase().includes(term) ||
-      u.email?.toLowerCase().includes(term) ||
-      u.role?.toLowerCase().includes(term),
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import BaseTable from '@/components/base/BaseTable.vue'
+import BasePagination from '@/components/base/BasePagination.vue'
+import BaseModal from '@/components/base/BaseModal.vue'
+import { usePagination } from '@/composable/usePagination'
+import { useAuthStore } from '@/stores/authentication/auth.store'
+import { accessApi } from '@/api/access'
+import { roleLabels, requestLabels, auditLabels, stamp } from '@/utils/access'
+import '@/assets/access.css'
+const auth = useAuthStore()
+const tabs = [
+  { key: 'requests', label: 'Aanvragen' },
+  { key: 'users', label: 'Gebruikers' },
+  { key: 'history', label: 'Historiek' },
+]
+const tab = ref('requests'),
+  search = ref(''),
+  status = ref('PENDING')
+const users = ref([]),
+  requests = ref([]),
+  history = ref([])
+const loading = ref(false),
+  saving = ref(false),
+  error = ref(''),
+  notice = ref(''),
+  dialogError = ref('')
+const reviewing = ref(null),
+  grantingAdmin = ref(null),
+  revoking = ref(null),
+  decision = ref('APPROVED'),
+  note = ref('')
+const currentId = computed(() => auth.user?.tenantId + ':' + auth.user?.objectId)
+const rows = computed(() => {
+  const term = search.value.trim().toLocaleLowerCase('nl-BE')
+  const list =
+    tab.value === 'requests'
+      ? requests.value.filter((item) => !status.value || item.status === status.value)
+      : tab.value === 'users'
+        ? users.value
+        : history.value
+  return list.filter(
+    (item) =>
+      !term ||
+      [
+        item.name,
+        item.username,
+        item.userName,
+        item.actorName,
+        item.reason,
+        item.role,
+        roleLabels[item.role],
+        ...(item.roles ?? []).map((role) => roleLabels[role]),
+      ].some((value) =>
+        String(value ?? '')
+          .toLocaleLowerCase('nl-BE')
+          .includes(term),
+      ),
   )
 })
-watch(search, () => {
-  page.value = 1
-})
-const totalPages = computed(() => Math.ceil(gefilterdeUsers.value.length / perPage))
-
-const paginatedUsers = computed(() => {
-  const start = (page.value - 1) * perPage
-  return gefilterdeUsers.value.slice(start, start + perPage)
-})
-
-function editUser(user) {
-  console.log('Edit user:', user)
+const emptyText = computed(() =>
+  loading.value
+    ? 'Gegevens laden…'
+    : error.value
+      ? 'Gegevens niet beschikbaar. Vernieuw het overzicht.'
+      : 'Geen resultaten voor deze selectie.',
+)
+const { currentPage, totalPages, paginatedItems, next, prev, reset, setPage } = usePagination(
+  rows,
+  { pageSize: 15 },
+)
+watch([tab, search, status], reset)
+watch(totalPages, () => setPage(currentPage.value))
+let alive = true
+async function load() {
+  loading.value = true
+  error.value = ''
+  try {
+    const result = await Promise.all([accessApi.users(), accessApi.requests(), accessApi.history()])
+    if (alive) [users.value, requests.value, history.value] = result
+  } catch (failure) {
+    if (alive) error.value = failure.message || 'Toegangsbeheer laden mislukt.'
+  } finally {
+    if (alive) loading.value = false
+  }
 }
-
-function resetPassword(user) {
-  console.log('Reset password for:', user)
+function openReview(item) {
+  if (saving.value) return
+  reviewing.value = item
+  decision.value = 'APPROVED'
+  note.value = ''
+  dialogError.value = ''
 }
+function openRevoke(user, role) {
+  if (saving.value) return
+  revoking.value = { user, role }
+  note.value = ''
+  dialogError.value = ''
+}
+function openGrantAdmin(user) {
+  if (saving.value || user.id === currentId.value || user.roles.includes('admin')) return
+  grantingAdmin.value = user
+  note.value = ''
+  dialogError.value = ''
+}
+function closeDialog() {
+  if (!saving.value) {
+    reviewing.value = null
+    revoking.value = null
+    grantingAdmin.value = null
+    dialogError.value = ''
+  }
+}
+async function mutate(work, message) {
+  if (saving.value) return
+  saving.value = true
+  dialogError.value = ''
+  try {
+    await work()
+    if (!alive) return
+    reviewing.value = null
+    revoking.value = null
+    grantingAdmin.value = null
+    notice.value = message
+    await load()
+  } catch (failure) {
+    if (alive) dialogError.value = failure.message || 'Wijziging opslaan mislukt.'
+  } finally {
+    if (alive) saving.value = false
+  }
+}
+function review() {
+  const item = reviewing.value
+  return mutate(
+    () =>
+      accessApi.review(item.id, {
+        revision: item.revision,
+        decision: decision.value,
+        note: note.value,
+      }),
+    'De aanvraag is beoordeeld. De beslissing staat in de historiek.',
+  )
+}
+function grantAdmin() {
+  const user = grantingAdmin.value
+  if (!user || !note.value.trim()) return
+  return mutate(
+    () => accessApi.grantAdmin(user.id, { reason: note.value }),
+    'De adminrechten zijn toegekend en vastgelegd in de historiek.',
+  )
+}
+function revoke() {
+  const item = revoking.value
+  return mutate(
+    () => accessApi.revoke(item.user.id, { role: item.role, reason: note.value }),
+    'De moduletoegang is ingetrokken.',
+  )
+}
+onMounted(load)
+onBeforeUnmount(() => {
+  alive = false
+})
 </script>
-<style scoped>
-.page {
-  min-height: 93vh;
-  font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg, #f1f5ff, #e8eeff);
-  padding: 40px 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* TITLE + SEARCH CENTERED */
-.title-wrapper {
-  width: 100%;
-  max-width: 1100px;
-  text-align: center;
-  margin-bottom: 26px;
-}
-
-.title-wrapper h1 {
-  font-size: 32px;
-  font-weight: 700;
-  color: #0f2e4d;
-  margin-bottom: 16px;
-  text-transform: uppercase;
-}
-
-.search {
-  padding: 13px 18px;
-  width: 100%;
-  max-width: 360px;
-  border-radius: 14px;
-  border: 1px solid #d1d5db;
-  background: rgba(255, 255, 255, 0.95);
-  transition: 0.3s ease;
-  margin: 0 auto;
-  display: block;
-}
-
-.search:focus {
-  outline: none;
-  border-color: #4f73ff;
-  box-shadow: 0 0 0 4px rgba(79, 115, 255, 0.18);
-}
-
-/* TABLE + CARDS CENTERED */
-.user-table-wrapper {
-  width: 100%;
-  max-width: 1100px;
-  display: flex;
-  flex-direction: column;
-  gap: 1.4rem;
-  margin: 0 auto;
-}
-
-/* HEADER */
-.table-header {
-  display: grid;
-  grid-template-columns: 2fr 2fr 1fr minmax(7rem, 0.4fr);
-  padding: 1rem 1.2rem;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-  font-weight: 600;
-  color: #3a4b63;
-}
-
-/* CARD ROW */
-.user-card {
-  display: grid;
-  grid-template-columns: 2fr 2fr 1fr minmax(7rem, 0.4fr);
-  background: white;
-  padding: 1.1rem 1.2rem;
-  border-radius: 18px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 8px 20px rgba(0, 0, 70, 0.06);
-  transition: 0.25s ease;
-}
-
-.user-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(0, 0, 60, 0.1);
-}
-
-.info {
-  font-size: 0.95rem;
-  color: #1f2d40;
-}
-
-/* ROLE TAGS */
-.role-tag {
-  padding: 0.35rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-.role-tag.admin {
-  background: #e0e7ff;
-  color: #1e3a8a;
-}
-
-.role-tag.renting {
-  background: #fae8ff;
-  color: #86198f;
-}
-
-.role-tag.purchase {
-  background: #cffafe;
-  color: #0f172a;
-}
-
-/* ACTION BUTTONS */
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
-}
-
-.icon-btn {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  padding: 0.45rem 0.65rem;
-  border-radius: 12px;
-  transition: 0.25s ease;
-}
-
-.icon-btn:hover {
-  background: #4f73ff;
-  color: white;
-  border-color: #4f73ff;
-}
-
-/* PAGINATION */
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 8px;
-}
-
-.page-btn,
-.page-number {
-  padding: 0.45rem 0.9rem;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
-  background: white;
-  cursor: pointer;
-  transition: 0.2s;
-  font-weight: 500;
-}
-
-.page-number.active {
-  background: #4f73ff;
-  color: white;
-}
-
-.page-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-</style>

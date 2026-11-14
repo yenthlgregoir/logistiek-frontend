@@ -6,6 +6,7 @@
       :placeholder="placeholder"
       class="autocomplete-input"
       @focus="openDropdown"
+      @click="openDropdown"
       @input="filterOptions"
       @keydown.down.prevent="nextOption"
       @keydown.up.prevent="prevOption"
@@ -18,7 +19,7 @@
       </li>
       <li
         v-for="(option, index) in filteredOptions"
-        :key="option._id"
+        :key="option.id ?? option._id"
         :class="{ highlighted: index === highlightedIndex }"
         @mousedown.prevent="selectOption(option)"
       >
@@ -75,7 +76,7 @@ function selectEmpty() {
 }
 function selectOption(option) {
   search.value = option[props.labelKey]
-  emit('update:modelValue', option._id)
+  emit('update:modelValue', option.id ?? option._id)
   emit('select', option)
   showDropdown.value = false
 }

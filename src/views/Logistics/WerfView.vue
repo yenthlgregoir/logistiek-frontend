@@ -84,7 +84,8 @@ onBeforeUnmount(() => {
 async function getWerven() {
   try {
     const response = await werfApi.list()
-    werven.value = Array.isArray(response) ? response : (response.items ?? [])
+    console.log('Werven loaded:', response)
+    werven.value = Array.isArray(response) ? response : (response.data ?? [])
   } catch (error) {
     console.error(error)
   }
@@ -126,7 +127,7 @@ async function deleteWerf(werfId) {
 
 async function editWerf(data) {
   try {
-    await werfApi.update(data._id, data)
+    await werfApi.update(data.id, data)
     await getWerven()
   } catch (err) {
     console.error(err)

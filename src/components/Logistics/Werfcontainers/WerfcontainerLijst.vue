@@ -17,7 +17,7 @@
       :items="assets"
       :expand-on-row-click="true"
       columns="2fr 2fr 1fr 1fr"
-      itemKey="_id"
+      itemKey="id"
       :rowStyle="rowStyle"
     >
       <template #header>
@@ -32,7 +32,7 @@
           {{ item.nummer }}
         </div>
 
-        <div>{{ item.Type?.naam || 'Onbekend' }}</div>
+        <div>{{ item.machineType?.naam || 'Onbekend' }}</div>
         <div
           class="col-entiteit"
           :style="{
@@ -59,8 +59,14 @@
           <div class="expanded-row-left">
             <div class="section-header">
               <div class="section-title">Werfcontainer info</div>
-              <button class="edit-btn" @click="editAsset(item)">✏️</button>
-            </div>
+<button
+  type="button"
+  class="edit-btn"
+  aria-label="Werfcontainer bewerken"
+  @click.stop="editAsset(item)"
+>
+  ✏️
+</button>            </div>
 
             <div class="devider"></div>
 
@@ -70,7 +76,7 @@
                 <div>{{ item.nummer }}</div>
 
                 <div><strong>type</strong></div>
-                <div>{{ item.Type?.naam || '-' }}</div>
+                <div>{{ item.machineType?.naam || '-' }}</div>
 
                 <div><strong>verantwoordelijke</strong></div>
                 <div>{{ item.verantwoordelijke || '-' }}</div>
@@ -80,7 +86,7 @@
                 <div>{{ getStatusLabel(item) }}</div>
 
                 <div><strong>entiteit</strong></div>
-                <div>{{ item.entiteit.naam || '-' }}</div>
+                <div>{{ item.entiteit?.naam || '-' }}</div>
               </div>
 
               <div class="comments">
@@ -101,8 +107,11 @@
             <div class="devider"></div>
 
             <div v-if="item.huidigeBoekingen?.length > 0">
-              <div v-for="(boeking, index) in item.huidigeBoekingen" :key="index" class="info-grid">
-                <div class="column">
+<div
+  v-for="boeking in item.huidigeBoekingen"
+  :key="boeking.id"
+  class="info-grid"
+>                <div class="column">
                   <div><strong>Leverdatum</strong></div>
                   <div>{{ formatDate(boeking.leverDatum) }}</div>
 
@@ -110,8 +119,7 @@
                   <div>{{ formatDate(boeking.ophaalDatum) || 'Geen' }}</div>
 
                   <div><strong>Ref</strong></div>
-                  <div>{{ boeking.reference }}</div>
-                </div>
+<div>{{ boeking.reference || '-' }}</div>                </div>
 
                 <div class="column">
                   <div><strong>Projectleider</strong></div>
@@ -141,113 +149,138 @@ defineProps({
 
 const emit = defineEmits(['search', 'openAdd', 'edit-asset'])
 
-
 function getContrastColor(hex) {
-  if (!hex) return '#fff'
+  let kleur = String(hex ?? '').trim()
 
-  const c = hex.substring(1)
-  const rgb = parseInt(c, 16)
-  const r = (rgb >> 16) & 0xff
-  const g = (rgb >> 8) & 0xff
-  const b = Math.trunc(rgb) & 0xff
+  // Ondersteun bijvoorbeeld ook #fff.
+  if (/^#[0-9a-f]{3}$/i.test(kleur)) {
+    kleur = '#' + [...kleur.slice(1)]
+      .map((teken) => teken + teken)
+      .join('')
+  }
+
+  if (!/^#[0-9a-f]{6}$/i.test(kleur)) {
+    return '#fff'
+  }
+
+  const rgb = Number.parseInt(kleur.slice(1), 16)
+  const r = (rgb >> 16) & 255
+  const g = (rgb >> 8) & 255
+  const b = rgb & 255
 
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
 
   return luminance > 0.5 ? '#000' : '#fff'
 }
 
+function formatDate(value) {
+  if (!value) return ''
 
-// DATE
-function formatDate(dateStr) {
-  if (!dateStr) return ''
-  return new Date(dateStr).toLocaleDateString('nl-BE')
+  // De backend geeft LocalDate terug als YYYY-MM-DD.
+  const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/)
+
+  if (!match) return ''
+
+  return `${match[3]}/${match[2]}/${match[1]}`
+}
+
+function vandaagInBrussel() {
+  const delen = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Brussels',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date())
+
+  const waarden = Object.fromEntries(
+    delen.map(({ type, value }) => [type, value]),
+  )
+
+  return `${waarden.year}-${waarden.month}-${waarden.day}`
+}
+
+function getBoekingStatus(boekingen) {
+  if (!Array.isArray(boekingen)) return null
+
+  const vandaag = vandaagInBrussel()
+
+  const actief = boekingen.some((boeking) => {
+    const leverDatum = boeking.leverDatum
+    const ophaalDatum = boeking.ophaalDatum
+
+    if (!leverDatum) return false
+
+    // ISO-kalenderdatums zijn rechtstreeks vergelijkbaar.
+    // De ophaaldag telt mee, zoals in je backend.
+    return (
+      leverDatum <= vandaag &&
+      (!ophaalDatum || ophaalDatum >= vandaag) &&
+      (!ophaalDatum || ophaalDatum >= leverDatum)
+    )
+  })
+
+  return actief ? 'bezet' : null
+}
+
+function getStatus(item) {
+  const status = String(item.status ?? '').trim().toUpperCase()
+
+  // Technische status heeft voorrang op de boekingen.
+  if (status === 'KAPOT') return 'kapot'
+  if (status === 'ONGEKEURD') return 'ongekeurd'
+
+  if (getBoekingStatus(item.huidigeBoekingen) === 'bezet') {
+    return 'bezet'
+  }
+
+  if (status === 'VRIJ') return 'vrij'
+
+  return 'onbekend'
+}
+
+function getStatusLabel(item) {
+  const status = getStatus(item)
+
+  const labels = {
+    vrij: 'Vrij',
+    bezet: 'Bezet',
+    kapot: 'Kapot',
+    ongekeurd: 'Ongekeurd',
+  }
+
+  return labels[status] ?? (item.status || 'Onbekend')
+}
+
+function rowStyle(item) {
+  const kleuren = {
+    vrij: {
+      background: '#d1fae5',
+      color: '#065f46',
+    },
+    bezet: {
+      background: '#fef3c7',
+      color: '#92400e',
+    },
+    kapot: {
+      background: '#fee2e2',
+      color: '#991b1b',
+    },
+    ongekeurd: {
+      background: '#f0f0f0',
+      color: '#6b7280',
+    },
+    onbekend: {
+      background: '#f3f4f6',
+      color: '#374151',
+    },
+  }
+
+  // Behoudt het bestaande formaat voor ExpandedBaseTable.
+  return [kleuren[getStatus(item)]]
 }
 
 function editAsset(asset) {
   emit('edit-asset', asset)
-}
-
-function getBoekingStatus(boekingen) {
-  const now = new Date()
-
-  let actief = false
-  let gepland = false
-
-  boekingen?.forEach((b) => {
-    const lever = new Date(b.leverDatum)
-    const ophaal = b.ophaalDatum ? new Date(b.ophaalDatum) : null
-
-    if (lever <= now && (!ophaal || ophaal >= now)) {
-      actief = true
-    }
-
-    if (lever > now) {
-      gepland = true
-    }
-  })
-
-  if (actief) return 'bezet'
-  if (gepland) return 'gepland'
-
-  return null
-}
-
-function rowStyle(item) {
-  const b = getBoekingStatus(item.huidigeBoekingen)
-
-  if (item.status === 'Kapot') {
-    return [{ background: '#fee2e2' }, { color: '#991b1b' }]
-  }
-
-  if (item.status === 'Ongekeurd') {
-    return [{ background: '#f0f0f0' }, { color: '#0153f7' }]
-  }
-
-  if (b === 'bezet') {
-    return [{ background: '#fef3c7' }, { color: '#92400e' }]
-  }
-
-  if (b === 'gepland') {
-    return [{ background: '#91b7f0' }, { color: '#0153f7' }]
-  }
-
-  return [{ background: '#d1fae5' }, { color: '#065f46' }]
-}
-
-/* -------------------- */
-/* STATUS CLASS */
-/* -------------------- */
-function getStatus(item) {
-  if (item.status === 'Kapot') return 'kapot'
-  if (item.status === 'Ongekeurd') return 'ongekeurd'
-
-  const b = getBoekingStatus(item.huidigeBoekingen)
-
-  if (b === 'bezet') return 'bezet'
-  if (b === 'gepland') return 'gepland'
-
-  return 'vrij'
-}
-
-function getStatusLabel(item) {
-  if (item.status === 'Kapot') return 'Kapot'
-  if (item.status === 'Ongekeurd') return 'Ongekeurd'
-
-  const b = getBoekingStatus(item.huidigeBoekingen)
-
-  if (b === 'bezet') return 'Bezet'
-
-  if (b === 'gepland') {
-    const next = item.huidigeBoekingen
-      ?.filter(b => new Date(b.leverDatum) > new Date())
-      ?.sort((a, b) => new Date(a.leverDatum) - new Date(b.leverDatum))[0]
-
-    return next
-      ? `Ingepland • ${formatDate(next.leverDatum)}`
-      : 'Ingepland'
-  }
-
-  return 'Vrij'
 }
 </script>
 <style scoped>
@@ -322,7 +355,10 @@ function getStatusLabel(item) {
   transform: translateX(-50%);
   pointer-events: none;
 }
-
+.status.onbekend {
+  background: #f3f4f6;
+  color: #374151;
+}
 .edit-btn {
   background: none;
   border: none;

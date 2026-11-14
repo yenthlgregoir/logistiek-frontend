@@ -1,7 +1,12 @@
 import { api } from './client'
 
+const BASE = '/entiteiten'
+
 export const entiteitApi = {
-  getEntiteiten: () => api.get(`/logistics/entiteit`),
-  createEniteit: (data) => api.post(`/logistics/entiteit`, data),
-  updateEntiteit: (id , data) => api.patch(`/logistics/entiteit/${id}` , data)
+  getEntiteiten: () => api.get(BASE),
+
+  createEniteit: (data) => api.post(BASE, data),
+
+  updateEntiteit: (id, data) =>
+    api.put(`${BASE}/${encodeURIComponent(id)}`, data),
 }

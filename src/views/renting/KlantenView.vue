@@ -4,7 +4,7 @@
     <KlantenList
       :klanten="paginatedKlanten"
       :search="search"
-      :selected-id="selectedKlant?._id"
+      :selected-id="selectedKlant?.id"
       @update:search="search = $event"
       @select="selectKlant"
       @new="selectNew"
@@ -87,7 +87,7 @@ async function loadKlanten() {
 }
 function editLeveradres(adres) {
   Object.assign(nieuwAdres, {
-    _id: undefined,
+    id: undefined,
     naam: '',
     straat: '',
     huisnummer: '',
@@ -138,7 +138,7 @@ function selectKlant(k) {
     form,
     JSON.parse(
       JSON.stringify({
-        id: k._id,
+        id: k.id,
         naam: k.naam,
         klantNummer: k.klantNummer,
         telefoonnummer: k.telefoonnummer,
@@ -170,7 +170,7 @@ function selectNew() {
 /* SAVE (ENIGE API MOMENT) */
 async function saveKlant(data) {
   if (selectedKlant.value) {
-    await klantApi.update(selectedKlant.value._id, data)
+    await klantApi.update(selectedKlant.value.id, data)
   } else {
     await klantApi.add(JSON.stringify(data))
   }
@@ -183,7 +183,7 @@ async function saveKlant(data) {
 function leveradresToevoegen(localForm) {
   Object.assign(form, localForm)
   Object.assign(nieuwAdres, {
-    _id: undefined,
+    id: undefined,
     naam: '',
     straat: '',
     huisnummer: '',
@@ -194,14 +194,14 @@ function leveradresToevoegen(localForm) {
 }
 
 function addLeverAdresModal(adres) {
-  if (adres._id) {
+  if (adres.id) {
     upsertLeverAdres(adres)
   } else {
     form.leverAdressen.push({ ...adres })
   }
   showModal.value = false
   Object.assign(nieuwAdres, {
-    _id: undefined,
+    id: undefined,
     naam: '',
     straat: '',
     huisnummer: '',
@@ -213,8 +213,8 @@ function addLeverAdresModal(adres) {
 function upsertLeverAdres(adres) {
   const list = form.leverAdressen
 
-  const index = adres._id
-    ? list.findIndex((a) => a._id === adres._id)
+  const index = adres.id
+    ? list.findIndex((a) => a.id === adres.id)
     : list.findIndex(
         (a) =>
           a.naam === adres.naam &&
@@ -233,8 +233,8 @@ function upsertLeverAdres(adres) {
 
 function removeLeverAdresLocal(adres) {
   form.leverAdressen = form.leverAdressen.filter((a) =>
-    a._id
-      ? a._id !== adres._id
+    a.id
+      ? a.id !== adres.id
       : !(
           a.naam === adres.naam &&
           a.straat === adres.straat &&
@@ -247,7 +247,7 @@ function removeLeverAdresLocal(adres) {
 
 /* DELETE */
 async function deleteKlant() {
-  await klantApi.remove(selectedKlant.value._id)
+  await klantApi.remove(selectedKlant.value.id)
   await loadKlanten()
   showDetail.value = false
 }

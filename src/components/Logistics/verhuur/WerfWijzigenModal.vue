@@ -7,7 +7,7 @@
     <input v-model="search" placeholder="Zoek werf..." class="search-input" type="text" />
 
     <ul class="list">
-      <li v-for="w in filtered" :key="w._id" class="list-item" @click="select(w)">
+      <li v-for="w in filtered" :key="w.id" class="list-item" @click="select(w)">
         {{ w.naam }}
       </li>
     </ul>

@@ -2,6 +2,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/authentication/auth.store.js'
 
 const routes = [
+  { path: '/toegang', name: 'mijnToegang', component: () => import('@/views/authentication/AccessView.vue'), meta: { requiresAuth: true, title: 'Mijn toegang' } },
+  { path: '/vandaag', name: 'vandaag', component: () => import('@/views/VandaagView.vue'), meta: { requiresAuth: true, noSidebar: true, roles: ['admin'], title: 'Vandaag' } },
+  // ---------------- TOOLS ----------------
+  { path: '/tools', redirect: '/tools/planning', meta: { requiresAuth: true, roles: ['admin', 'tools'], title: 'Tools' } },
+  { path: '/tools/planning', name: 'toolsPlanning', component: () => import('@/views/tools/UitleenView.vue'), props: { mode: 'planning' }, meta: { requiresAuth: true, roles: ['admin', 'tools'], title: 'Tools' } },
+  { path: '/tools/uitleen', name: 'toolsUitleen', component: () => import('@/views/tools/UitleenView.vue'), props: { mode: 'lijst' }, meta: { requiresAuth: true, roles: ['admin', 'tools'], title: 'Tools' } },
+  { path: '/tools/archief', name: 'toolsArchief', component: () => import('@/views/tools/UitleenView.vue'), props: { mode: 'archief' }, meta: { requiresAuth: true, roles: ['admin', 'tools'], title: 'Tools' } },
+  { path: '/tools/materiaal', name: 'toolsMateriaal', component: () => import('@/views/tools/MateriaalView.vue'), meta: { requiresAuth: true, roles: ['admin', 'tools'], title: 'Tools' } },
   // Home
   {
     path: '/',
@@ -78,7 +86,7 @@ const routes = [
   {
     path: '/admin/create-user',
     name: 'createUser',
-    component: () => import('@/views/authentication/createUserPage.vue'),
+    redirect: '/admin/users',
     meta: {
       requiresAuth: true,
       roles: ['admin'],
@@ -247,14 +255,14 @@ const routes = [
     },
   },
   {
-    path: '/logistics/hoogtewerkers/lijst',
+    path: '/hoogtewerkerselectie',
+    alias: '/logistics/hoogtewerkers/lijst',
     name: 'hoogtewerkersLijst',
     component: () => import('@/views/Logistics/HoogtewerkerCardsView.vue'),
-    props: { assetModel: 'Hoogtewerker' },
     meta: {
-      requiresAuth: false,
+      requiresAuth: true,
       noSidebar: true,
-      title: 'Logistics',
+      title: 'Hoogtewerker kiezen',
     },
   },
   {
@@ -316,35 +324,46 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to) => {
   const auth = useAuthStore()
 
-  if (auth.token && !auth.initialized) {
+  if (!auth.initialized || to.meta.requiresAuth) {
     try {
       await auth.fetchMe()
-    } catch (e) {
-      console.warn('fetchMe failed')
+    } catch {
+      // Bij een verbindingsfout tonen we de loginpagina met een foutmelding.
+      if (to.name !== 'login') {
+        return { name: 'login' }
+      }
+
+      return true
     }
   }
 
-  if (to.meta.requiresAuth && !auth.token) {
-    return next({ name: 'login' })
+  if (to.meta.requiresAuth && !auth.isLoggedIn) {
+    return { name: 'login' }
+  }
+
+  // Wie al aangemeld is, hoeft het loginscherm niet te zien.
+  if (to.name === 'login' && auth.isLoggedIn) {
+    return { name: 'home' }
   }
 
   if (to.meta.roles) {
-    const role = auth.user?.role
+  const roles = auth.user?.roles ?? []
 
-    if (!role) {
-      return next({ name: 'login' })
-    }
+  const allowed =
+    roles.includes('admin') ||
+    to.meta.roles.some(role => roles.includes(role))
 
-    if (role !== 'admin' && !to.meta.roles.includes(role)) {
-      return next({ name: 'home' })
-    }
+  if (!allowed) {
+    return { name: 'home' }
   }
+}
 
-  next()
+  return true
 })
+
 router.afterEach((to) => {
   const defaultTitle = 'Operations'
   document.title = to.meta.title ? `${to.meta.title} | Operations` : defaultTitle

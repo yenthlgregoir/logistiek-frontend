@@ -1,12 +1,29 @@
 import { api } from './client'
 
+const BASE = '/werven'
+
 export const werfApi = {
   list: (query = {}) => {
-    const params = new URLSearchParams(query).toString()
-    return api.get(`/logistics/werf?${params}`)
+    const params = new URLSearchParams()
+
+    for (const [key, value] of Object.entries(query)) {
+      if (value != null && value !== '') {
+        params.set(key, String(value))
+      }
+    }
+
+    const search = params.toString()
+    return api.get(`${BASE}${search ? `?${search}` : ''}`)
   },
-  create: (data) => api.post('/logistics/werf', data),
-  getById: (id) => api.get(`/logistics/werf/${id}`),
-  remove: (id) => api.del(`/logistics/werf/${id}`),
-  update: (id, data) => api.patch(`/logistics/werf/${id}`, data),
+
+  create: (data) => api.post(BASE, data),
+
+  getById: (id) =>
+    api.get(`${BASE}/${encodeURIComponent(id)}`),
+
+  remove: (id) =>
+    api.del(`${BASE}/${encodeURIComponent(id)}`),
+
+  update: (id, data) =>
+    api.put(`${BASE}/${encodeURIComponent(id)}`, data),
 }

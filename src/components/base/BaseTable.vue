@@ -1,25 +1,18 @@
 <template>
-  <div class="lijstweergave">
-    <!-- HEADER -->
+  <div class="base-table" :style="{ '--table-min-width': minWidth }" tabindex="0" role="region" aria-label="Tabel; horizontaal scrollbaar">
+    <div class="table-grid">
     <div class="table-header" :style="gridStyle">
-      <slot name="header" />
+      <template v-if="sortableColumns.length">
+        <button v-for="column in sortableColumns" :key="column.key" type="button" class="sort-heading" :class="{ 'sort-active': sortBy === column.key, right: column.align === 'right' }" :aria-label="`${column.label}: ${sortBy === column.key ? (sortDirection === 'asc' ? 'oplopend' : 'aflopend') + ' gesorteerd. ' : ''}Klik om ${sortBy === column.key && sortDirection === 'asc' ? 'aflopend' : 'oplopend'} te sorteren`" @click="emit('sort-change', { key: column.key, direction: sortBy === column.key && sortDirection === 'asc' ? 'desc' : 'asc' })">
+          {{ column.label }}<span class="sort-indicator" aria-hidden="true">{{ sortBy === column.key ? (sortDirection === 'asc' ? '↑' : '↓') : '↕' }}</span>
+        </button>
+      </template>
+      <slot v-else name="header" />
     </div>
-
-    <!-- ROWS -->
-    <div
-      v-for="item in items"
-      :key="getKey(item)"
-      class="table-row"
-      :class="{ 'no-hover': !hover }"
-      :style="gridStyle"
-      @click="$emit('row-click', item)"
-    >
+    <div v-for="(item, index) in items" :key="getKey(item, index)" class="table-row" :class="{ 'no-hover': !hover }" :style="gridStyle" tabindex="0" @click="emit('row-click', item)" @keydown.enter.self.prevent="emit('row-click', item)" @keydown.space.self.prevent="emit('row-click', item)">
       <slot name="row" :item="item" />
     </div>
-
-    <!-- EMPTY -->
-    <div v-if="!items.length" class="no-results">
-      <slot name="empty">Geen resultaten gevonden</slot>
+    <div v-if="!items.length" class="no-results"><slot name="empty">Geen resultaten gevonden.</slot></div>
     </div>
   </div>
 </template>
@@ -32,163 +25,85 @@ const props = defineProps({
   columns: { type: String, default: '1fr 1fr' },
   itemKey: { type: String, default: '_id' },
   hover: { type: Boolean, default: true },
+  minWidth: { type: String, default: '720px' },
+  sortableColumns: { type: Array, default: () => [] },
+  sortBy: { type: String, default: '' },
+  sortDirection: { type: String, default: 'asc' },
 })
-
-defineEmits(['row-click'])
-
-const gridStyle = computed(() => ({
-  gridTemplateColumns: props.columns,
-}))
-
-function getKey(item) {
-  return item?.[props.itemKey] || item?.id || Math.random()
+const emit = defineEmits(['row-click', 'sort-change'])
+const gridStyle = computed(() => ({ gridTemplateColumns: props.columns }))
+const fallbackKeys = new WeakMap()
+let nextKey = 0
+function getKey(item, index) {
+  const id = item?.[props.itemKey] ?? item?.id ?? item?._id
+  if (id != null && id !== '') return `id:${typeof id}:${id}`
+  if (item !== null && typeof item === 'object') {
+    if (!fallbackKeys.has(item)) fallbackKeys.set(item, `row:${nextKey++}`)
+    return fallbackKeys.get(item)
+  }
+  return `value:${typeof item}:${String(item)}:${index}`
 }
 </script>
 
-<style>
-/* =========================================
-   WRAPPER
-========================================= */
-.lijstweergave {
+<style scoped>
+.base-table {
+  --table-ink: #263347;
   width: 100%;
-  font-family: 'Inter', sans-serif;
-  overflow-x: hidden; /* ✅ prevent horizontal scroll */
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--table-ink);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  scrollbar-width: thin;
+  scrollbar-color: #b8c5d5 #f4f6f9;
+  -webkit-font-smoothing: antialiased;
 }
-
-/* =========================================
-   HEADER (Desktop)
-========================================= */
+.base-table, .base-table :deep(*) { box-sizing: border-box; }
+.base-table:focus-visible { outline: 2px solid #6794d2; outline-offset: 3px; }
+.table-grid { min-width: var(--table-min-width, 720px); padding-bottom: 4px; }
+.table-header, .table-row { display: grid; align-items: center; column-gap: 28px; padding: 0 26px; }
 .table-header {
-  display: grid;
-  padding: 14px 18px;
-  background: #f0f0f0;
-  font-weight: 700;
-  color: #6e6e6e;
-  border-radius: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  margin-bottom: 12px;
-  font-size: 14px;
-  backdrop-filter: blur(6px);
-}
-
-/* =========================================
-   ROW (Desktop)
-========================================= */
-.table-row {
-  display: grid;
-  padding: 16px 18px;
-  background: #ffffff;
-  border-radius: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-  transition: 0.25s ease;
-  cursor: pointer;
+  min-height: 48px;
+  background: #1c2d43;
+  color: #c4d0e0;
+  border-bottom: 1px solid #132238;
+  border-radius: 10px;
   margin-bottom: 10px;
-  align-items: center;
-  overflow-x: hidden; /* ✅ prevents overflow */
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
-
-/* Hover */
-.table-row:hover {
-  background: #5786f7;
-  color: white;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+.table-row {
+  position: relative;
+  min-height: 76px;
+  padding-top: 17px;
+  padding-bottom: 17px;
+  background: #fff;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px #1b304b08;
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: background-color 140ms, box-shadow 140ms;
 }
-
-.table-row.no-hover:hover {
-  background: #ffffff;
-  color: inherit;
-  transform: none;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-  cursor: default;
-}
-
-/* =========================================
-   CELLS
-========================================= */
-.table-header > div,
-.table-row > div {
-  font-size: 14px;
-}
-
-/* =========================================
-   ALIGNMENT
-========================================= */
-.right {
-  justify-self: end;
-  text-align: right;
-}
-
-/* =========================================
-   EMPTY
-========================================= */
-.no-results {
-  text-align: center;
-  padding: 2rem;
-  font-size: 15px;
-  color: #94a3b8;
-  font-style: italic;
-}
-
-/* =========================================
-   MOBILE CARD LAYOUT
-========================================= */
-@media (max-width: 768px) {
-  /* Header weg */
-  .table-header {
-    display: none !important;
-  }
-
-  /* ✅ VOLLEDIG weg van grid op mobiel */
-  .table-row {
-    display: flex !important;
-    flex-direction: column;
-    grid-template-columns: none !important;
-
-    width: 100%;
-    padding: 18px;
-    row-gap: 10px;
-
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-    transform: none !important;
-    color: inherit !important;
-  }
-
-  .table-row:hover {
-    transform: none;
-    background: white;
-    color: inherit;
-  }
-
-  /* ✅ Cards moeten nooit overflowen */
-  .table-row > div {
-    width: 100%;
-    box-sizing: border-box;
-    word-break: break-word;
-    text-align: left !important;
-  }
-
-  /* ========= LABEL SUPPORT ========= */
-  .table-row > div[data-label] {
-    position: relative;
-    padding-left: 90px;
-    min-height: 20px;
-  }
-
-  .table-row > div[data-label]::before {
-    content: attr(data-label);
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 80px;
-    white-space: normal;
-    font-weight: 600;
-    color: #6b7280;
-    font-size: 13px;
-    line-height: 1.2;
-  }
-}
+.table-row + .table-row { margin-top: 8px; }
+.table-row:not(.no-hover):hover { background: #fff; box-shadow: inset 3px 0 #477cce, 0 3px 8px #1b304b0d; }
+.table-row:focus-visible { z-index: 1; outline: 2px solid #729cdb; outline-offset: -3px; background: #edf4ff; }
+.table-row.no-hover { cursor: default; }
+.sort-heading { display: inline-flex; align-items: center; gap: 8px; justify-self: start; padding: 10px 0; border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; text-align: left; cursor: pointer; }
+.sort-heading:hover, .sort-heading.sort-active { color: #fff; }
+.sort-heading:focus-visible { outline: 2px solid #99bdf3; outline-offset: 3px; border-radius: 3px; }
+.sort-indicator { opacity: .45; font-size: 13px; }
+.sort-active .sort-indicator { opacity: 1; color: #a8cbff; }
+.table-header > :deep(*), .table-row > :deep(*) { min-width: 0; overflow-wrap: anywhere; }
+.table-header :deep(.right), .table-row :deep(.right) { justify-self: end; text-align: right; }
+.no-results { padding: 56px 26px; text-align: center; color: #8390a2; font-size: 13px; line-height: 1.7; background: transparent; }
+@media (max-width: 768px) { .table-header, .table-row { padding-left: 20px; padding-right: 20px; column-gap: 22px; } }
+@media (prefers-reduced-motion: reduce) { .table-row { transition: none; } }
 </style>

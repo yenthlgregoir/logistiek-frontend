@@ -1,67 +1,147 @@
 import { useLoadingStore } from '@/stores/LoadingStore'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api')
+  .replace(/\/$/, '')
 
-function isTokenExpired(token) {
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]))
-    return Date.now() >= payload.exp * 1000
-  } catch (err) {
-    return true
+function handleUnauthorized() {
+  localStorage.removeItem('token')
+
+  if (window.location.pathname !== '/login') {
+    window.location.assign('/login')
   }
+}
+
+async function responseError(response) {
+  const text = await response.text()
+
+  let data
+  try {
+    data = JSON.parse(text)
+  } catch {
+    data = { message: text || `API-fout (${response.status})` }
+  }
+
+  const error = new Error(data?.message || `API-fout (${response.status})`)
+
+  // Behoud ondersteuning voor bestaande err.response-controles.
+  error.response = {
+    status: response.status,
+    data,
+  }
+
+  if (response.status === 401) {
+    handleUnauthorized()
+  }
+
+  return error
+}
+
+async function getCsrfToken() {
+  const response = await fetch('/api/csrf', {
+    credentials: 'same-origin',
+    cache: 'no-store',
+  })
+
+  if (!response.ok) {
+    throw await responseError(response)
+  }
+
+  return response.json()
 }
 
 export async function request(path, options = {}) {
   const loading = useLoadingStore()
-  const isFormData = options.body instanceof FormData
-  const token = localStorage.getItem('token')
-  const key = options.key || null
+
+  const {
+    key = null,
+    responseType,
+    headers: customHeaders,
+    ...fetchOptions
+  } = options
+
+  const method = (fetchOptions.method || 'GET').toUpperCase()
+  const isFormData = fetchOptions.body instanceof FormData
+  const headers = new Headers(customHeaders)
+
+  headers.delete('Authorization')
+
+  if (
+    fetchOptions.body != null &&
+    !isFormData &&
+    !headers.has('Content-Type')
+  ) {
+    headers.set('Content-Type', 'application/json')
+  }
 
   loading.start(key)
 
   try {
-    if (token && isTokenExpired(token)) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
-      return
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+      const csrf = await getCsrfToken()
+      headers.set(csrf.headerName, csrf.token)
     }
 
-    const headers = {
-      ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
-      ...(options.headers || {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    }
-
-    const res = await fetch(`${API_BASE}${path}`, {
-      credentials: 'include',
+    const response = await fetch(`${API_BASE}${path}`, {
+      ...fetchOptions,
+      method,
+      credentials: 'same-origin',
       headers,
-      ...options,
     })
 
-    if (res.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
-      return
+    if (!response.ok) {
+      throw await responseError(response)
     }
 
-    if (!res.ok) {
-      const text = await res.text()
-      throw new Error(text || 'API error')
+    if (response.status === 204 || method === 'HEAD') {
+      return null
     }
 
-    if (options.responseType === 'blob') return await res.blob()
-    if (options.responseType === 'arraybuffer') return await res.arrayBuffer()
+    if (responseType === 'blob') return response.blob()
+    if (responseType === 'arraybuffer') return response.arrayBuffer()
 
-    return res.status === 204 ? null : await res.json()
+    const text = await response.text()
+    if (!text) return null
+
+    const contentType = response.headers.get('content-type') || ''
+
+    return contentType.includes('json') ? JSON.parse(text) : text
   } finally {
     loading.stop(key)
   }
 }
-// Helper functies
+
 export const api = {
-  get: (path, options) => request(path, options),
-  post: (path, body) => request(path, { method: 'POST', body: JSON.stringify(body) }),
-  postFormData: (path, formData) => request(path, { method: 'POST', body: formData }),
-  patch: (path, body) => request(path, { method: 'PATCH', body: JSON.stringify(body) }),
-  del: (path) => request(path, { method: 'DELETE' }),
+  get: (path, options = {}) =>
+    request(path, { ...options, method: 'GET' }),
+
+  post: (path, body, options = {}) =>
+    request(path, {
+      ...options,
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  postFormData: (path, formData, options = {}) =>
+    request(path, {
+      ...options,
+      method: 'POST',
+      body: formData,
+    }),
+
+  put: (path, body, options = {}) =>
+    request(path, {
+      ...options,
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+
+  patch: (path, body, options = {}) =>
+    request(path, {
+      ...options,
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }),
+
+  del: (path, options = {}) =>
+    request(path, { ...options, method: 'DELETE' }),
 }

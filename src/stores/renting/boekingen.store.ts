@@ -43,6 +43,7 @@ export const useBoekingenStore = defineStore('boekingen', {
   state: () => ({
     boekingen: [] as any[],
     currentBoeking: null as any | null,
+    historyRevision: 0,
     huidigeBoekingId: null as string | null,
 
     currentViewMode: 'actief',
@@ -225,6 +226,7 @@ export const useBoekingenStore = defineStore('boekingen', {
     await boekingApi.changeState(id, {
       status
     })
+    this.historyRevision++
 
     this.detailCache.delete(id)
     this.invalidateLists()
@@ -248,6 +250,7 @@ export const useBoekingenStore = defineStore('boekingen', {
 
       try {
         await boekingApi.updatePeriode(id, beginDatum, eindDatum)
+        this.historyRevision++
 
         const patch = {
           beginDatum,
@@ -258,6 +261,7 @@ export const useBoekingenStore = defineStore('boekingen', {
 
         this.updateLocal(id, patch)
         this.detailCache.delete(id)
+        this.invalidateLists()
       } catch (err) {
         console.error(err)
         this.error.action = err
@@ -272,9 +276,11 @@ export const useBoekingenStore = defineStore('boekingen', {
 
       try {
         await updateComment(id, comment)
+        this.historyRevision++
 
         this.updateLocal(id, { comment })
         this.detailCache.delete(id)
+        this.invalidateLists()
       } catch (err) {
         console.error(err)
         this.error.action = err
@@ -287,6 +293,7 @@ export const useBoekingenStore = defineStore('boekingen', {
       if(!this.currentBoeking) return
       const id = adres._id;
       await boekingApi.update(this.currentBoeking._id, { leverAdres: id})
+      this.historyRevision++
       this.updateLocal(this.currentBoeking._id, {leverAdresDetails : adres});
     },
 
@@ -316,11 +323,13 @@ export const useBoekingenStore = defineStore('boekingen', {
     async openVrijeToestellen(boekingId: string) {
       try {
         const b = this.boekingen.find((b) => b._id === boekingId)
+          ?? (this.currentBoeking?._id === boekingId ? this.currentBoeking : null)
         if (!b) return
 
         this.huidigeBoekingId = boekingId
 
         this.vrijeToestellen = await getVrijeToestellen({
+          boekingId,
           beginDatum: b.beginDatum,
           eindDatum: b.eindDatum,
           toestelType: b.toestelType?._id,
@@ -338,9 +347,11 @@ export const useBoekingenStore = defineStore('boekingen', {
 
       try {
         await assignToestel(this.huidigeBoekingId, toestel._id)
+        this.historyRevision++
 
         this.updateLocal(this.huidigeBoekingId, { toestel })
         this.detailCache.delete(this.huidigeBoekingId)
+        this.invalidateLists()
       } catch (err) {
         console.error(err)
         this.error.action = err

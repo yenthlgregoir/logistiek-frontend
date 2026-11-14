@@ -29,7 +29,7 @@ defineEmits(['openBoeking', 'addBoeking', 'filterType'])
 const filteredBoekingen = computed(() => {
   return (props.boekingen || []).filter((b) => {
     const asset = b.asset || b.toestel
-    return asset && asset._id // 🔥 alleen geldige boekingen
+    return asset && asset.id // 🔥 alleen geldige boekingen
   })
 })
 
@@ -39,14 +39,14 @@ const assets = computed(() => {
 
   filteredBoekingen.value.forEach((b) => {
     const asset = b.asset || b.toestel
-    map.set(asset._id, asset)
+    map.set(asset.id, asset)
   })
 
   return Array.from(map.values())
 })
 
 /* ---------------- MAPPERS ---------------- */
-const getAssetId = (a) => a._id
+const getAssetId = (a) => a.id
 
 const getStart = (b) => {
   const raw = b.leverDatum || b.beginDatum

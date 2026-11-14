@@ -15,8 +15,11 @@
     </div>
 
     <!-- tabel -->
-    <BaseTable :items="werven" columns="1fr 2fr 2fr 1fr" @row-click="openWerfDrawer">
-      <!-- header -->
+<BaseTable
+  :items="werven"
+  columns="1fr 2fr 1fr"
+  @row-click="openWerfDrawer"
+>      <!-- header -->
       <template #header>
         <div>Naam</div>
         <div>Locatie</div>
@@ -27,9 +30,12 @@
       <template #row="{ item: werf }">
         <div>{{ werf.naam || 'Onbekend' }}</div>
         <div>{{ formatLocatie(werf) }}</div>
-        <div class="col-status right" :class="werf.status">
-          {{ werf.status || 'Onbekend' }}
-        </div>
+        <div
+  class="col-status right"
+  :class="statusClass(werf.status)"
+>
+  {{ statusLabel(werf.status) }}
+</div>
       </template>
     </BaseTable>
 
@@ -111,6 +117,20 @@ function handleEdit(data) {
   emit('edit', data)
   closeDrawer
 }
+
+function statusClass(status) {
+  return String(status ?? '').trim().toLowerCase()
+}
+
+function statusLabel(status) {
+  const labels = {
+    bezig: 'Bezig',
+    afgerond: 'Afgerond',
+    onderhoud: 'Onderhoud',
+  }
+
+  return labels[statusClass(status)] || status || 'Onbekend'
+}
 </script>
 
 <style scoped>
@@ -130,15 +150,17 @@ function handleEdit(data) {
   font-size: 13px;
   text-align: center;
 }
-.col-status.Bezig {
+.col-status.bezig {
   background: #9add91;
   color: #065f46;
 }
-.col-status.Afgerond {
+
+.col-status.afgerond {
   background: #fee2e2;
   color: #7f1d1d;
 }
-.col-status.Onderhoud {
+
+.col-status.onderhoud {
   background: #5786f7;
   color: #e0f2fe;
 }

@@ -22,7 +22,7 @@
         </div>
         <select v-else v-model="verhuurCopy.assetType">
           <option disabled value="">Selecteer type</option>
-          <option v-for="a in assets" :key="a._id" :value="a.naam">
+          <option v-for="a in assets" :key="a.id" :value="a.naam">
             {{ a.naam }}
           </option>
         </select>

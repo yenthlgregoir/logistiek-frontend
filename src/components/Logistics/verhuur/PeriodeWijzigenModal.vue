@@ -1,82 +1,51 @@
 <template>
-  <BaseModal @close="close">
-    <!-- HEADER -->
-    <template #header>
-      <h3>Datum aanpassen</h3>
-    </template>
-
-    <!-- BODY -->
+  <BaseModal @close="$emit('close')">
+    <template #header><h3>Periode aanpassen</h3></template>
     <div class="form-group">
-      <label>Begin datum</label>
-      <input type="date" v-model="form.leverDatum" required />
+      <label>Leveren: datum en tijd</label>
+      <input v-model="form.leverDatum" type="datetime-local" step="1" required />
     </div>
-
     <div class="form-group">
-      <label>Eind datum</label>
-      <input type="date" v-model="form.ophaalDatum" />
+      <label>Ophalen: datum en tijd (optioneel)</label>
+      <input v-model="form.ophaalDatum" type="datetime-local" step="1" />
     </div>
-
-    <div v-if="errorMessage" class="error-box">
-      {{ errorMessage }}
-    </div>
-
-    <!-- FOOTER -->
-    <template #footer>
-      <button class="toevoegen-btn" @click="save">Opslaan</button>
-    </template>
+    <div v-if="errorMessage" class="error-box" role="alert">{{ errorMessage }}</div>
+    <template #footer><button type="button" class="toevoegen-btn" @click="save">Overnemen</button></template>
   </BaseModal>
 </template>
 
 <script setup>
 import { reactive, ref, watch } from 'vue'
 import BaseModal from '@/components/base/BaseModal.vue'
-
-const props = defineProps({
-  boeking: Object,
-})
-
+const props = defineProps({ boeking: Object })
 const emit = defineEmits(['close', 'save'])
-
 const errorMessage = ref('')
-
-// Lokaal kopie van de data
-const form = reactive({
-  leverDatum: '',
-  ophaalDatum: '',
-})
-
-// Vul lokale kopie bij mount of wanneer boeking verandert
-watch(
-  () => props.boeking,
-  (v) => {
-    if (!v) return
-    form.leverDatum = v.leverDatum?.split('T')[0] || ''
-    form.ophaalDatum = v.ophaalDatum?.split('T')[0] || ''
-  },
-  { immediate: true },
-)
-
-function close() {
-  emit('close')
+const form = reactive({ leverDatum: '', ophaalDatum: '' })
+function localDateTime(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const pad = (number) => String(number).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
 }
-
-// Save stuurt de lokale kopie terug naar de parent (drawer)
+watch(() => props.boeking, (value) => {
+  form.leverDatum = localDateTime(value?.leverDatum)
+  form.ophaalDatum = localDateTime(value?.ophaalDatum)
+}, { immediate: true })
 function save() {
-  if (!form.leverDatum) {
-    errorMessage.value = 'Leverdatum is verplicht'
+  errorMessage.value = ''
+  const start = new Date(form.leverDatum)
+  const end = form.ophaalDatum ? new Date(form.ophaalDatum) : null
+  if (!form.leverDatum || Number.isNaN(start.getTime()) || (end && Number.isNaN(end.getTime()))) {
+    errorMessage.value = 'Vul een geldige datum en tijd in'
     return
   }
-
-  emit('save', {
-    leverDatum: form.leverDatum,
-    ophaalDatum: form.ophaalDatum || null,
-  })
-
+  if (end && end < start) { errorMessage.value = 'Ophalen mag niet voor leveren liggen'; return }
+  emit('save', { leverDatum: start.toISOString(), ophaalDatum: end?.toISOString() ?? null })
   emit('close')
 }
 </script>
 <style scoped>
-/* ✅ AL JE ORIGINELE CSS BLIJFT GELDIG — BaseModal vervangt alleen overlay & container */
 
 /* =========================================
    FORM GROUPS
@@ -168,3 +137,5 @@ function save() {
   }
 }
 </style>
+
+

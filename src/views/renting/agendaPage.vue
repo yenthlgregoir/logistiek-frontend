@@ -10,7 +10,7 @@
         :bookings="store.filteredBoekingen"
         :typeOptions="store.types"
         item-label="Toestel"
-        :get-item-id="(t) => t._id"
+        :get-item-id="(t) => t.id"
         :get-booking-start="(b) => new Date(b.beginDatum)"
         :get-booking-end="(b) => new Date(b.eindDatum)"
         :get-booking-title="(b) => b.leverAdresDetails?.naam || b.klant?.naam"
@@ -25,6 +25,9 @@
         :boekingen="store.boekingen"
         v-model:search="store.search"
         v-model:dateRange="store.dateRange"
+        v-model:klant="store.selectedKlant"
+        v-model:status="store.selectedStatus"
+        v-model:type="store.selectedType"
         @openBoeking="openBoekingModal"
         @addBoeking="openCreateModal"
       />
@@ -34,7 +37,7 @@
         v-if="showCreateModal"
         :types="store.types"
         @close="showCreateModal = false"
-        @update="refreshBoekingen"
+        @update="handleBoekingCreated"
       />
 
       <!-- Detail -->
@@ -61,7 +64,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useDebounceFn } from '@vueuse/core'
 
 import { useBoekingenStore } from '@/stores/renting/boekingen.store.js'
@@ -77,6 +80,7 @@ import VrijToestellenModal from '@/components/renting/agenda/VrijToestellenModal
 // =========================
 const store = useBoekingenStore()
 const route = useRoute()
+const router = useRouter()
 
 const showAgenda = computed(() => route.path.includes('/planning'))
 
@@ -95,8 +99,8 @@ const toestellen = computed(() => {
   const map = new Map()
 
   store.filteredBoekingen.forEach((b) => {
-    if (b.toestel?._id) {
-      map.set(b.toestel._id, b.toestel)
+    if (b.toestel?.id) {
+      map.set(b.toestel.id, b.toestel)
     }
   })
 
@@ -111,20 +115,39 @@ function onFilterType(type) {
   store.loadBoekingen()
 }
 
+/** Alle filters leeg, inclusief de chips uit BoekingList. */
+function resetAllFilters() {
+  store.resetFilters()
+  store.selectedKlant = null
+  store.selectedStatus = null
+  store.selectedType = null
+  store.dateRange = [null, null]
+}
+
 // =========================
-// SEARCH / DATE RELOAD
+// FILTER RELOAD (search, periode + chips)
 // =========================
 const reload = useDebounceFn(() => {
   store.loadBoekingen()
 }, 300)
 
-watch([() => store.search, () => store.dateRange], reload)
+watch(
+  () => [
+    store.search,
+    store.dateRange,
+    store.selectedKlant,
+    store.selectedStatus,
+    store.selectedType,
+  ],
+  () => reload(),
+  { deep: true }
+)
 
 // =========================
 // RESET WHEN SWITCHING VIEW
 // =========================
 watch(showAgenda, () => {
-  store.resetFilters()
+  resetAllFilters()
   store.loadBoekingen()
 })
 
@@ -135,10 +158,24 @@ function openCreateModal() {
   showCreateModal.value = true
 }
 
+function handleBoekingCreated(booking) {
+  openBoekingModal(booking.id ?? booking._id)
+}
+
 function openBoekingModal(id) {
   selectedBoekingId.value = id
   showBoekingModal.value = true
 }
+
+watch(() => route.query.boeking, id => {
+  if (typeof id === 'string' && id) openBoekingModal(id)
+}, { immediate: true })
+watch(showBoekingModal, open => {
+  if (!open && route.query.boeking) {
+    const query = { ...route.query }; delete query.boeking
+    router.replace({ query })
+  }
+})
 
 async function openVrijeToestellenModal(id) {
   selectedBoekingId.value = id
@@ -179,6 +216,7 @@ async function saveComment(payload) {
 // =========================
 onMounted(async () => {
   store.currentViewMode = 'actief'
+  resetAllFilters()
   await store.loadBoekingen()
   await store.loadTypes()
 })

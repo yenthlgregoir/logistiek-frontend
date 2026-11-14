@@ -90,7 +90,7 @@
 
                 <div
                   v-for="adres in filtered"
-                  :key="adres._id ?? adres.naam"
+                  :key="adres.id ?? adres.naam"
                   class="leveradres-card"
                 >
 

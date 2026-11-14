@@ -1,80 +1,64 @@
 <template>
   <div class="login-page">
-    <!-- LEFT PANEL -->
     <div class="login-left">
       <div class="left-content">
-        <img src="@/assets/logo_ops.png" alt="OPS Platform" class="logo" />
+        <img
+          src="@/assets/logo_ops.png"
+          alt="OPS Platform"
+          class="logo"
+        />
       </div>
     </div>
 
-    <!-- RIGHT PANEL -->
     <div class="login-right">
       <div class="login-card">
         <h2>Sign in</h2>
 
-        <div class="form-group">
-          <input v-model="email" type="email" placeholder="Email" />
-        </div>
+        <p>Meld je aan met je Microsoft-werkaccount.</p>
 
-        <div class="form-group">
-          <input v-model="password" type="password" placeholder="Wachtwoord" />
-        </div>
+        <button
+  type="button"
+  class="microsoft-button"
+  :disabled="loading"
+  :aria-busy="loading"
+  @click="handleLogin"
+>
+  <svg
+    class="microsoft-logo"
+    width="21"
+    height="21"
+    viewBox="0 0 21 21"
+    aria-hidden="true"
+  >
+    <path fill="#f25022" d="M0 0h10v10H0z" />
+    <path fill="#7fba00" d="M11 0h10v10H11z" />
+    <path fill="#00a4ef" d="M0 11h10v10H0z" />
+    <path fill="#ffb900" d="M11 11h10v10H11z" />
+  </svg>
 
-        <button type="button" @click="handleLogin" :disabled="loading">
-          {{ loading ? 'Bezig...' : 'Login' }}
-        </button>
+  <span>
+    {{ loading ? 'Doorsturen…' : 'Aanmelden met Microsoft' }}
+  </span>
+</button>
 
-        <p v-if="error" class="error">{{ error }}</p>
+        <p v-if="auth.error" class="error">
+          {{ auth.error }}
+        </p>
       </div>
     </div>
   </div>
 </template>
 
-
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authentication/auth.store.js'
 
-const email = ref('')
-const password = ref('')
-const error = ref(null)
+const auth = useAuthStore()
 const loading = ref(false)
 
-const router = useRouter()
-const auth = useAuthStore()
-
-const handleLogin = async () => {
-  error.value = null
-
-  if (!email.value || !password.value) {
-    error.value = 'Email en wachtwoord zijn verplicht'
-    return
-  }
-
-  try {
-    loading.value = true
-
-    await auth.login(email.value, password.value)
-
-
-    router.push({ name: 'home' })
-
-
-    
-  } catch (err) {
-    console.error(err)
-
-    const backendError = err?.response?.data
-
-    if (backendError?.message) {
-      error.value = backendError.message.replace(/^Error:\s*/, '')
-    } else {
-      error.value = 'Login mislukt'
-    }
-  } finally {
-    loading.value = false
-  }
+function handleLogin() {
+  loading.value = true
+  auth.login()
 }
 </script>
 
@@ -158,25 +142,57 @@ input:focus {
 }
 
 /* BUTTON */
-button {
+.microsoft-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   width: 100%;
-  padding: 14px;
+  min-height: 50px;
+  margin-top: 20px;
+  padding: 14px 20px;
+
+  background: #fff;
+  border: 1px solid #cbd5e1;
   border-radius: 10px;
-  border: none;
-  background: linear-gradient(180deg, #5a89ff, #3553f2);
-  color: white;
+  box-shadow: 0 2px 4px rgb(15 23 42 / 5%);
+
+  color: #334155;
+  font-family: 'Segoe UI', 'Inter', sans-serif;
+  font-size: 15px;
   font-weight: 600;
-  margin-top: 10px;
+  line-height: 1.4;
+
   cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
-button:hover {
-  background: linear-gradient(180deg, #3553f2, #5a89ff  );
+.microsoft-logo {
+  flex-shrink: 0;
 }
 
-button:disabled {
+.microsoft-button:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  box-shadow: 0 4px 10px rgb(15 23 42 / 8%);
+}
+
+.microsoft-button:active:not(:disabled) {
+  background: #f1f5f9;
+  box-shadow: none;
+}
+
+.microsoft-button:focus-visible {
+  outline: 3px solid #3553f2;
+  outline-offset: 3px;
+}
+
+.microsoft-button:disabled {
   opacity: 0.6;
-  cursor: not-allowed;
+  cursor: wait;
 }
 
 .error {

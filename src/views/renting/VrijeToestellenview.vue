@@ -22,8 +22,8 @@
 
 <option
   v-for="type in types"
-  :key="type._id"
-  :value="type._id"
+  :key="type.id"
+  :value="type.id"
 >
   {{ type.naam }}
 </option>

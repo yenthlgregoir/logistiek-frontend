@@ -54,6 +54,7 @@
               <option value="Geleverd">Geleverd</option>
             </select>
           </div>
+          <ChangeHistory :entity-id="boekingId" entity-type="boeking" :revision="historyRevision" />
         </div>
       </section>
 
@@ -107,6 +108,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import ChangeHistory from '@/components/base/ChangeHistory.vue'
 import { boekingApi } from '@/api/boeking'
 import { toestelApi } from '@/api/toestel'
 
@@ -114,6 +116,7 @@ const { boekingId } = defineProps({ boekingId: String })
 
 const boeking = ref(null)
 const details = ref(null)
+const historyRevision = ref(0)
 
 onMounted(async () => {
   await getBoeking()
@@ -131,7 +134,8 @@ async function getBoeking() {
 
 async function changeStatus() {
   try {
-    await boekingApi.changeState(boeking.value._id, { status: boeking.value.status })
+    await boekingApi.changeState(boeking.value.id, { status: boeking.value.status })
+    historyRevision.value++
   } catch (err) {
     console.log(err)
   }
@@ -139,7 +143,7 @@ async function changeStatus() {
 
 async function changeToestelStatus() {
   try {
-    await toestelApi.changeStatus(details.value._id, {
+    await toestelApi.changeStatus(details.value.id, {
       statusType: details.value.status.statusType,
     })
   } catch (err) {

@@ -23,11 +23,13 @@ export async function getVrijeToestellen(params: {
   beginDatum: string
   eindDatum: string
   toestelType?: string
+  boekingId?: string
 }) {
   return boekingApi.vrijeToestellen({
     beginDatum: params.beginDatum,
     eindDatum: params.eindDatum,
     toestelType: params.toestelType ?? '',
+    boekingId: params.boekingId,
   })
 }
 

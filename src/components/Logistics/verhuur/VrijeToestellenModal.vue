@@ -1,145 +1,78 @@
 <template>
   <div class="modal-overlay" @click.self="close">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="toestel-modal-title">
       <div class="modal-header">
-        <h2>Kies Toestel</h2>
-        <button class="close-btn" @click="close">✕</button>
+        <h2 id="toestel-modal-title">Kies toestel</h2>
+        <button type="button" class="close-btn" :disabled="busy" @click="close" aria-label="Sluiten">✕</button>
       </div>
 
-      <input
-        ref="inputRef"
-        v-model="search"
-        type="text"
-        placeholder="Zoek toestel..."
-        class="search-input"
-      />
+      <input ref="inputRef" v-model="search" type="search" placeholder="Zoek op nummer of type…"
+        class="search-input" :disabled="busy" />
+      <p v-if="toonWerkhoogteFilter && minimumWerkhoogte != null" class="toestel-subtitle">
+        Benodigde werkhoogte: {{ minimumWerkhoogte }} m
+      </p>
+      <p v-if="loading" role="status">Vrije toestellen laden…</p>
+      <p v-if="busy" role="status">Toestel toewijzen…</p>
+      <div v-if="error" class="modal-error" role="alert">{{ error }}</div>
 
-      <div v-if="toonWerkhoogteFilter" class="filter-toggle">
-        <button
-          type="button"
-          :class="{ active: !filterOpWerkhoogte }"
-          @click="setFilterOpWerkhoogte(false)"
-        >
-          Alle vrije toestellen
-        </button>
-
-        <button
-          type="button"
-          :class="{ active: filterOpWerkhoogte }"
-          @click="setFilterOpWerkhoogte(true)"
-        >
-          Op werkhoogte
-        </button>
-      </div>
-
-      <ul class="toestel-list">
-        <li
-          v-for="toestel in gefilterdeToestellen"
-          :key="toestel._id"
-          @click="selectToestel(toestel)"
-          class="toestel-item"
-        >
-          <div class="toestel-title">{{ toestel.nummer }}</div>
-          <div class="toestel-subtitle">
-            {{ toestel.Type?.naam || '-' }}
-
-            <template v-if="toonWerkhoogteFilter">
-              - Werkhoogte: {{ toestel.werkhoogte || '-' }}m
-            </template>
-          </div>
+      <ul v-if="!loading" class="toestel-list">
+        <li v-for="toestel in gefilterdeToestellen" :key="toestel.id">
+          <button type="button" class="toestel-item" :disabled="busy"
+            :aria-pressed="selectedToestel?.id === toestel.id" @click="selectToestel(toestel)">
+            <span class="toestel-title">{{ toestel.nummer }}</span>
+            <span class="toestel-subtitle">
+              {{ toestel.machineType?.naam || 'Onbekend type' }}
+              <template v-if="toonWerkhoogteFilter"> — Werkhoogte: {{ toestel.werkhoogte ?? '—' }} m</template>
+            </span>
+          </button>
         </li>
-
-        <li v-if="!gefilterdeToestellen.length" class="no-results">
-          Geen toestellen gevonden
+        <li v-if="!error && !gefilterdeToestellen.length" class="no-results">
+          {{ search ? 'Geen toestellen die bij je zoekopdracht passen' : 'Geen passende vrije toestellen in deze periode' }}
         </li>
       </ul>
-
       <div class="modal-footer">
-        <button class="btn-cancel" @click="close">Annuleren</button>
+        <button type="button" class="btn-cancel" :disabled="busy || loading" @click="$emit('retry')">Vernieuwen</button>
+        <button type="button" class="btn-cancel" :disabled="busy" @click="close">Annuleren</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
-  toestellen: {
-    type: Array,
-    required: true,
-  },
-  selectedToestel: Object,
-
-  // Alleen true zetten bij hoogtewerkers/schaarliften
-  toonWerkhoogteFilter: {
-    type: Boolean,
-    default: false,
-  },
+  toestellen: { type: Array, default: () => [] },
+  selectedToestel: { type: Object, default: null },
+  toonWerkhoogteFilter: { type: Boolean, default: false },
+  minimumWerkhoogte: { type: Number, default: null },
+  loading: Boolean,
+  busy: Boolean,
+  error: { type: String, default: '' },
 })
-
-const emit = defineEmits(['select', 'close', 'filter-change'])
-
+const emit = defineEmits(['select', 'close', 'retry'])
 const search = ref('')
 const inputRef = ref(null)
-const localToestel = ref(props.selectedToestel || null)
-
-const filterOpWerkhoogte = ref(true)
 
 const gefilterdeToestellen = computed(() => {
-  if (!search.value) return props.toestellen
-
-  const q = search.value.toLowerCase()
-
-  return props.toestellen.filter(
-    (t) =>
-      t.nummer?.toLowerCase().includes(q) ||
-      t.Type?.naam?.toLowerCase().includes(q),
-  )
+  const query = search.value.trim().toLowerCase()
+  return props.toestellen.filter((toestel) => toestel.id && (!query
+    || toestel.nummer?.toLowerCase().includes(query)
+    || toestel.machineType?.naam?.toLowerCase().includes(query)))
 })
 
-function setFilterOpWerkhoogte(value) {
-  if (!props.toonWerkhoogteFilter) return
-
-  filterOpWerkhoogte.value = value
-
-  emit('filter-change', {
-    gebruikWerkhoogte: value,
-    werkhoogte: value ? undefined : 0,
-  })
-}
-
 function selectToestel(toestel) {
-  localToestel.value = toestel
-  emit('select', localToestel.value)
-  close()
+  if (!props.busy && !props.loading && toestel.id) emit('select', toestel)
+  // De drawer sluit pas na een bevestigde API-response.
 }
-
-function close() {
-  emit('close')
-}
-
-function handleKey(e) {
-  if (e.key === 'Escape') close()
-}
-
+function close() { if (!props.busy) emit('close') }
+function handleKey(event) { if (event.key === 'Escape') close() }
 onMounted(() => {
   inputRef.value?.focus()
   window.addEventListener('keydown', handleKey)
 })
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKey)
-})
-
-watch(
-  () => props.selectedToestel,
-  (v) => {
-    localToestel.value = v || null
-  },
-)
+onUnmounted(() => window.removeEventListener('keydown', handleKey))
 </script>
-
 <style scoped>
 .modal-overlay {
   position: fixed;
@@ -349,4 +282,13 @@ watch(
     transform: translateY(0);
   }
 }
+</style>
+
+<style scoped>
+.toestel-item { width: 100%; text-align: left; font: inherit; }
+.toestel-item[aria-pressed="true"] { border-color: #4f73ff; }
+.toestel-item:disabled { cursor: wait; opacity: 0.65; }
+.modal-error { margin-top: 12px; padding: 12px; border-radius: 8px; background: #fee2e2; color: #991b1b; }
+.modal-footer { gap: 8px; }
+.search-input { box-sizing: border-box; }
 </style>

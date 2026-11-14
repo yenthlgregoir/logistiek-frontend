@@ -1,12 +1,29 @@
 import { api } from './client'
 
+const BASE = '/projectleiders'
+
 export const leiderApi = {
   list: (query = {}) => {
-    const params = new URLSearchParams(query).toString()
-    return api.get(`/logistics/projectleider?${params}`)
+    const params = new URLSearchParams()
+
+    for (const [key, value] of Object.entries(query)) {
+      if (value != null && value !== '') {
+        params.set(key, String(value))
+      }
+    }
+
+    const search = params.toString()
+    return api.get(`${BASE}${search ? `?${search}` : ''}`)
   },
-  create: (data) => api.post('/logistics/projectleider', data),
-  getById: (id) => api.get(`/logistics/projectleider/${id}`),
-  remove: (id) => api.del(`/logistics/projectleider/${id}`),
-  update: (id, data) => api.patch(`/logistics/projectleider/${id}`, data),
+
+  create: (data) => api.post(BASE, data),
+
+  getById: (id) =>
+    api.get(`${BASE}/${encodeURIComponent(id)}`),
+
+  remove: (id) =>
+    api.del(`${BASE}/${encodeURIComponent(id)}`),
+
+  update: (id, data) =>
+    api.put(`${BASE}/${encodeURIComponent(id)}`, data),
 }

@@ -71,7 +71,7 @@ const klanten = ref([])
 const types = ref([])
 
 const form = reactive({
-  _id: '',
+  id: '',
   type: '',
   Ref: '',
   nrplaat: '',
@@ -143,7 +143,7 @@ async function loadToestellen() {
       type: filterType.value || undefined,
 
       // 🔥 FIX: klant toevoegen
-      klant: filterKlant.value?._id || filterKlant.value || undefined,
+      klant: filterKlant.value?.id || filterKlant.value || undefined,
 
       ...(currentDateFilter.value
         ? {
@@ -194,8 +194,8 @@ function openForm() {
 
 function editForm(toestel) {
   Object.assign(form, {
-    _id: toestel._id,
-    type: toestel.type?._id || toestel.type || '',
+    id: toestel.id,
+    type: toestel.type?.id || toestel.type || '',
     Ref: toestel.Ref || '',
     nrplaat: toestel.nrplaat || '',
     chasisnummer: toestel.chasisnummer || '',
@@ -204,7 +204,7 @@ function editForm(toestel) {
       eindDatum: toestel.status?.eindDatum || '',
       statusType: toestel.status?.statusType || 'Actief',
     },
-    klant: toestel.klant?._id || toestel.klant || '',
+    klant: toestel.klant?.id || toestel.klant || '',
   })
 
   isEdit.value = true
@@ -217,7 +217,7 @@ function closeForm() {
 
 function resetForm() {
   Object.assign(form, {
-    _id: '',
+    id: '',
     type: '',
     Ref: '',
     nrplaat: '',
@@ -236,7 +236,7 @@ function resetForm() {
 ----------------------------- */
 async function saveToestel(data) {
   try {
-    if (data._id) await toestelApi.update(data._id, data)
+    if (data.id) await toestelApi.update(data.id, data)
     else await toestelApi.create(data)
 
     closeForm()

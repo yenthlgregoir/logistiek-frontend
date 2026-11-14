@@ -24,7 +24,7 @@
         <div v-else>
           <select v-model="leaderCopy.entiteit">
             <option disabled value="">Selecteer entiteit</option>
-            <option v-for="entiteit in entiteiten" :key="entiteit._id" :value="entiteit">
+            <option v-for="entiteit in entiteiten" :key="entiteit.id" :value="entiteit">
               {{ entiteit.naam }}
             </option>
           </select>
@@ -102,7 +102,7 @@ watch(
       // Vervang entiteit ID/object door volledig object uit props.entiteiten
       if (copy.entiteit) {
         const fullEntiteit = props.entiteiten.find(
-          (e) => e._id === copy.entiteit._id || e._id === copy.entiteit,
+          (e) => e.id === copy.entiteit.id || e.id === copy.entiteit,
         )
         copy.entiteit = fullEntiteit || null
       } else {
@@ -138,16 +138,18 @@ function startEdit() {
 function saveLeader() {
   if (isEditMode.value) {
     if (!isEditing.value) return startEdit()
+
     emit('edit', leaderCopy.value)
     isEditing.value = false
   } else {
+    console.log(leaderCopy.value)
     emit('save', leaderCopy.value)
     leaderCopy.value = { naam: '', mailAdres: '', telefoonnummer: '', entiteit: null }
   }
 }
 
 function confirmDelete() {
-  emit('delete', props.leader._id)
+  emit('delete', props.leader.id)
   showConfirm.value = false
 }
 </script>

@@ -1,4 +1,5 @@
 <template>
+  <p v-if="loadError" role="alert">{{ loadError }} <button type="button" :disabled="loading" @click="loadMachines">Opnieuw proberen</button></p>
   <div v-if="step < 4" class="filters wizard">
     <transition name="wizard-fade" mode="out-in">
       <div :key="step" class="filters-full wizard-center wizard-step">
@@ -136,95 +137,47 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import MachineCard from '@/components/Logistics/Schaarliften/HoogtewerkerCard.vue'
-import { schaarliftenApi } from '@/api/schaarliften.js'
 import HoogtewerkerKeuzeCard from '@/components/Logistics/Schaarliften/HoogtewerkerKeuzeCard.vue'
+import { fetchHoogtewerkerSelectie } from '@/api/hoogtewerkerselectie'
+import { matchingMachines } from '@/utils/hoogtewerkerselectie'
 
 const machines = ref([])
-
-/* STEP FLOW */
 const step = ref(1)
 const machineType = ref(null)
-
-/* FILTERS */
-const filters = ref({
-  maxIngeklapteHoogte: 0,
-  maxBreedte: 0,
-  minWerkhoogte: 0,
-  minHefvermogen: 0,
-})
-
-/* FILTER LOGICA */
-const filteredMachines = computed(() => {
-  return machines.value.filter((m) => {
-    if (machineType.value !== 'both' && machineType.value) {
-      if (m.type !== machineType.value) return false
-    }
-
-    if (filters.value.maxIngeklapteHoogte && m.ingeklapteHoogte > filters.value.maxIngeklapteHoogte)
-      return false
-
-    if (filters.value.maxBreedte && m.breedte > filters.value.maxBreedte) return false
-
-    if (filters.value.minWerkhoogte && m.werkhoogte < filters.value.minWerkhoogte) return false
-
-    if (filters.value.minHefvermogen && m.hefvermogen < filters.value.minHefvermogen) return false
-
-    return true
-  })
-})
-
-/* RESET */
-const resetFilters = () => {
+const loadError = ref('')
+const loading = ref(false)
+const filters = ref({ maxIngeklapteHoogte: 0, maxBreedte: 0, minWerkhoogte: 0, minHefvermogen: 0 })
+const filteredMachines = computed(() => matchingMachines(machines.value, machineType.value, filters.value).map(item => ({
+  ...item,
+  brand: item.brand || '-',
+  werkhoogte: item.werkhoogte ?? 0,
+  hefvermogen: item.hefvermogen ?? 0,
+  ingeklapteHoogte: item.ingeklapteHoogte ?? 0,
+  breedte: item.breedte ?? 0,
+  description: item.description || '',
+})))
+function resetFilters() {
   step.value = 1
   machineType.value = null
-
-  filters.value = {
-    maxIngeklapteHoogte: 0,
-    maxBreedte: 0,
-    minWerkhoogte: 0,
-    minHefvermogen: 0,
+  filters.value = { maxIngeklapteHoogte: 0, maxBreedte: 0, minWerkhoogte: 0, minHefvermogen: 0 }
+}
+let alive = true
+async function loadMachines() {
+  loading.value = true
+  loadError.value = ''
+  try {
+    const data = await fetchHoogtewerkerSelectie()
+    if (alive) machines.value = data
+  } catch (failure) {
+    if (alive) loadError.value = failure.message || 'Hoogtewerkers konden niet geladen worden.'
+  } finally {
+    if (alive) loading.value = false
   }
 }
-
-/* DATA */
-onMounted(async () => {
-  const response = await schaarliftenApi.list()
-
-  const data = Array.isArray(response) ? response : (response?.data ?? [])
-
-  const grouped = {}
-
-  data.forEach((item) => {
-    const naam = item.Type?.naam ?? 'Onbekend'
-    const werkhoogte = item.werkhoogte ?? 0
-    const type = item.Type?.type ?? 'unknown'
-
-    const key = `${naam}_${werkhoogte}`
-
-    if (!grouped[key]) {
-      grouped[key] = {
-        id: item._id,
-        model: item.Type?.naam ?? '—',
-        brand: item.Type?.merk ?? '-',
-        type,
-
-        werkhoogte,
-        hefvermogen: item.Type?.hefvermogen ?? 0,
-        ingeklapteHoogte: item.Type?.ingeklapteHoogte ?? 0,
-        breedte: item.Type?.breedte ?? 0,
-
-        description: item.Type?.omschrijving ?? '',
-        aantal: 1,
-      }
-    } else {
-      grouped[key].aantal++
-    }
-  })
-
-  machines.value = Object.values(grouped)
-})
+onMounted(loadMachines)
+onBeforeUnmount(() => { alive = false })
 </script>
 
 <style scoped>

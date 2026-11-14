@@ -1,0 +1,241 @@
+.access-page {
+  padding: 30px;
+  max-width: 1400px;
+  margin: auto;
+  min-width: 0;
+  color: #263347;
+  font-family: Inter, 'Segoe UI', sans-serif;
+}
+.access-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.access-head h1 {
+  font-size: 25px;
+  color: #19304e;
+  margin: 6px 0;
+}
+.access-head p,
+.access-note {
+  font-size: 12px;
+  color: #73839a;
+  line-height: 1.7;
+}
+.access-back {
+  display: block;
+  color: #466fbd;
+  font-size: 12px;
+  margin-bottom: 18px;
+  text-decoration: none;
+}
+.access-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 15px;
+  border: 1px solid #d6dfec;
+  border-radius: 9px;
+  background: white;
+  color: #375573;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.access-button.primary {
+  background: #346acd;
+  border-color: #346acd;
+  color: white;
+}
+.access-button.danger {
+  color: #ad3e49;
+  border-color: #eccbd0;
+}
+.access-button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.access-error,
+.access-success {
+  border-radius: 9px;
+  padding: 13px 16px;
+  line-height: 1.7;
+  font-size: 12px;
+  margin: 14px 0;
+}
+.access-error {
+  background: #fff3f4;
+  border: 1px solid #edcbd0;
+  color: #a03945;
+}
+.access-success {
+  background: #eaf6ef;
+  border: 1px solid #c5e4d2;
+  color: #2c754d;
+}
+.access-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 13px;
+  margin-bottom: 24px;
+}
+.access-module,
+.access-section {
+  background: #fff;
+  border: 1px solid #e0e7f1;
+  border-radius: 12px;
+  padding: 20px;
+}
+.access-module h2,
+.access-section h2 {
+  font-size: 15px;
+  color: #294768;
+  margin: 0 0 14px;
+}
+.access-module p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #77879b;
+}
+.access-form {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.access-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+  color: #536981;
+}
+.access-field input,
+.access-field select,
+.access-field textarea,
+.access-toolbar input,
+.access-toolbar select {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-height: 40px;
+  padding: 10px 12px;
+  border: 1px solid #d9e1ed;
+  border-radius: 8px;
+  color: #344b68;
+  background: white;
+  font: inherit;
+  font-size: 13px;
+}
+.access-field textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+.access-field small {
+  font-size: 11px;
+  color: #8190a3;
+}
+.access-form fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+.access-form .access-button {
+  justify-self: start;
+}
+.access-form-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 16px;
+}
+.access-toolbar,
+.access-tabs,
+.access-role-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+.access-tabs .active {
+  background: #e5edfb;
+  border-color: #a9c0e4;
+  color: #315eaa;
+}
+.access-toolbar input {
+  width: 310px;
+}
+.access-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  background: #edf0f6;
+  color: #5c728e;
+}
+.access-badge.PENDING {
+  background: #fff2d8;
+  color: #916823;
+}
+.access-badge.APPROVED {
+  background: #e3f3e9;
+  color: #327551;
+}
+.access-badge.REJECTED,
+.access-badge.REVOKED {
+  background: #fce8eb;
+  color: #ad4551;
+}
+.access-sub {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  color: #8190a4;
+  line-height: 1.6;
+}
+.access-reason {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.access-role-row {
+  margin: 5px 0;
+  gap: 7px;
+}
+.access-role-row button {
+  padding: 4px 8px;
+  min-height: 28px;
+  font-size: 10px;
+}
+.access-page :is(button, input, select, textarea, a):focus-visible {
+  outline: 3px solid #8aafea;
+  outline-offset: 3px;
+}
+@media (max-width: 850px) {
+  .access-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .access-page {
+    padding: 20px 14px;
+  }
+  .access-form-row {
+    grid-template-columns: 1fr;
+  }
+  .access-module {
+    padding: 15px;
+  }
+  .access-head > .access-button {
+    width: 100%;
+  }
+  .access-toolbar input {
+    width: 100%;
+  }
+}
