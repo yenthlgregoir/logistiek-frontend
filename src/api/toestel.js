@@ -110,6 +110,8 @@ function changeStatus(id, value) {
 }
 
 export const toestelApi = {
+  movesPdf: (id, query = {}) =>
+    api.get(`${path(id)}/moves/pdf${queryString(query)}`, { responseType: 'blob' }),
   list: async (query = {}) => {
     const data = unwrap(await api.get(`${BASE}${queryString(query)}`))
     const items = Array.isArray(data) ? data : data?.items

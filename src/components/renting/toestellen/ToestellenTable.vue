@@ -19,7 +19,17 @@
       <div>{{ toestel.type?.naam || 'Onbekend' }}</div>
       <div>{{ toestel.Ref || 'N/A' }}</div>
       <div>{{ toestel.nrplaat || 'N/A' }}</div>
-      <div>{{ toestel.chasisnummer || 'N/A' }}</div>
+      <div class="asset-actions">
+        <span>{{ toestel.chasisnummer || 'N/A' }}</span>
+        <button
+          type="button"
+          class="moves-button"
+          :aria-label="`Verplaatsingen exporteren voor ${toestel.Ref || 'toestel'}`"
+          @click.stop="$emit('export-moves', toestel)"
+        >
+          <i class="fa fa-file-pdf" aria-hidden="true"></i> Moves
+        </button>
+      </div>
       <div>{{ formatAdres(toestel.gnw) || 'Niet toegewezen' }}</div>
       <div class="col-status right" :class="toestel.status?.statusType">
         {{ toestel.status?.statusType }}
@@ -37,7 +47,7 @@ const props = defineProps({
   search: { type: String, default: '' },
 })
 
-defineEmits(['edit-toestel'])
+defineEmits(['edit-toestel', 'export-moves'])
 
 const gefilterdeToestellen = computed(() => {
   const term = props.search.toLowerCase()
@@ -64,6 +74,29 @@ function formatAdres(adres) {
 </script>
 
 <style scoped>
+.asset-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.moves-button {
+  border: 1px solid #d7e2f0;
+  border-radius: 7px;
+  background: #f3f7fd;
+  color: #294f86;
+  padding: 5px 8px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+.moves-button:hover {
+  background: #e6eefc;
+}
+.moves-button:focus-visible {
+  outline: 2px solid #3267d5;
+  outline-offset: 2px;
+}
 .col-status {
   padding: 6px 12px;
   border-radius: 10px;

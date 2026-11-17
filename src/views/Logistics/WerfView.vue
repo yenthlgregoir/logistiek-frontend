@@ -84,7 +84,6 @@ onBeforeUnmount(() => {
 async function getWerven() {
   try {
     const response = await werfApi.list()
-    console.log('Werven loaded:', response)
     werven.value = Array.isArray(response) ? response : (response.data ?? [])
   } catch (error) {
     console.error(error)

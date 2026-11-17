@@ -18,6 +18,7 @@
       :toestellen="paginatedToestellen"
       @update-status="handleStatusUpdate"
       @edit-toestel="editForm"
+      @export-moves="movesToestel = $event"
     />
 
     <!-- PAGINATION -->
@@ -29,6 +30,7 @@
     />
 
     <!-- OVERLAY FORM -->
+    <ToestelMovesModal v-if="movesToestel" :toestel="movesToestel" @close="movesToestel = null" />
     <div v-if="showForm" class="overlay">
       <div class="modal">
         <ToestellenForm
@@ -50,6 +52,7 @@ import { ref, reactive, onMounted, watch, onBeforeUnmount } from 'vue'
 import ToestellenTable from '@/components/renting/toestellen/ToestellenTable.vue'
 import ToestellenToolbar from '@/components/renting/toestellen/ToestellenToolbar.vue'
 import ToestellenForm from '@/components/renting/toestellen/ToestellenForm.vue'
+import ToestelMovesModal from '@/components/renting/toestellen/ToestelMovesModal.vue'
 import BasePagination from '@/components/base/BasePagination.vue'
 
 import { toestelApi } from '@/api/toestel'
@@ -61,6 +64,7 @@ import { usePagination } from '@/composable/usePagination'
    STATE
 ----------------------------- */
 const toestellen = ref([])
+const movesToestel = ref(null)
 const search = ref('')
 const filterType = ref('')
 const filterKlant = ref(null)

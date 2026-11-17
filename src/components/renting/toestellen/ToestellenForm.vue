@@ -20,7 +20,7 @@
             <template v-else>
               <select v-model="localForm.type" required>
                 <option disabled value="">Selecteer type</option>
-                <option v-for="type in types" :key="type._id" :value="type._id">
+                <option v-for="type in types" :key="type.id" :value="type.id">
                   {{ type.naam }}
                 </option>
               </select>

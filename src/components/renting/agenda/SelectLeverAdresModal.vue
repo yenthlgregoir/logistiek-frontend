@@ -12,7 +12,7 @@
     <ul class="list">
       <li
         v-for="adres in gefilterdeAdressen"
-        :key="adres._id"
+        :key="adres.id"
         @click="selectAdres(adres)"
         class="list-item"
       >
