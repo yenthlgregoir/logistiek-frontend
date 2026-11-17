@@ -1,110 +1,64 @@
 <template>
   <div class="modal-overlay" @click.self="close">
-    <div
-      class="modal"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Nieuwe Boeking"
-      :aria-busy="saving"
-    >
+    <div class="modal">
       <div class="modal-header">
         <h2>Nieuwe Boeking</h2>
-        <button class="close-btn" :disabled="saving" aria-label="Sluiten" @click="close">✕</button>
+        <button class="close-btn" @click="close">✕</button>
       </div>
 
       <form @submit.prevent="submitBoeking">
-        <fieldset :disabled="saving || loadingKlanten">
-          <!-- Type toestel -->
+        <!-- Type toestel -->
 
-          <div class="form-group">
-            <label>Type toestel</label>
-            <AutocompleteSelect
-              v-model="form.toestelType"
-              :options="types"
-              label-key="naam"
-              placeholder="Zoek Type"
-            />
-          </div>
-          <!-- ✅ Klant autocomplete select -->
-          <!-- NieuweBoekingModal.vue -->
-          <div class="form-group">
-            <label>Klant</label>
-            <AutocompleteSelect
-              v-model="form.klant"
-              :options="klanten"
-              label-key="naam"
-              placeholder="Zoek klant..."
-              @select="handleKlantAdres"
-            />
-          </div>
+        <div class="form-group">
+          <label>Type toestel</label>
+          <AutocompleteSelect
+            v-model="form.toestelType"
+            :options="types"
+            label-key="naam"
+            placeholder="Zoek Type"
+          />
+        </div>
+        <!-- ✅ Klant autocomplete select -->
+        <!-- NieuweBoekingModal.vue -->
+        <div class="form-group">
+          <label>Klant</label>
+          <AutocompleteSelect
+            v-model="form.klant"
+            :options="klanten"
+            label-key="naam"
+            placeholder="Zoek klant..."
+            @select="handleKlantAdres"
+          />
+        </div>
 
-          <div v-if="selectedKlant" class="form-group">
-            <label>Leveradres</label>
-            <p>
-              {{
-                selectedAdres
-                  ? [
-                      selectedAdres.naam,
-                      selectedAdres.straat,
-                      selectedAdres.huisnummer,
-                      selectedAdres.postcode,
-                      selectedAdres.stad,
-                    ]
-                      .filter(Boolean)
-                      .join(' ')
-                  : 'Nog geen leveradres gekozen'
-              }}
-            </p>
-            <button
-              v-if="beschikbareAdressen.length"
-              type="button"
-              class="btn-cancel"
-              @click="showAdresModal = true"
-            >
-              Leveradres kiezen
-            </button>
-          </div>
-          <!-- Periode -->
-          <div class="form-group">
-            <label>Begin datum</label>
-            <input
-              type="date"
-              v-model="form.beginDatum"
-              :min="today"
-              aria-label="Begin datum"
-              required
-            />
-          </div>
+        <!-- Periode -->
+        <div class="form-group">
+          <label>Begin datum</label>
+          <input type="date" v-model="form.beginDatum" required />
+        </div>
 
-          <div class="form-group">
-            <label>Eind datum</label>
-            <input
-              type="date"
-              v-model="form.eindDatum"
-              :min="form.beginDatum"
-              aria-label="Eind datum"
-            />
-          </div>
+        <div class="form-group">
+          <label>Eind datum</label>
+          <input type="date" v-model="form.eindDatum" />
+        </div>
 
-          <!-- Service -->
-          <div class="form-group">
-            <label>Type service</label>
-            <select v-model="form.type" aria-label="Type service" required>
-              <option disabled value="">Selecteer</option>
-              <option value="Transport door logistiek">Transport door logistiek</option>
-              <option value="ophaling door klant">Ophaling door klant</option>
-            </select>
-          </div>
+        <!-- Service -->
+        <div class="form-group">
+          <label>Type service</label>
+          <select v-model="form.type" required>
+            <option disabled value="">Selecteer</option>
+            <option value="Transport door logistiek">Transport door logistiek</option>
+            <option value="ophaling door klant">Ophaling door klant</option>
+          </select>
+        </div>
 
-          <div class="modal-footer">
-            <button type="button" class="btn-cancel" @click="close">Annuleren</button>
-            <button type="submit" class="btn-primary">{{ saving ? 'Opslaan…' : 'Opslaan' }}</button>
-          </div>
-        </fieldset>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" @click="close">Annuleren</button>
+          <button type="submit" class="btn-primary">Opslaan</button>
+        </div>
       </form>
 
-      <p v-if="message" :class="{ error: error }" role="alert">{{ message }}</p>
-      <p v-if="loadingKlanten" role="status">Klanten laden…</p>
+      <p v-if="message" :class="{ error: error }">{{ message }}</p>
     </div>
   </div>
 
@@ -112,20 +66,20 @@
   <SelectLeverAdresModal
     v-if="showAdresModal"
     :adressen="beschikbareAdressen"
-    @select="(adres) => (form.leverAdres = adres.id ?? adres._id)"
+    @select="(adres) => (form.leverAdres = adres.id)"
     @close="showAdresModal = false"
   />
 </template>
 
 <script setup>
-import { reactive, ref, computed, onMounted, onUnmounted } from 'vue'
+import { reactive, ref, onMounted, onUnmounted } from 'vue'
 import { boekingApi } from '@/api/boeking'
 import { klantApi } from '@/api/klant'
 import { useBoekingenStore } from '@/stores/renting/boekingen.store.js'
 import SelectLeverAdresModal from './SelectLeverAdresModal.vue'
 import AutocompleteSelect from '@/components/base/AutocompleteSelect.vue'
 
-defineProps({ types: { type: Array, default: () => [] } })
+defineProps({ types: Object })
 const emit = defineEmits(['close', 'update'])
 const boekingenstore = useBoekingenStore()
 
@@ -134,7 +88,7 @@ const boekingenstore = useBoekingenStore()
 -------------------------- */
 const form = reactive({
   toestelType: '',
-  klant: '', // wordt _id
+  klant: '', // wordt id
   beginDatum: '',
   eindDatum: '',
   type: '',
@@ -146,22 +100,13 @@ const message = ref('')
 const error = ref(false)
 const showAdresModal = ref(false)
 const beschikbareAdressen = ref([])
-const saving = ref(false)
-const loadingKlanten = ref(true)
-const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Brussels' }).format(new Date())
-const selectedKlant = computed(() =>
-  klanten.value.find((klant) => (klant.id ?? klant._id) === form.klant),
-)
-const selectedAdres = computed(() =>
-  beschikbareAdressen.value.find((adres) => (adres.id ?? adres._id) === form.leverAdres),
-)
 
 /* --------------------------
    LEEFTIJD: GET KLANTEN
 -------------------------- */
 onMounted(async () => {
-  document.addEventListener('keydown', handleEsc)
   await getKlanten()
+  document.addEventListener('keydown', handleEsc)
 })
 
 onUnmounted(() => document.removeEventListener('keydown', handleEsc))
@@ -171,31 +116,20 @@ async function getKlanten() {
     const data = await klantApi.list()
     klanten.value = Array.isArray(data) ? data : (data.items ?? [])
   } catch (e) {
-    message.value = e.message || 'Klanten konden niet geladen worden.'
-    error.value = true
-  } finally {
-    loadingKlanten.value = false
+    console.error(e)
   }
 }
 function handleKlantAdres(klant) {
-  form.klant = klant?.id ?? klant?._id ?? ''
-  form.leverAdres = ''
-  showAdresModal.value = false
-  const addresses = [
-    ...(klant?.leverAdressen ?? []),
-    ...(klant?.factuurAdres ? [klant.factuurAdres] : []),
-  ]
-  beschikbareAdressen.value = [
-    ...new Map(
-      addresses
-        .filter((adres) => adres.id ?? adres._id)
-        .map((adres) => [adres.id ?? adres._id, adres]),
-    ).values(),
-  ]
-  const deliveries = klant?.leverAdressen ?? []
-  if (deliveries.length === 1) form.leverAdres = deliveries[0].id ?? deliveries[0]._id
-  else if (deliveries.length > 1) showAdresModal.value = true
-  else form.leverAdres = klant?.factuurAdres?.id ?? klant?.factuurAdres?._id ?? ''
+  form.klant = klant.id
+
+  if (klant.leverAdressen?.length > 1) {
+    beschikbareAdressen.value = klant.leverAdressen
+    showAdresModal.value = true
+  } else if (klant.leverAdressen?.length === 1) {
+    form.leverAdres = klant.leverAdressen[0].id
+  } else {
+    form.leverAdres = klant.factuurAdres?.id || null
+  }
 }
 /* --------------------------
    KLANT ADRES LOGICA
@@ -205,61 +139,43 @@ function handleKlantAdres(klant) {
    ESC EN CLOSE
 -------------------------- */
 function handleEsc(e) {
-  if (e.key === 'Escape') {
-    if (showAdresModal.value) showAdresModal.value = false
-    else close()
-  }
+  if (e.key === 'Escape') close()
 }
 
 function close() {
-  if (!saving.value) emit('close')
+  emit('close')
 }
 
 /* --------------------------
    SUBMIT
 -------------------------- */
 async function submitBoeking() {
-  if (saving.value) return
-  message.value = ''
-  error.value = false
-  if (!form.toestelType || !form.klant) {
-    message.value = 'Kies een toesteltype en een klant.'
-    error.value = true
-    return
-  }
   if (!form.leverAdres) {
     message.value = 'Kies eerst een leveradres'
     error.value = true
     return
   }
 
-  if (
-    !form.beginDatum ||
-    form.beginDatum < today ||
-    (form.eindDatum && form.eindDatum <= form.beginDatum)
-  ) {
-    message.value = 'Kies een begindatum vanaf vandaag en een einddatum na de begindatum.'
-    error.value = true
-    return
+  if (!form.eindDatum) {
+    const begin = new Date(form.beginDatum)
+    begin.setFullYear(begin.getFullYear() + 5)
+    form.eindDatum = begin.toISOString().split('T')[0]
   }
 
-  saving.value = true
   try {
-    const booking = await boekingApi.add({ ...form })
+    await boekingApi.add(JSON.stringify(form))
 
-    boekingenstore.invalidateLists()
+    // 🔥 BELANGRIJK: refresh lijst/cache
     await boekingenstore.loadBoekingen(false)
 
     message.value = 'Boeking succesvol aangemaakt!'
     error.value = false
 
-    emit('update', booking)
-    emit('close')
+    emit('update')
+    setTimeout(() => close(), 800)
   } catch (err) {
     message.value = err.message || 'Er is een fout opgetreden.'
     error.value = true
-  } finally {
-    saving.value = false
   }
 }
 </script>
@@ -295,18 +211,6 @@ async function submitBoeking() {
   animation: slideUp 0.3s ease-out;
   position: relative;
   font-family: 'Inter', sans-serif;
-  max-height: 90dvh;
-  overflow-y: auto;
-}
-fieldset {
-  border: 0;
-  padding: 0;
-  margin: 0;
-  min-width: 0;
-}
-button:disabled {
-  opacity: 0.55;
-  cursor: wait;
 }
 .autocomplete {
   position: relative;

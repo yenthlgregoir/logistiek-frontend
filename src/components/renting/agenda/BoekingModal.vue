@@ -4,10 +4,7 @@
       <!-- HEADER -->
       <div class="modal-header">
         <h3>Boeking</h3>
-        <div class="boeking-header-actions">
-          <ChangeHistory v-if="boekingId" compact :entity-id="boekingId" entity-type="boeking" :revision="boekingenStore.historyRevision" />
-          <button class="close-btn" @click="close">✖</button>
-        </div>
+        <button class="close-btn" @click="close">✖</button>
       </div>
 
       <!-- BODY -->
@@ -64,7 +61,7 @@
           <div class="detail-card">
             <div class="card-header">
               <span>Toestel</span>
-              <button class="ghost-btn" @click="assignToestel(boekingenStore.currentBoeking._id)">
+              <button class="ghost-btn" @click="assignToestel(boekingenStore.currentBoeking.id)">
                 Toewijzen
               </button>
             </div>
@@ -155,7 +152,6 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import ChangeHistory from '@/components/base/ChangeHistory.vue'
 import { useBoekingenStore } from '@/stores/renting/boekingen.store.js'
 import SelectLeverAdresModal from './SelectLeverAdresModal.vue'
 import DatumAanpassenModal from './DatumAanpassenModal.vue'
@@ -197,7 +193,7 @@ function verwijderen() {
       'Weet je zeker dat je deze boeking wilt verwijderen? Dit kan niet ongedaan gemaakt worden.',
     )
   ) {
-    emit('verwijderen', boekingenStore.currentBoeking._id)
+    emit('verwijderen', boekingenStore.currentBoeking.id)
   }
 }
 function save() {
@@ -212,7 +208,7 @@ async function updateLeverAdres(adres) {
 }
 
 async function toPDF() {
-  const blob = await uploadApi.exportBoeking(boekingenStore.currentBoeking._id)
+  const blob = await uploadApi.exportBoeking(boekingenStore.currentBoeking.id)
   const url = window.URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
@@ -223,7 +219,7 @@ async function toPDF() {
 
 async function updatePeriode({ beginDatum, eindDatum }) {
   try {
-    await boekingenStore.updatePeriode(boekingenStore.currentBoeking._id, beginDatum, eindDatum)
+    await boekingenStore.updatePeriode(boekingenStore.currentBoeking.id, beginDatum, eindDatum)
   } catch (err) {
     console.error(err)
   }
@@ -250,13 +246,13 @@ async function updateStatus() {
     showConfirmAfgewerkt.value = true
     return
   }
-      await boekingenStore.changeStatus(boekingenStore.currentBoeking._id, localStatus.value)
+      await boekingenStore.changeStatus(boekingenStore.currentBoeking.id, localStatus.value)
 
 }
 
 async function confirmAfgewerkt() {
   showConfirmAfgewerkt.value = false
-  await boekingenStore.changeStatus(boekingenStore.currentBoeking._id, pendingStatus.value)
+  await boekingenStore.changeStatus(boekingenStore.currentBoeking.id, pendingStatus.value)
 }
 
 function cancelAfgewerkt() {
@@ -270,7 +266,6 @@ function assignToestel(boekingId) {
 </script>
 
 <style scoped>
-.boeking-header-actions { display: flex; align-items: center; gap: 8px; }
 .modal-overlay {
   position: fixed;
   inset: 0;

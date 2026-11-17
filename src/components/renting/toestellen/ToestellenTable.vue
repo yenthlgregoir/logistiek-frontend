@@ -24,10 +24,10 @@
         <button
           type="button"
           class="moves-button"
-          :aria-label="`Verplaatsingen exporteren voor ${toestel.Ref || 'toestel'}`"
+          :aria-label="`Boekingen bekijken voor ${toestel.Ref || 'toestel'}`"
           @click.stop="$emit('export-moves', toestel)"
         >
-          <i class="fa fa-file-pdf" aria-hidden="true"></i> Moves
+          <i class="fa fa-file-pdf" aria-hidden="true"></i> Boekingen
         </button>
       </div>
       <div>{{ formatAdres(toestel.gnw) || 'Niet toegewezen' }}</div>

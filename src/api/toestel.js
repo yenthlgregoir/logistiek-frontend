@@ -35,9 +35,7 @@ function normalizeToestel(value) {
 }
 
 function idOrName(value) {
-  return value && typeof value === 'object'
-    ? value.id ?? value._id ?? value.naam
-    : value
+  return value && typeof value === 'object' ? (value.id ?? value._id ?? value.naam) : value
 }
 
 function calendarDate(value) {
@@ -76,9 +74,10 @@ function statusPayload(value) {
   for (const key of ['beginDatum', 'eindDatum']) {
     if (value[key] == null || value[key] === '') continue
     const raw = value[key]
-    const date = typeof raw === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw)
-      ? new Date(raw + 'T00:00:00')
-      : new Date(raw)
+    const date =
+      typeof raw === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw)
+        ? new Date(raw + 'T00:00:00')
+        : new Date(raw)
     if (!Number.isFinite(date.getTime())) throw new Error('Ongeldige statusdatum.')
     result[key] = date.toISOString()
   }
@@ -110,8 +109,10 @@ function changeStatus(id, value) {
 }
 
 export const toestelApi = {
-  movesPdf: (id, query = {}) =>
-    api.get(`${path(id)}/moves/pdf${queryString(query)}`, { responseType: 'blob' }),
+  bookings: async (id, query = {}) =>
+    unwrap(await api.get(`${path(id)}/boekingen${queryString(query)}`)),
+  bookingsPdf: (id, query = {}) =>
+    api.get(`${path(id)}/boekingen/pdf${queryString(query)}`, { responseType: 'blob' }),
   list: async (query = {}) => {
     const data = unwrap(await api.get(`${BASE}${queryString(query)}`))
     const items = Array.isArray(data) ? data : data?.items
@@ -129,8 +130,7 @@ export const toestelApi = {
     if (!Array.isArray(types)) throw new Error('Ongeldige typelijst ontvangen.')
     return { types: types.map(withId) }
   },
-  createType: async (naam) =>
-    withId(unwrap(await api.post(`${BASE}/types`, { naam }))),
+  createType: async (naam) => withId(unwrap(await api.post(`${BASE}/types`, { naam }))),
   changeStatus,
   updateStatus: changeStatus,
 }
